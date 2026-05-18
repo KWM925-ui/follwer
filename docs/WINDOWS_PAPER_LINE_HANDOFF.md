@@ -151,3 +151,53 @@ Possible software copyright module name:
 - Keep generated figures/data under ignored output folders:
   - `research/outputs/`
   - `research/figures_generated/`
+
+## Copy-Paste Startup Prompt For Windows Codex
+
+Use this exact prompt on the Windows side:
+
+```text
+You are working on the paper-line of the follwer project.
+
+Repository:
+- GitHub: https://github.com/KWM925-ui/follwer.git
+- Branch to use: paper-line
+
+First read:
+- docs/WINDOWS_PAPER_LINE_HANDOFF.md
+
+Hard boundary:
+- Do not touch the Ubuntu mainline or hardware/calibration work.
+- Treat the Ubuntu side as the source of truth for the deployed ROS stack.
+- Do not rewrite the long Ubuntu chat history into Windows.
+
+Current project status:
+- Stage2/EGO simulation on Ubuntu has already been validated under a strict no-GUI contract.
+- That evidence is simulation-contract evidence only, not hardware flight proof.
+
+Your job:
+- Build the research/paper/prototype line only.
+- Focus on short-horizon human motion prediction.
+- Focus on safety-aware follow-point generation.
+- Focus on follow-quality scoring.
+- Focus on target-loss / planning-failure protection state machines.
+- Treat MATLAB/Simulink as the main prototyping environment.
+
+What to produce first:
+- A clean system diagram.
+- A 2D or 2.5D MATLAB simulation prototype.
+- A predictor baseline: constant velocity, then a stronger baseline if needed.
+- A follow-point scoring function.
+- A recovery state machine with follow/search/lost/reacquire/hold/failsafe.
+- A first-cut paper outline and experiment table.
+
+How to think about the stack:
+- Use fast LIO or low-latency odom as a supporting perception/localization base.
+- Do not make the paper contribution be “we used Point-LIO” or “we used EGO”.
+- The contribution is the prediction + scoring + safe follow-point + recovery layer.
+
+If you need code context from Ubuntu:
+- Read the repo files.
+- Ask for a small exported artifact or summary.
+- Do not ask to move the whole Ubuntu conversation over.
+```
