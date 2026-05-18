@@ -151,3 +151,82 @@ Possible software copyright module name:
 - Keep generated figures/data under ignored output folders:
   - `research/outputs/`
   - `research/figures_generated/`
+
+## Research Hygiene
+
+- Treat the repo as the first source of truth.
+- If a question depends on current MATLAB, ROS, EGO planner, package, or
+  literature behavior, verify it on the web before guessing.
+- Prefer primary sources:
+  - MathWorks documentation
+  - ROS documentation
+  - source repos or release notes for EGO-related code
+  - the relevant paper itself when available
+- Record the exact links or paper names in your notes or commit messages.
+- If something is still unclear after checking the repo and the web, ask for
+  the smallest concrete clarification instead of inventing assumptions.
+
+## Recommended Windows Startup Sequence
+
+1. Clone `https://github.com/KWM925-ui/follwer.git`.
+2. `git checkout paper-line`.
+3. Read `FOLLOWER_ROUTE_MASTER.txt`.
+4. Read this file.
+5. Start with the 2D/2.5D MATLAB prototype and keep all outputs in `research/`.
+
+## Copy-Paste Startup Prompt For Windows Codex
+
+Use this exact prompt on the Windows side:
+
+```text
+You are working on the paper-line of the follwer project.
+
+Repository:
+- GitHub: https://github.com/KWM925-ui/follwer.git
+- Branch to use: paper-line
+
+First read:
+- FOLLOWER_ROUTE_MASTER.txt
+- docs/WINDOWS_PAPER_LINE_HANDOFF.md
+
+Hard boundary:
+- Do not touch the Ubuntu mainline or hardware/calibration work.
+- Treat the Ubuntu side as the source of truth for the deployed ROS stack.
+- Do not rewrite the long Ubuntu chat history into Windows.
+- Keep all research artifacts under research/ or another ignored research
+  folder.
+
+Current project status:
+- Stage2/EGO simulation on Ubuntu has already been validated under a strict no-GUI contract.
+- That evidence is simulation-contract evidence only, not hardware flight proof.
+
+Your job:
+- Build the research/paper/prototype line only.
+- Focus on short-horizon human motion prediction.
+- Focus on safety-aware follow-point generation.
+- Focus on follow-quality scoring.
+- Focus on target-loss / planning-failure protection state machines.
+- Treat MATLAB/Simulink as the main prototyping environment.
+- If a technical detail is uncertain or version-sensitive, search the web first
+  and prefer current official documentation or primary sources over memory.
+- When you browse, bring back the link and the specific conclusion, not just a
+  vague summary.
+
+What to produce first:
+- A clean system diagram.
+- A 2D or 2.5D MATLAB simulation prototype.
+- A predictor baseline: constant velocity, then a stronger baseline if needed.
+- A follow-point scoring function.
+- A recovery state machine with follow/search/lost/reacquire/hold/failsafe.
+- A first-cut paper outline and experiment table.
+
+How to think about the stack:
+- Use fast LIO or low-latency odom as a supporting perception/localization base.
+- Do not make the paper contribution be "we used Point-LIO" or "we used EGO".
+- The contribution is the prediction + scoring + safe follow-point + recovery layer.
+
+If you need code context from Ubuntu:
+- Read the repo files.
+- Ask for a small exported artifact or summary.
+- Do not ask to move the whole Ubuntu conversation over.
+```
