@@ -1,0 +1,40 @@
+<launch>
+  <arg name="image_topic" default="/camera/usb_cam/image_raw" />
+  <arg name="require_image_heartbeat" default="true" />
+  <arg name="image_rotation_deg" default="180" />
+  <arg name="flip_horizontal" default="false" />
+  <arg name="flip_vertical" default="false" />
+  <arg name="enable_mock_projection" default="true" />
+  <arg name="min_consecutive_valid_inputs" default="3" />
+  <arg name="camera_ns" default="camera" />
+  <arg name="camera_name" default="usb_cam" />
+  <arg name="video_device" default="/dev/video0" />
+  <arg name="image_width" default="640" />
+  <arg name="image_height" default="480" />
+  <arg name="pixel_format" default="mjpeg" />
+  <arg name="framerate" default="30.0" />
+  <arg name="camera_frame_id" default="usb_cam" />
+  <arg name="io_method" default="mmap" />
+
+  <include file="$(find human_follow_bringup)/launch/stage1_usb_cam.launch">
+    <arg name="camera_ns" value="$(arg camera_ns)" />
+    <arg name="camera_name" value="$(arg camera_name)" />
+    <arg name="video_device" value="$(arg video_device)" />
+    <arg name="image_width" value="$(arg image_width)" />
+    <arg name="image_height" value="$(arg image_height)" />
+    <arg name="pixel_format" value="$(arg pixel_format)" />
+    <arg name="framerate" value="$(arg framerate)" />
+    <arg name="camera_frame_id" value="$(arg camera_frame_id)" />
+    <arg name="io_method" value="$(arg io_method)" />
+  </include>
+
+  <include file="$(find human_follow_bringup)/launch/stage1_live_px4.launch">
+    <arg name="image_topic" value="$(arg image_topic)" />
+    <arg name="require_image_heartbeat" value="$(arg require_image_heartbeat)" />
+    <arg name="image_rotation_deg" value="$(arg image_rotation_deg)" />
+    <arg name="flip_horizontal" value="$(arg flip_horizontal)" />
+    <arg name="flip_vertical" value="$(arg flip_vertical)" />
+    <arg name="enable_mock_projection" value="$(arg enable_mock_projection)" />
+    <arg name="min_consecutive_valid_inputs" value="$(arg min_consecutive_valid_inputs)" />
+  </include>
+</launch>

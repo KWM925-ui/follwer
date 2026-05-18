@@ -1,0 +1,86 @@
+<launch>
+  <arg name="target_world_topic" default="/follow/fusion/target_world" />
+  <arg name="odom_topic" default="/follow/lio/odom" />
+  <arg name="goal_topic" default="/follow/stage2/goal" />
+  <arg name="debug_path_topic" default="/follow/stage2/debug_goal_path" />
+  <arg name="state_topic" default="/follow/stage2/state" />
+  <arg name="goal_provider" default="baseline" />
+  <arg name="goal_node_name" default="stage2_follow_goal_generator" />
+  <arg name="external_goal_pkg" default="human_follow_bringup" />
+  <arg name="external_goal_type" default="stage2_follow_goal_generator_node.py" />
+  <arg name="world_frame_id" default="map" />
+  <arg name="rate_hz" default="15.0" />
+  <arg name="target_timeout_sec" default="0.35" />
+  <arg name="odom_timeout_sec" default="0.6" />
+  <arg name="follow_distance_m" default="3.5" />
+  <arg name="lateral_bias_m" default="0.0" />
+  <arg name="vertical_bias_m" default="0.0" />
+  <arg name="min_goal_shift_m" default="0.08" />
+  <arg name="face_target_yaw" default="true" />
+  <arg name="search_timeout_sec" default="2.0" />
+  <arg name="lost_timeout_sec" default="5.0" />
+  <arg name="search_mode" default="target_orbit" />
+  <arg name="search_yaw_rate_rps" default="0.25" />
+  <arg name="search_sweep_span_deg" default="0.0" />
+  <arg name="search_sweep_pass_count" default="0" />
+  <arg name="search_return_to_center" default="false" />
+  <arg name="search_goal_radius_m" default="1.0" />
+  <arg name="search_observation_distance_m" default="-1.0" />
+  <arg name="require_initial_occupancy_before_planning" default="false" />
+
+  <group if="$(eval arg('goal_provider') == 'baseline')">
+    <node pkg="human_follow_bringup" type="stage2_follow_goal_generator_node.py" name="$(arg goal_node_name)" output="screen">
+      <param name="target_world_topic" value="$(arg target_world_topic)" />
+      <param name="odom_topic" value="$(arg odom_topic)" />
+      <param name="goal_topic" value="$(arg goal_topic)" />
+      <param name="debug_path_topic" value="$(arg debug_path_topic)" />
+      <param name="state_topic" value="$(arg state_topic)" />
+      <param name="world_frame_id" value="$(arg world_frame_id)" />
+      <param name="rate_hz" value="$(arg rate_hz)" />
+      <param name="target_timeout_sec" value="$(arg target_timeout_sec)" />
+      <param name="odom_timeout_sec" value="$(arg odom_timeout_sec)" />
+      <param name="follow_distance_m" value="$(arg follow_distance_m)" />
+      <param name="lateral_bias_m" value="$(arg lateral_bias_m)" />
+      <param name="vertical_bias_m" value="$(arg vertical_bias_m)" />
+      <param name="min_goal_shift_m" value="$(arg min_goal_shift_m)" />
+      <param name="face_target_yaw" value="$(arg face_target_yaw)" />
+      <param name="search_timeout_sec" value="$(arg search_timeout_sec)" />
+      <param name="lost_timeout_sec" value="$(arg lost_timeout_sec)" />
+      <param name="search_mode" value="$(arg search_mode)" />
+      <param name="search_yaw_rate_rps" value="$(arg search_yaw_rate_rps)" />
+      <param name="search_sweep_span_deg" value="$(arg search_sweep_span_deg)" />
+      <param name="search_sweep_pass_count" value="$(arg search_sweep_pass_count)" />
+      <param name="search_return_to_center" value="$(arg search_return_to_center)" />
+      <param name="search_goal_radius_m" value="$(arg search_goal_radius_m)" />
+      <param name="search_observation_distance_m" value="$(arg search_observation_distance_m)" />
+      <param name="require_initial_occupancy_before_planning" value="$(arg require_initial_occupancy_before_planning)" />
+    </node>
+  </group>
+
+  <group if="$(eval arg('goal_provider') == 'external')">
+    <node pkg="$(arg external_goal_pkg)" type="$(arg external_goal_type)" name="$(arg goal_node_name)" output="screen">
+      <param name="target_world_topic" value="$(arg target_world_topic)" />
+      <param name="odom_topic" value="$(arg odom_topic)" />
+      <param name="goal_topic" value="$(arg goal_topic)" />
+      <param name="debug_path_topic" value="$(arg debug_path_topic)" />
+      <param name="state_topic" value="$(arg state_topic)" />
+      <param name="world_frame_id" value="$(arg world_frame_id)" />
+      <param name="rate_hz" value="$(arg rate_hz)" />
+      <param name="target_timeout_sec" value="$(arg target_timeout_sec)" />
+      <param name="odom_timeout_sec" value="$(arg odom_timeout_sec)" />
+      <param name="follow_distance_m" value="$(arg follow_distance_m)" />
+      <param name="lateral_bias_m" value="$(arg lateral_bias_m)" />
+      <param name="vertical_bias_m" value="$(arg vertical_bias_m)" />
+      <param name="min_goal_shift_m" value="$(arg min_goal_shift_m)" />
+      <param name="face_target_yaw" value="$(arg face_target_yaw)" />
+      <param name="search_timeout_sec" value="$(arg search_timeout_sec)" />
+      <param name="lost_timeout_sec" value="$(arg lost_timeout_sec)" />
+      <param name="search_yaw_rate_rps" value="$(arg search_yaw_rate_rps)" />
+      <param name="search_sweep_span_deg" value="$(arg search_sweep_span_deg)" />
+      <param name="search_sweep_pass_count" value="$(arg search_sweep_pass_count)" />
+      <param name="search_return_to_center" value="$(arg search_return_to_center)" />
+      <param name="search_goal_radius_m" value="$(arg search_goal_radius_m)" />
+      <param name="require_initial_occupancy_before_planning" value="$(arg require_initial_occupancy_before_planning)" />
+    </node>
+  </group>
+</launch>

@@ -1,0 +1,21 @@
+<launch>
+  <arg name="planner_command_topic" default="/follow/stage2/ego_position_cmd" />
+  <arg name="bridge_output_topic" default="/follow/stage2/offboard/setpoint" />
+  <arg name="mavros_setpoint_topic" default="/mavros/setpoint_raw/local" />
+  <arg name="set_mode_service" default="/mavros/set_mode" />
+
+  <rosparam command="load" file="$(find human_follow_px4_bridge)/config/offboard_gate.yaml" />
+
+  <node pkg="human_follow_px4_bridge" type="ego_position_command_bridge_node.py" name="ego_position_command_bridge" output="screen">
+    <param name="input_topic" value="$(arg planner_command_topic)" />
+    <param name="output_topic" value="$(arg bridge_output_topic)" />
+  </node>
+
+  <node pkg="human_follow_px4_bridge" type="offboard_mode_gate_node.py" name="stage2_offboard_gate" output="screen">
+    <param name="eligibility_source" value="setpoint" />
+    <param name="command_topic" value="" />
+    <param name="input_setpoint_topic" value="$(arg bridge_output_topic)" />
+    <param name="output_setpoint_topic" value="$(arg mavros_setpoint_topic)" />
+    <param name="set_mode_service" value="$(arg set_mode_service)" />
+  </node>
+</launch>

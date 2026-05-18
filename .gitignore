@@ -1,0 +1,38 @@
+/build/
+/devel/
+/logs/
+/.catkin_tools/
+/install/
+/install_isolated/
+/__pycache__/
+*.pyc
+
+# ROS/catkin runtime outputs
+/.ros/
+/.catkin_tools/
+/log/
+*.bag
+*.bag.active
+*.db3
+
+# Local runtime artifacts. Keep source-like scripts under
+# artifacts/live_demo_isolated, but never commit generated runs/logs/cache.
+/artifacts/live_demo_isolated/logs/
+/artifacts/live_demo_isolated/pids/
+/artifacts/live_demo_isolated/recordings/
+/artifacts/live_demo_isolated/results/
+/artifacts/live_demo_isolated/ros_home/
+/artifacts/live_demo_isolated/ros_home_verify*/
+/artifacts/camera_snapshots/
+
+# Codex/session machine-local state
+/.codex/
+/.supervisor/
+
+# Python/editor noise
+__pycache__/
+*.pyo
+*.swp
+*~
+.vscode/
+.idea/

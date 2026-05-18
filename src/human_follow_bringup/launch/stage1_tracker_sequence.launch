@@ -1,0 +1,10 @@
+<launch>
+  <rosparam command="load" file="$(find human_follow_perception)/config/perception.yaml" />
+  <rosparam command="load" file="$(find human_follow_fusion)/config/fusion.yaml" />
+  <rosparam command="load" file="$(find human_follow_control)/config/control.yaml" />
+
+  <node pkg="human_follow_perception" type="target_sequence_publisher_node.py" name="target_sequence_publisher" output="screen" />
+  <node pkg="human_follow_perception" type="tracker_node.py" name="human_follow_tracker" output="screen" />
+  <node pkg="human_follow_fusion" type="target_fusion_node.py" name="human_follow_target_fusion" output="screen" />
+  <node pkg="human_follow_control" type="follow_controller_node.py" name="human_follow_controller" output="screen" />
+</launch>

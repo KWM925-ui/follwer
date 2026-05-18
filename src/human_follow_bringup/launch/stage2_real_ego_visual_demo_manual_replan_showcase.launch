@@ -1,0 +1,36 @@
+<launch>
+  <arg name="rviz" default="true" />
+  <arg name="open_image_view" default="false" />
+  <arg name="enable_image_debug" default="false" />
+  <arg name="ego_cloud_input_topic" default="/follow/lidar/points" />
+  <arg name="enable_face_target_yaw_override" default="true" />
+  <arg name="vehicle_input_topic" default="/follow/stage2/ego_position_cmd_face_target" />
+  <arg name="ego_map_size_x" default="80.0" />
+  <arg name="ego_map_size_y" default="80.0" />
+  <arg name="ego_map_size_z" default="3.0" />
+  <arg name="ego_obstacles_inflation" default="0.099" />
+  <arg name="keyboard_initial_x_m" default="9.0" />
+  <arg name="keyboard_initial_y_m" default="0.0" />
+  <arg name="keyboard_initial_z_m" default="-1.6" />
+
+  <include file="$(find human_follow_bringup)/launch/stage2_real_ego_visual_demo.launch">
+    <arg name="rviz" value="$(arg rviz)" />
+    <arg name="open_image_view" value="$(arg open_image_view)" />
+    <arg name="enable_image_debug" value="$(arg enable_image_debug)" />
+    <arg name="truth_source_mode" value="keyboard" />
+    <arg name="truth_motion_mode" value="scripted_standard" />
+    <arg name="scene_static_obstacle_layout" value="ego_demo_acceptance_dense_weave" />
+    <arg name="scene_static_obstacle_point_spacing_m" value="0.12" />
+    <arg name="stage2_follow_distance_m" value="3.2" />
+    <arg name="enable_face_target_yaw_override" value="$(arg enable_face_target_yaw_override)" />
+    <arg name="vehicle_input_topic" value="$(arg vehicle_input_topic)" />
+    <arg name="ego_cloud_input_topic" value="$(arg ego_cloud_input_topic)" />
+    <arg name="ego_map_size_x" value="$(arg ego_map_size_x)" />
+    <arg name="ego_map_size_y" value="$(arg ego_map_size_y)" />
+    <arg name="ego_map_size_z" value="$(arg ego_map_size_z)" />
+    <arg name="ego_obstacles_inflation" value="$(arg ego_obstacles_inflation)" />
+    <arg name="keyboard_initial_x_m" value="$(arg keyboard_initial_x_m)" />
+    <arg name="keyboard_initial_y_m" value="$(arg keyboard_initial_y_m)" />
+    <arg name="keyboard_initial_z_m" value="$(arg keyboard_initial_z_m)" />
+  </include>
+</launch>

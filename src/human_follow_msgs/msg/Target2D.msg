@@ -1,0 +1,9 @@
+std_msgs/Header header
+int32 track_id
+bool valid
+float32 confidence
+float32 cx
+float32 cy
+float32 width
+float32 height
+string source

@@ -1,0 +1,767 @@
+FOLLOWER ROUTE MASTER
+FOR CODEX USE
+WORKSPACE: /home/coco/follwer_ws
+STATUS: ACTIVE
+LAST_INTENT: 2026-04-27 user confirmed route and requested persistence in root .txt
+
+================================================================
+1. PRIMARY MISSION
+================================================================
+
+Build a new clean human-follow capability for the user's aircraft.
+
+Exact mission order:
+
+STAGE 1:
+- Reproduce Stanley-like human-follow behavior on the user's PX4 aircraft.
+- Goal is functional parity or better, not repo-level 1:1 reuse.
+- Keep PX4 fixed.
+- Do not depend on OAK-D Lite or any depth camera.
+- Use USB monocular camera plus MID-360 as the stage1 sensing pair.
+
+STAGE 2:
+- Build a stronger version by adding fresh EGO integration in a separate clean path.
+- Do NOT depend on the current onboard EGO workspace naming or layout.
+- Planner integration happens only after stage1 follow is stable.
+
+One-line mission:
+- First do Stanley-like follow on PX4.
+- Then do EGO-enhanced human-following UAV.
+
+================================================================
+2. HARD LOCKS
+================================================================
+
+- Flight controller stays PX4. No ArduPilot switch.
+- Aircraft target is the user's F450 quad.
+- Human-follow function is the first milestone. Do not widen before it works.
+- Stage1 must stay smaller than full autonomy.
+- Stage2 must use a fresh clean EGO pull, separate from old onboard workspaces.
+- Current control terminal is the user's laptop, with SSH access to the onboard Jetson when an exclusive window exists.
+- Hardware-dependent claims must come only from fresh bench or flight evidence on the current lab setup.
+
+================================================================
+3. FRESH HARDWARE FACTS TO CARRY FORWARD
+================================================================
+
+From prior user-provided evidence:
+
+- Airframe: F450 quad
+- Props: 9045
+- Motors: 1440KV
+- FCU: CUAV V5+
+- FCU firmware: PX4 1.15.4
+- Lidar: MID-360
+- Camera for stage1: USB monocular camera
+- D435i must NOT be assumed available for stage1
+- GPS present, no RTK
+- MTF-01 optical flow + range module already active on PX4
+- User reported position-mode flight is already stable
+- FCU to companion link is intended to be USB
+- Onboard computer later reported by direct shell output as NVIDIA Orin NX Developer Kit
+- Old session showed USB monocular RGB topic existed and image orientation could be upside down
+
+Implication:
+- Camera model is not yet a locked fact.
+- Camera driver and topic names must stay configurable.
+- Image flip capability must be a config parameter, not a hardcoded assumption.
+
+================================================================
+4. STAGE 1 GOAL
+================================================================
+
+Only reproduce these four behaviors first:
+
+1. Follow the nearest person.
+2. Keep a fixed distance from that person.
+3. Yaw toward the person when they move left or right in view.
+4. If the target is lost, do a short search and reacquire.
+
+If these four behaviors are not done, stage1 is not done.
+
+================================================================
+5. STAGE 1 NON-GOALS
+================================================================
+
+Do NOT bind these into stage1:
+
+- automatic takeoff
+- automatic landing
+- complex obstacle avoidance
+- multi-person re-identification
+- seamless indoor/outdoor switching
+- real-time mapping display
+- full mission autonomy
+- deep planner integration
+
+These are stage2 or later.
+
+================================================================
+6. STAGE 1 ARCHITECTURE
+================================================================
+
+Perception:
+- USB monocular camera
+- lightweight person detector
+- tracker after detector to reduce box flicker and target switching
+- output is selected target 2D box
+
+Fusion:
+- use camera intrinsics
+- use camera-to-MID360 extrinsics
+- project lidar points into image plane
+- select points inside target box
+- reject outliers
+- estimate target 3D position relative to aircraft
+
+Control:
+- do NOT start with EGO
+- do NOT start with full trajectory planner
+- compute simple low-speed follow commands from target relative pose
+- command set should be:
+  - forward or backward correction
+  - lateral correction
+  - yaw rate correction
+- send result into PX4 Offboard through a dedicated adapter layer
+
+State machine:
+- idle
+- target_acquired
+- follow
+- search
+- lost
+
+Key principle:
+- Replace Stanley's DroneKit downstream with a PX4-friendly downstream.
+
+================================================================
+7. STAGE 2 ARCHITECTURE
+================================================================
+
+Only after stage1 is stable:
+
+- monocular detection + tracking
+- MID-360 + LIO produce stable odom and target localization
+- target converted into world-frame rolling follow goal
+- target goal sent to fresh clean EGO planner stack
+- EGO handles obstacle avoidance and smoothing
+- PX4 executes stable Offboard control
+
+End-state capability:
+- human follow
+- lidar localization
+- obstacle-aware planning
+- PX4 execution stability
+
+================================================================
+8. THREE MAIN RISKS
+================================================================
+
+RISK 1: camera-to-MID360 extrinsic calibration
+- This is the biggest technical risk.
+- If the extrinsic is wrong, target distance and lateral position will drift.
+- Follow behavior will oscillate or fly biased.
+
+RISK 2: sparse or unstable target point association
+- Human points inside the box may be sparse or noisy.
+- Need temporal filtering and outlier rejection.
+- Need fallback behavior when depth estimate is weak.
+
+RISK 3: overcomplicated early control
+- First version must not jump into full trajectory planning.
+- First version must solve smooth low-speed follow only.
+- Otherwise debugging surface becomes: detector + tracker + fusion + planner + bridge + offboard.
+
+================================================================
+9. NO-HARDWARE ROUND POLICY
+================================================================
+
+Because no hardware is physically present now, the only valid work is:
+
+- clean workspace and package structure
+- interface contracts
+- offline detector and tracker pipeline
+- lidar-image projection and target association code
+- control law and state machine code
+- config schema
+- launch structure
+- calibration workflow tooling and instructions
+- synthetic or log-driven tests
+- replay harnesses and unit tests
+- stage2 interface planning
+
+Not valid now:
+
+- claiming sensor timings
+- claiming target_3d stability on real bags
+- claiming Offboard safety
+- claiming PX4 execution correctness
+- claiming calibration solved
+
+================================================================
+10. WHAT CAN BE PREPARED FOR CALIBRATION NOW
+================================================================
+
+Codex can help with:
+
+- calibration data capture checklist
+- bag recording commands
+- expected target board or motion procedure
+- offline calibration script wrappers
+- file format contracts for intrinsics and extrinsics
+- validation scripts for reprojection error
+- launch and config plumbing
+
+Codex cannot finish the final camera-lidar extrinsic without real data from actual hardware.
+
+================================================================
+11. PREFERRED INTERNAL INTERFACE CONTRACTS
+================================================================
+
+Use new names. Do not inherit old onboard naming unless there is a deliberate compatibility reason.
+
+Recommended stage1 internal interfaces:
+
+- /follow/camera/image_raw
+  type: sensor_msgs/Image
+  note: raw monocular RGB input
+
+- /follow/camera/camera_info
+  type: sensor_msgs/CameraInfo
+  note: camera intrinsics
+
+- /follow/lidar/points
+  type: sensor_msgs/PointCloud2
+  note: MID-360 point cloud input
+
+- /follow/lio/odom
+  type: nav_msgs/Odometry
+  note: aircraft odom source for later world-frame upgrades
+
+- /follow/detector/person_detections
+  type: vision_msgs/Detection2DArray or equivalent wrapper
+  note: raw detector output
+
+- /follow/tracker/selected_target_2d
+  type: custom wrapper or selected Detection2D equivalent
+  note: exactly one active target
+
+- /follow/tracker/status
+  type: human_follow_msgs/TrackerStatus
+  note: tracker continuity, hold, timeout, and reacquire observability
+
+- /follow/fusion/target_body
+  type: geometry_msgs/PointStamped
+  frame_id: base_link
+  note: target position relative to aircraft
+
+- /follow/control/cmd_body
+  type: geometry_msgs/TwistStamped
+  frame_id: base_link
+  note: low-level desired body velocity plus yaw command semantics
+
+- /follow/offboard/setpoint
+  type: mavros_msgs/PositionTarget
+  note: adapter output to PX4
+
+- /follow/state
+  type: diagnostic or string-like state publisher
+  note: idle/target_acquired/follow/search/lost
+
+- /follow/debug/overlay_image
+  type: sensor_msgs/Image
+  note: offline replay overlay for detector and tracker inspection
+
+Design rule:
+- keep internal control output separate from MAVROS-specific message output
+- this makes stage2 planner integration easier
+
+================================================================
+12. INITIAL CONTROL LAW SHAPE
+================================================================
+
+Stage1 control should prefer low-speed body-frame control.
+
+Inputs:
+- target x in body frame
+- target y in body frame
+- target z or forward distance in body frame
+
+Outputs:
+- vx_body
+- vy_body
+- yaw_rate
+
+Constraints:
+- low speed only
+- saturations mandatory
+- deadbands mandatory
+- hold behavior when confidence is weak
+- search behavior when target is lost
+
+Do NOT start with aggressive position jumps.
+
+================================================================
+13. IMAGE HANDLING RULES
+================================================================
+
+- camera orientation must be parameterized
+- allow 0/90/180/270 rotation or flip options
+- do not assume upright mount
+- do not bind code to exact /dev/video index
+- camera source must be replaceable between live USB and offline video
+
+================================================================
+14. STAGE 1 IMPLEMENTATION ORDER
+================================================================
+
+Order is fixed:
+
+1. create clean workspace structure
+2. lock interface contracts
+3. build detector wrapper with offline video mode
+4. build tracker and selected-target logic
+5. build lidar-to-image projection module
+6. build target point association and filtering
+7. build target_body estimator
+8. build simple follow controller and state machine
+9. build MAVROS/PX4 adapter
+10. build offline replay and synthetic tests
+11. only then prepare hardware bringup checklist
+
+================================================================
+15. OFFLINE VALIDATION ORDER
+================================================================
+
+Without hardware, validation order is:
+
+1. detector stability on saved monocular video
+2. tracker target continuity
+3. projection math on synthetic calibration inputs
+4. target association filtering behavior on mocked point sets
+5. controller output sanity from scripted target trajectories
+6. state machine transitions under lost/reacquire sequences
+
+================================================================
+16. HARDWARE VALIDATION ORDER LATER
+================================================================
+
+Once hardware is back, validation order is:
+
+1. offline perception on real recorded image plus point cloud
+2. ground stationary target_3d continuity
+3. no-prop Offboard command chain
+4. low-speed open-area follow
+5. only after stage1 passes, begin stage2 planner integration
+
+================================================================
+17. STAGE 2 EGO POLICY
+================================================================
+
+- Use a fresh clean EGO pull.
+- Keep it logically separate from stage1 direct-follow stack.
+- Do not tie package names to the old onboard workspaces.
+- Define our own interface alignment.
+- Planner should consume target goal abstraction, not raw detector boxes.
+
+================================================================
+18. FORBIDDEN DRIFT
+================================================================
+
+Do not drift into:
+
+- replanning full autonomy before stage1 follow works
+- arguing about ArduPilot vs PX4
+- assuming D435i exists for first milestone
+- reusing old workspace naming because it already exists elsewhere
+- treating mapping, obstacle avoidance, target follow, and auto takeoff as one first milestone
+- claiming progress from broad summaries without new code or new locked interface decisions
+
+================================================================
+19. CURRENT FRONTIER
+================================================================
+
+Current frontier for this workspace:
+
+- detector, tracker, fusion, controller, and PX4 bridge are no longer separate active frontiers
+- the stable no-hardware baseline is now the full synthetic stage1 chain through `/follow/offboard/setpoint`
+- that baseline has already been widened with:
+  - real offline-video smoke through the detector HOG path
+  - live missing-camera idle safety on the PX4 launch surface
+- new lab facts are now locked:
+  - the onboard host is reachable at `nv@192.168.5.10`
+  - FCU is visible at `/dev/serial/by-id/usb-3D_Robotics_PX4_FMU_v5.x_0-if00`
+  - the USB monocular camera exposes `/dev/video0` and `/dev/video1`
+  - `eth0` is on `192.168.1.50/24`, which matches the MID-360 subnet expectation
+  - the separate stage1 workspace now exists at `/home/nv/human_follow_ws`
+  - remote stage1 software preflight has passed there
+  - separate `usb_cam` smoke has passed there with `/camera/usb_cam/image_raw` and `encoding="rgb8"`
+  - the live hardware camera correction is now explicit and locked:
+    - `stage1_live_core.launch` exposes `image_rotation_deg`, `flip_horizontal`, and `flip_vertical`
+    - the hardware-facing defaults are `image_rotation_deg=180`, `flip_horizontal=false`, `flip_vertical=false`
+    - the user confirmed the corrected `180` image as the right live view
+    - `env/stage1_remote_camera_snapshot.bash` now emits both raw and corrected snapshot files under the same defaults
+  - the latest read-only lab snapshot at `2026-04-29 00:40:43 CST` shows no active EGO or ROS runtime processes, so the exclusive window is genuinely open on fresh evidence
+  - the live stage1 chain on the Jetson now emits detector, tracker, state, command, and bridge setpoint topics
+  - the hardware-side bridge surface is now being moved toward `/mavros/setpoint_raw/local`
+  - after the FCU replug and reboot, robust MAVROS verification reaches `connected=True`
+  - after the FCU replug and reboot, raw USB probes on `/dev/ttyACM0` read real bytes again
+  - a split runtime in `/home/nv/human_follow_ws` now passes:
+    - camera ingress
+    - MAVROS connectivity
+    - live follower topics
+    - `/mavros/setpoint_raw/local`
+  - `OFFBOARD` mode entry while disarmed is now proven
+  - generic arm behavior is now separated:
+    - `MANUAL` and `STABILIZED` arm without an external odometry source
+    - `POSCTL` and direct `OFFBOARD` arm do not
+  - a static external odometry stream on `/mavros/odometry/out` is enough to make the estimator valid and unlock `POSCTL`
+  - with the same external odometry source:
+    - `STABILIZED -> POSCTL` while armed succeeds
+    - `STABILIZED -> OFFBOARD` fails if the setpoint source is the live follower in zero-hold
+    - `STABILIZED -> OFFBOARD` succeeds if the setpoint source is a bounded nonzero raw body-velocity setpoint
+  - the real separate odometry path now exists inside `/home/nv/human_follow_ws`:
+    - `stage1_mid360_faster_lio_hw.launch`
+    - `human_follow_bringup/config/mid360_driver_config.json`
+    - `odom_topic_relay_node.py`
+  - the current MID-360 driver config in this branch is aligned to the working aircraft network:
+    - lidar IP `192.168.1.151`
+    - host IP `192.168.1.50`
+  - fresh bench evidence proves the real odometry path replaced the static emulator:
+    - `env/stage1_remote_real_odom_smoke.bash` passes
+    - `/laserMapping/odometry` publishes
+    - relay publishes `/follow/lio/odom`
+    - relay publishes `/mavros/odometry/out`
+    - `ODOM_LAUNCH=stage1_mid360_faster_lio_hw.launch env/stage1_remote_ev_posctl_arm_probe.bash` passes
+    - `ODOM_LAUNCH=stage1_mid360_faster_lio_hw.launch env/stage1_remote_offboard_after_arm_probe.bash` passes
+  - the reusable stage1 runtime gate is now wired into normal bringup and freshly proven:
+    - `env/stage1_remote_offboard_gate_probe.bash` passes with real odom and armed `OFFBOARD` entry
+    - `env/stage1_remote_offboard_hold_guard_probe.bash` passes and blocks `OFFBOARD` while the live chain is still `hold/zero`
+  - after the live camera transform patch:
+    - `REMOTE_BUILD=1 env/stage1_remote_workspace_prepare.bash` passes again
+    - `env/stage1_remote_split_runtime_smoke.bash` passes again
+  - host-side sim assets now exist, but the user explicitly corrected the order:
+    - they are parked for later
+    - they are not the current active frontier
+  - the full no-hardware acceptance batch was rerun after the timing-noise fixes and now also passes under a strict `grep FAIL` wrapper
+  - current live target presence is now measured explicitly:
+    - `env/stage1_remote_live_target_presence_probe.bash` exists
+    - with the user-confirmed `image_rotation_deg=180` correction active, it still reports no valid live human target in the current scene
+    - therefore no meaningful live cut-in widening signal exists yet, but camera orientation ambiguity is no longer part of the blocker
+  - once a real human target was reintroduced on the same current boot:
+    - `env/stage1_remote_live_target_presence_probe.bash` reported valid live target data
+    - the hardened `env/stage1_remote_live_follow_cutin_probe.bash` then passed
+    - armed `OFFBOARD` entry on a real target is now proven on the current boot
+  - a detailed timeline probe now locks one more bench truth:
+    - target-ready appeared before `OFFBOARD armed`
+    - `OFFBOARD armed` was reached
+    - bench ground auto-disarm then happened around `9.3-9.5s`
+    - therefore ground repeatability probes must score success on reaching armed `OFFBOARD`, not on holding it indefinitely while stationary on the ground
+  - the live target-3D contract is now explicit:
+    - live hardware defaults still run `enable_mock_projection=true`
+    - so the current proven live cut-in path is not real camera-lidar person fusion yet
+  - empty-scene repeatability is now measured explicitly:
+    - new tools:
+      - `env/stage1_remote_detector_only_probe.bash`
+      - `env/stage1_remote_absence_repeatability_probe.bash`
+    - before tracker hardening:
+      - detector-only valid `3/5`
+      - full-chain detector-valid `1/5`
+      - full-chain command-valid `1/5`
+    - after live tracker hardening with `min_consecutive_valid_inputs=3`:
+      - detector-only valid `1/5`
+      - full-chain detector-valid `2/5`
+      - full-chain command-valid `0/5`
+    - so empty-scene detector blips still exist at low rate, but they were no longer amplified into follow commands in the latest measured sample
+  - after the same tracker hardening, the positive path was revalidated:
+    - real-target live presence still reports strong valid data
+    - `env/stage1_remote_live_follow_cutin_probe.bash` still passes
+    - so the anti-false-positive gate reduced empty-scene command noise without breaking real-target acquisition
+  - target-loss fallback was then revalidated on the same current boot:
+    - after the target left the scene again, `env/stage1_remote_live_target_presence_probe.bash` ended at:
+      - `detector_valid=0`
+      - `last_state=idle`
+      - `command_valid=0`
+      - `last_mode=hold`
+    - so the current hardened live path now has fresh evidence for:
+      - positive acquisition
+      - armed `OFFBOARD` cut-in
+      - clean fallback to `idle/hold`
+  - the live cut-in probe itself is now hardened one step further:
+    - its arm waiter now accepts `armed=True` even if PX4 has already switched from `STABILIZED` into `OFFBOARD`
+    - that retired a second probe-only timing false negative
+- therefore the only valid live frontier is:
+  - keep this branch completely separate from `/home/nv/ego_fresh_ws`
+  - do not reuse the existing onboard EGO workspace as runtime base, interface contract, or future stage2 base
+  - keep stage1 live deployment rooted in `/home/nv/human_follow_ws`
+  - the static external odometry emulator is no longer the active branch
+  - the first real-target live cut-in question is no longer open
+  - the first empty-scene command-amplification question is also narrowed substantially
+  - the hardened positive path is no longer open
+  - the hardened target-loss fallback is no longer open
+  - hold one narrower open question only:
+    - can the branch lock clean target-loss behavior and then preserve that cleanliness while moving from `enable_mock_projection=true` toward real camera-lidar target fusion
+  - do not reopen simulation until:
+    - this project itself is declared ready enough for simulation
+    - the user's `sim_plane` platform is also declared ready
+
+================================================================
+20. NEXT ACTION ORDER
+================================================================
+
+Immediate next coding round should do this:
+
+1. treat `/home/nv/ego_fresh_ws` as untouchable from this branch and not as the future stage2 base
+2. reuse the new PX4 launch wrappers, smoke launches, and acceptance scripts as the software baseline:
+   - `stage1_live_px4.launch`
+   - `stage1_offline_px4.launch`
+   - `stage1_offline_video_px4.launch`
+   - `stage1_offline_video_px4_smoke.launch`
+   - `stage1_live_px4_idle_regression.launch`
+   - `env/stage1_px4_preflight_check.bash`
+   - `env/prepare_public_people_smoke_video.bash`
+   - `env/run_stage1_nohardware_acceptance.bash`
+3. use the new lab helper scripts to lock the non-interference boundary:
+   - `env/stage1_lab_readonly_snapshot.bash`
+   - `env/stage1_remote_workspace_prepare.bash`
+4. the separate remote stage1 root is now locked at:
+   - `/home/nv/human_follow_ws`
+5. the first live checks are now locked as passed:
+   - camera visibility only
+   - topic and frame sanity through detector, tracker, controller, and bridge
+6. the next narrow live step is:
+   - keep the now-passing transport checks available:
+     - `env/stage1_remote_mavros_smoke.bash`
+     - `env/stage1_remote_px4_usb_probe.bash`
+   - keep the new real-odom path and probes available:
+     - `stage1_mid360_faster_lio_hw.launch`
+     - `env/stage1_remote_real_odom_smoke.bash`
+     - `ODOM_LAUNCH=stage1_mid360_faster_lio_hw.launch env/stage1_remote_ev_posctl_arm_probe.bash`
+     - `ODOM_LAUNCH=stage1_mid360_faster_lio_hw.launch env/stage1_remote_offboard_after_arm_probe.bash`
+   - keep the now-passing runtime gate probes available:
+     - `ODOM_LAUNCH=stage1_mid360_faster_lio_hw.launch env/stage1_remote_offboard_gate_probe.bash`
+     - `ODOM_LAUNCH=stage1_mid360_faster_lio_hw.launch env/stage1_remote_offboard_hold_guard_probe.bash`
+   - keep the locked live camera transform:
+     - `image_rotation_deg=180`
+     - `flip_horizontal=false`
+     - `flip_vertical=false`
+   - use `env/stage1_remote_live_target_presence_probe.bash` before any live cut-in attempt
+   - only if a real target is actually present, run `env/stage1_remote_live_follow_cutin_probe.bash`
+   - use `env/stage1_remote_absence_repeatability_probe.bash` when empty-scene regression needs to be rechecked after perception or tracker changes
+   - for bench widening after that, remember the locked ground fact:
+     - auto-disarm occurs around `9.3-9.5s`
+     - armed `OFFBOARD` reached before that is already a pass condition for cut-in
+7. no prop-on or free-flight work until the now-proven real-target live cut-in path is followed by clean target-loss and repeatability evidence, and until the mock target-projection gap has a deliberate resolution path
+8. do not reopen detector, tracker, fusion, controller, or bridge work unless new evidence contradicts the current baseline
+
+If a future round starts widening before step 1-3 are done, pull it back to this file.
+
+================================================================
+21. CURRENT IMPLEMENTATION STATUS
+================================================================
+
+Completed in this workspace already:
+
+- supervisor pack created at /home/coco/follwer_ws/.codex/supervisor
+- root route file created and aligned with supervisor frontier
+- clean catkin workspace skeleton created
+- stage1 package split created:
+  - human_follow_msgs
+  - human_follow_perception
+  - human_follow_fusion
+  - human_follow_control
+  - human_follow_bringup
+- message contracts created:
+  - Target2D
+  - Target3D
+  - FollowState
+  - FollowCommand
+  - TrackerStatus
+- placeholder nodes created:
+  - detector_node.py
+  - tracker_node.py
+  - target_fusion_node.py
+  - follow_controller_node.py
+- config files created for perception/fusion/control
+- launch entrypoints created:
+  - stage1_offline_core.launch
+  - stage1_offline_px4.launch
+  - stage1_live_core.launch
+  - stage1_live_px4.launch
+  - stage1_offline_video.launch
+  - stage1_offline_video_px4.launch
+  - stage1_offline_video_px4_smoke.launch
+  - stage1_tracker_sequence.launch
+  - stage1_tracker_sequence_regression.launch
+  - stage1_projection_sanity.launch
+  - stage1_association_sanity.launch
+  - stage1_target_fusion_synthetic.launch
+  - stage1_target_fusion_body_synthetic.launch
+  - stage1_px4_bridge_regression.launch
+  - stage1_controller_px4_chain_regression.launch
+  - stage1_live_px4_idle_regression.launch
+  - stage2_placeholder.launch
+- detector branch materially advanced:
+  - detector node now supports `hog` backend with OpenCV built-in people detector
+  - detector node keeps image orientation configurable
+  - offline video replay node now exists for RGB-only development on the laptop
+- offline observability advanced:
+  - target_overlay_node now exists
+  - stage1_offline_video.launch exposes detector plus tracker overlay output
+- tracker branch materially advanced:
+  - tracker now has explicit `valid` / `hold` / `timeout` states
+  - tracker publishes `/follow/tracker/status`
+  - tracker hold output decays confidence instead of pretending every held target is equally fresh
+  - tracker logs state transitions and reacquire or timeout counters
+- scripted continuity harness now exists:
+  - target_sequence_publisher_node.py can drive repeated valid/hold/timeout/reacquire cases without hardware
+  - stage1_tracker_sequence.launch runs `sequence -> tracker -> fusion(mock) -> controller`
+- scripted continuity regression now exists:
+  - sequence_regression_monitor_node.py can automatically pass or fail tracker plus controller continuity
+  - stage1_tracker_sequence_regression.launch no longer depends on manual log inspection
+- controller observability improved:
+  - follow controller now logs state transitions
+- config integrity fixed:
+  - perception, fusion, and control YAML now match the actual node private param names
+  - loaded YAML now lands under the correct node namespaces instead of silently falling back to defaults
+- calibration work order created:
+  - /home/coco/follwer_ws/CAMERA_MID360_CALIBRATION_WORK_ORDER.txt
+  - content has been converted to Chinese-only form
+- local MAVROS overlay support created:
+  - /home/coco/follwer_ws/env/source_local_mavros_overlay.bash
+  - local overlay `/home/coco/.local/ros_noetic_overlay/opt/ros/noetic` is now a locked workspace fact
+- public no-hardware sample tooling created:
+  - /home/coco/follwer_ws/env/prepare_public_people_smoke_video.bash
+  - /home/coco/follwer_ws/data/samples/public_people_smoke.avi
+- one-shot acceptance runner created:
+  - /home/coco/follwer_ws/env/run_stage1_nohardware_acceptance.bash
+- real lidar-odom bringup path created:
+  - /home/coco/follwer_ws/src/human_follow_bringup/launch/stage1_mid360_faster_lio_hw.launch
+  - /home/coco/follwer_ws/src/human_follow_bringup/scripts/odom_topic_relay_node.py
+  - /home/coco/follwer_ws/src/human_follow_bringup/config/mid360_driver_config.json
+- vendored remote-only lidar driver source captured for Jetson deployment:
+  - /home/coco/follwer_ws/vendor/livox_ros_driver2
+- calibration file schemas created:
+  - /home/coco/follwer_ws/src/human_follow_fusion/config/camera_intrinsics.example.yaml
+  - /home/coco/follwer_ws/src/human_follow_fusion/config/camera_mid360_extrinsics.example.yaml
+- fusion geometry utilities now exist:
+  - projection_math.py loads camera and transform yaml, projects lidar points, selects bbox points, filters frontmost depth inliers, and estimates robust cluster centers
+- calibration asset validation now exists:
+  - human_follow_fusion/scripts/calibration_asset_validator.py checks:
+    - intrinsics image size and focal lengths
+    - distortion coefficient count
+    - frame-name consistency across intrinsics, camera-lidar extrinsics, and camera-body transform
+    - rigid-transform orthogonality, determinant sanity, and coarse translation plausibility
+  - env/stage1_calibration_assets_check.bash runs it locally
+  - env/stage1_remote_calibration_assets_check.bash runs it on the Jetson workspace
+- fusion synthetic validation now exists:
+  - projection_sanity_node.py verifies projection math on synthetic geometry
+  - association_sanity_node.py verifies bbox selection, depth filtering, and 3D center estimation on mocked foreground plus background points
+- target fusion node materially advanced:
+  - target_fusion_node.py still supports mock mode
+  - target_fusion_node.py now also supports a real pointcloud-driven path using calibration yaml and bbox-driven association
+  - stage1_target_fusion_synthetic.launch proves the real fusion path on synthetic pointcloud plus target input
+- camera-to-body adapter path now exists:
+  - camera_to_body_extrinsics.example.yaml defines a configurable rigid transform contract
+  - target_frame_adapter_node.py converts camera-frame Target3D into body-frame Target3D
+  - stage1_target_fusion_body_synthetic.launch proves synthetic scene -> fusion real path -> body-frame adapter
+- local checks completed:
+  - python syntax check passed
+  - catkin workspace builds with CATKIN_ENABLE_TESTING=OFF
+  - rospack sees all human_follow_* packages
+  - roslaunch --nodes parses both stage1 launch files
+  - roslaunch --nodes parses stage1_offline_video.launch
+  - roslaunch --nodes parses stage1_tracker_sequence.launch
+  - roslaunch --nodes parses stage1_tracker_sequence_regression.launch
+  - roslaunch --nodes parses stage1_projection_sanity.launch
+  - roslaunch --nodes parses stage1_association_sanity.launch
+  - roslaunch --nodes parses stage1_target_fusion_synthetic.launch
+  - roslaunch --nodes parses stage1_target_fusion_body_synthetic.launch
+  - runtime smoke test on `stage1_offline_core.launch` with mock detector confirmed:
+    - private params are injected correctly
+    - `/follow/tracker/status` publishes valid runtime data
+    - `/follow/control/cmd_body` publishes downstream command output
+  - runtime sequence smoke test on `stage1_tracker_sequence.launch` confirmed repeated:
+    - tracker `valid -> hold -> timeout -> valid`
+    - controller `target_acquired -> search -> lost -> idle -> target_acquired`
+    - tracker reacquire and timeout counters increase across repeated loops
+  - runtime automatic regression on `stage1_tracker_sequence_regression.launch` passed
+  - runtime synthetic projection sanity passed
+  - runtime synthetic association sanity passed
+  - runtime synthetic target_fusion real-path regression passed
+  - runtime synthetic body-frame adapter regression passed
+  - runtime automatic PX4 bridge regression on `stage1_px4_bridge_regression.launch` passed
+  - runtime automatic end-to-end synthetic chain regression on `stage1_controller_px4_chain_regression.launch` passed
+  - runtime automatic offline-video PX4 smoke on `stage1_offline_video_px4_smoke.launch` passed
+  - runtime automatic live missing-camera safety on `stage1_live_px4_idle_regression.launch` passed
+  - roslaunch --nodes parses `stage1_offline_px4.launch`
+  - roslaunch --nodes parses `stage1_live_px4.launch`
+  - roslaunch --nodes parses `stage1_offline_video_px4.launch`
+  - roslaunch --nodes parses `stage1_offline_video_px4_smoke.launch`
+  - roslaunch --nodes parses `stage1_live_px4_idle_regression.launch`
+- software-only PX4 preflight script passed:
+    - `/home/coco/follwer_ws/env/stage1_px4_preflight_check.bash`
+  - full no-hardware acceptance script passed:
+    - `/home/coco/follwer_ws/env/run_stage1_nohardware_acceptance.bash`
+  - separate Jetson workspace sync and build passed with vendored `livox_ros_driver2`:
+    - `/home/coco/follwer_ws/env/stage1_remote_workspace_prepare.bash`
+  - separate Jetson real-odom smoke passed:
+    - `/home/coco/follwer_ws/env/stage1_remote_real_odom_smoke.bash`
+  - separate Jetson real-odom estimator and mode probes passed:
+    - `ODOM_LAUNCH=stage1_mid360_faster_lio_hw.launch /home/coco/follwer_ws/env/stage1_remote_ev_posctl_arm_probe.bash`
+    - `ODOM_LAUNCH=stage1_mid360_faster_lio_hw.launch /home/coco/follwer_ws/env/stage1_remote_offboard_after_arm_probe.bash`
+  - reusable runtime gate probes now exist and pass:
+    - `/home/coco/follwer_ws/env/stage1_remote_offboard_gate_probe.bash`
+    - `/home/coco/follwer_ws/env/stage1_remote_offboard_hold_guard_probe.bash`
+  - live target presence probe now exists:
+    - `/home/coco/follwer_ws/env/stage1_remote_live_target_presence_probe.bash`
+  - live follow cut-in probe now exists:
+    - `/home/coco/follwer_ws/env/stage1_remote_live_follow_cutin_probe.bash`
+  - real-fusion prep tooling now exists and is freshly validated:
+    - `/home/coco/follwer_ws/src/human_follow_fusion/scripts/projection_overlay_debug_node.py`
+    - `/home/coco/follwer_ws/src/human_follow_bringup/launch/stage1_projection_overlay_debug.launch`
+    - `/home/coco/follwer_ws/src/human_follow_bringup/scripts/calibration_record_monitor_node.py`
+    - `/home/coco/follwer_ws/env/stage1_remote_projection_overlay_snapshot.bash`
+    - `/home/coco/follwer_ws/env/stage1_remote_calibration_record.bash`
+    - `/home/coco/follwer_ws/env/stage1_remote_real_fusion_preflight.bash` now fails fast if calibration assets are structurally invalid
+    - `tf_static` is now optional by default in the calibration-record precheck, matching the existing work-order rule
+  - local and remote real-fusion prep checks passed:
+    - local `env/stage1_calibration_assets_check.bash` passed on example yaml
+    - local `roslaunch --nodes human_follow_bringup stage1_projection_overlay_debug.launch` parses
+    - remote `env/stage1_remote_calibration_assets_check.bash` passed on Jetson-side example yaml
+    - remote `env/stage1_remote_real_fusion_preflight.bash` still passed after validator insertion
+    - remote `env/stage1_remote_calibration_capture_smoke.bash` passed with the default calibration topic set
+  - first real calibration-board check passed:
+    - corrected live snapshot showed the board fully visible and large enough in frame
+    - OpenCV detected four `DICT_6X6_250` markers with ids `[1, 2, 3, 4]`
+    - marker envelope coverage was about `48.9%` image width and `43.5%` image height
+  - first real joint calibration bag captured:
+    - `/home/nv/human_follow_ws/data/calibration/calib_session_20260429_0402/stage1_calibration_record.bag`
+    - `rosbag info`:
+      - duration `119s`
+      - size `2.0 GB`
+      - messages `34547`
+      - image `3574`
+      - camera_info `3574`
+      - cloud_registered_body `1191`
+      - odometry `1191`
+      - livox lidar `1191`
+      - livox imu `23826`
+  - board geometry template now exists:
+    - `/home/coco/follwer_ws/src/human_follow_fusion/config/calibration_board_spec.template.yaml`
+    - still missing from the real board:
+      - exact marker edge length
+      - preferably marker-center geometry or original design source
+
+Not done yet:
+
+- stronger detector backend beyond OpenCV HOG
+- real offline monocular video replay against user data
+- real recorded image plus lidar replay against lab captures
+- this aircraft's real camera intrinsics yaml
+- this aircraft's real camera-to-mid360 extrinsics yaml
+- this aircraft's real camera-to-body transform yaml
+- this aircraft's exact board-marker geometry metadata
+- projected lidar-on-image overlay acceptance on the real calibration outputs
+- full live stage1 follow validation after replacing `enable_mock_projection=true` with real fusion on this aircraft
+- formal simulation on the user's `sim_plane` platform after both project and sim platform are ready

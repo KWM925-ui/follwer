@@ -1,0 +1,13 @@
+std_msgs/Header header
+string tracking_state
+string detail
+int32 track_id
+bool output_valid
+float32 output_confidence
+float32 age_since_valid_sec
+float32 remaining_hold_sec
+uint32 valid_input_streak
+uint32 invalid_input_streak
+uint32 reacquire_count
+uint32 timeout_count
+string output_source

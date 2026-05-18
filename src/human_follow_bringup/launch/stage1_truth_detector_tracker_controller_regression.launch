@@ -1,0 +1,46 @@
+<launch>
+  <arg name="max_duration_sec" default="24.0" />
+  <arg name="loop" default="false" />
+  <arg name="motion_mode" default="scripted_standard" />
+  <arg name="random_seed" default="13" />
+  <arg name="truth_source_mode" default="scripted" />
+  <arg name="rviz" default="false" />
+  <arg name="monitor_required" default="true" />
+  <arg name="controller_provider" default="baseline" />
+  <arg name="controller_node_name" default="human_follow_controller" />
+  <arg name="external_controller_pkg" default="human_follow_control" />
+  <arg name="external_controller_type" default="control_algorithm_template_node.py" />
+
+  <include file="$(find human_follow_bringup)/launch/stage1_truth_fusion_controller_regression.launch">
+    <arg name="max_duration_sec" value="$(arg max_duration_sec)" />
+    <arg name="loop" value="$(arg loop)" />
+    <arg name="motion_mode" value="$(arg motion_mode)" />
+    <arg name="random_seed" value="$(arg random_seed)" />
+    <arg name="truth_source_mode" value="$(arg truth_source_mode)" />
+    <arg name="rviz" value="$(arg rviz)" />
+    <arg name="monitor_required" value="$(arg monitor_required)" />
+    <arg name="enable_monitor" value="false" />
+    <arg name="controller_provider" value="$(arg controller_provider)" />
+    <arg name="controller_node_name" value="$(arg controller_node_name)" />
+    <arg name="external_controller_pkg" value="$(arg external_controller_pkg)" />
+    <arg name="external_controller_type" value="$(arg external_controller_type)" />
+    <arg name="enable_detector_node" value="true" />
+    <arg name="enable_synthetic_camera" value="true" />
+    <arg name="detector_backend" value="synthetic_box" />
+    <arg name="detector_require_image_heartbeat" value="true" />
+    <arg name="scene_target_topic" value="/follow/sim/truth_target_2d" />
+    <arg name="debug_target_topic" value="/follow/sim/truth_target_2d_debug" />
+    <arg name="tracker_input_topic" value="/follow/detector/person_target" />
+  </include>
+
+  <node pkg="human_follow_px4_bridge" type="truth_chain_regression_monitor_node.py" name="truth_chain_regression_monitor" output="screen" required="$(arg monitor_required)">
+    <param name="max_duration_sec" value="$(arg max_duration_sec)" />
+    <param name="detector_topic" value="/follow/detector/person_target" />
+    <param name="require_detector_valid_detection" value="true" />
+    <param name="min_detector_valid_count" value="8" />
+    <param name="required_detector_source_token" value="synthetic_box" />
+    <param name="required_tracker_source_token" value="synthetic_box" />
+    <rosparam param="required_visible_phase_labels">[approach_center, reacquire_right, reacquire_left]</rosparam>
+    <rosparam param="required_hidden_phase_labels">[short_occlusion, long_loss]</rosparam>
+  </node>
+</launch>

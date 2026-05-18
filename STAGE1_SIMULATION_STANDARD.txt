@@ -1,0 +1,313 @@
+STAGE1 仿真标准
+FOR CODEX USE
+WORKSPACE: /home/coco/follwer_ws
+STATUS: ACTIVE
+LAST_INTENT: 2026-04-30 user asked to land the detailed simulation plan as the standard and start implementing it directly
+
+================================================================
+1. 目标
+================================================================
+
+这个标准只服务于 Stage1:
+
+- 机型: F450 四旋翼
+- 飞控: PX4
+- 传感组合: USB 单目 + MID-360
+- 任务: Stanley 风格的人跟随
+
+这个标准不是重型全栈仿真平台，不引入新的重型 3D 引擎。
+它的作用是把当前已经存在的 Stage1 链路标准化，让后续自己的算法可以有一个统一、轻量、可复现的接入口。
+
+================================================================
+2. 标准分层
+================================================================
+
+Layer A: 控制链回归基线
+- 复用现有链路:
+  - `Target2D -> tracker -> Target3D -> FollowCommand -> PositionTarget`
+- 目的:
+  - 保证 tracker、controller、PX4 bridge 这条链本身是可回归的
+
+Layer B: 统一人体真值驱动的几何仿真
+- 只允许一个人体运动真值源
+- 从同一个真值源派生:
+  - `Target2D`
+  - MID-360 风格点云
+  - 可选 truth `Target3D`
+  - 遮挡/丢失事件
+- 目的:
+  - 不再用静态 bbox 和静态场景各自为政
+  - 用同一条真值链同时驱动 perception/fusion/control/bridge
+
+Layer C: 可选图像/视频层
+- 以后如果需要再接入离线视频回放、图像生成或更强视觉前端
+- 这一层不是当前 Stage1 标准的阻塞项
+
+当前标准先做到 Layer A + Layer B。
+
+================================================================
+3. 标准接口
+================================================================
+
+标准真值源:
+- `/follow/sim/truth_target_body`
+  - type: `human_follow_msgs/Target3D`
+  - frame: `base_link`
+  - 语义: 人体在机体系下的真值中心
+
+- `/follow/sim/truth_phase`
+  - type: `std_msgs/String`
+  - 语义: 当前仿真 phase 的结构化描述
+
+真值派生层:
+- `/follow/detector/person_target`
+  - type: `human_follow_msgs/Target2D`
+  - 语义: 由真值驱动生成的目标框
+
+- `/follow/sim/truth_target_2d`
+  - type: `human_follow_msgs/Target2D`
+  - 语义: 与 detector 输入同源的调试输出
+
+- `/follow/lidar/points`
+  - type: `sensor_msgs/PointCloud2`
+  - 语义: 由真值驱动生成的轻量几何点云
+
+可视化层:
+- `/follow/viz/markers`
+  - type: `visualization_msgs/MarkerArray`
+  - 语义: truth 人体代理、fusion 目标点、控制箭头
+
+- `/follow/viz/truth_path`
+  - type: `nav_msgs/Path`
+  - 语义: 真值目标轨迹
+
+- `/follow/viz/fusion_path`
+  - type: `nav_msgs/Path`
+  - 语义: fusion 输出轨迹
+
+下游复用链:
+- `/follow/tracker/selected_target`
+- `/follow/fusion/target_body`
+- `/follow/control/cmd_body`
+- `/follow/offboard/setpoint`
+
+设计原则:
+- 内部控制输出和 MAVROS/PX4 输出保持分离
+- 仿真标准只提供稳定输入和回归判据，不绑死后续算法实现方式
+
+人工交互标准:
+- 日常真线演示里，人体位置通过 RViz `2D Nav Goal` 直接设置
+- Tk 小面板只保留:
+  - `V`: `shown/hidden`
+  - `R`: 复位到机前默认位置
+  - `Space`: 清空面板状态提示，不改当前位置
+- `hidden` 必须代表真实遮挡，而不是只隐藏显示
+
+================================================================
+4. 标准仿真场景
+================================================================
+
+标准场景固定包含这些 phase:
+
+1. `idle_boot`
+- 初始空场景
+- 用于验证 `idle` 和 `hold` 安全落点
+
+2. `approach_center`
+- 人从更远处向期望跟随距离接近
+- 用于验证前向误差闭环
+
+3. `stop_go_pause`
+- 人短暂停住
+- 用于验证命令收敛和平滑保持
+
+4. `short_occlusion`
+- 短时遮挡
+- 时长要足以触发 tracker `hold`
+
+5. `reacquire_right`
+- 遮挡后在画面右侧重新出现
+- 用于验证 reacquire 和右向控制符号
+
+6. `retreat_center`
+- 人回到中间并稍微拉远
+- 用于验证后退/再跟随
+
+7. `long_loss`
+- 长时间丢失
+- 时长要足以触发:
+  - tracker `timeout`
+  - controller `search`
+  - controller `lost`
+- 当前真线搜索配置是 120 度来回扫两次后停下，因此 `long_loss` 必须长于整段 search 窗口，不能再用早期那种几秒钟短丢失去冒充 `lost`
+
+8. `reacquire_left`
+- 长失联后在画面左侧重新出现
+- 用于验证左向 reacquire 和桥接输出
+
+这个标准场景已经覆盖:
+- crossing
+- approach/retreat
+- stop/go
+- short occlusion
+- timeout/loss
+- reacquire
+
+================================================================
+5. 标准回归入口
+================================================================
+
+标准 launch:
+- `human_follow_bringup/stage1_truth_fusion_controller_regression.launch`
+- 可视化配置:
+  - `human_follow_bringup/rviz/stage1_truth_follow.rviz`
+
+这个入口必须做到:
+- 使用统一 truth 源
+- 走真实几何 fusion 路径，而不是 `enable_mock_projection=true`
+- 继续复用现有 tracker/controller/PX4 bridge
+- 给出一条可重复执行的本地无硬件回归路径
+
+================================================================
+6. 通过判据
+================================================================
+
+标准回归至少需要同时证明:
+
+1. 真值驱动链路是活的
+- 所有标准 phase 都能被观测到
+
+2. fusion 没有偏掉
+- 可见 phase 下，`/follow/fusion/target_body` 与 truth `Target3D` 的位置误差受控
+
+3. 短遮挡行为正确
+- 能看到 `hold`
+- fusion 在遮挡阶段会变成 invalid，而不是瞎输出目标
+
+4. 长丢失行为正确
+- 能看到 `timeout`
+- controller 能进入 `search` 和 `lost`
+
+5. reacquire 行为正确
+- 至少完成一次右侧 reacquire
+- 至少完成一次左侧 reacquire
+
+6. bridge 没有跑偏
+- `FollowCommand` 到 `PositionTarget` 的映射保持一致
+
+================================================================
+7. 后续算法接入方式
+================================================================
+
+控制类算法:
+- 保留 `/follow/fusion/target_body`
+- 你自己的控制器直接替换 `follow_controller_node.py`
+- 输出仍然走:
+  - `/follow/control/cmd_body`
+  - `/follow/offboard/setpoint`
+
+当前已经标准化的替换方式:
+- 不再要求手动改主线 launch
+- 统一使用 `stage1_controller_slot.launch`
+- 参数:
+  - `controller_provider:=baseline|external`
+  - `external_controller_pkg:=...`
+  - `external_controller_type:=...`
+
+因此现在“替换控制器”指的是:
+- 仿真真线:
+  - `stage1_truth_fusion_controller_regression.launch`
+  - `stage1_truth_visual_demo.launch`
+- 部署真线:
+  - `stage1_live_core.launch`
+  - `stage1_live_core_real_fusion.launch`
+  - `stage1_live_px4_to_mavros.launch`
+  - `stage1_live_px4_to_mavros_real_fusion.launch`
+
+都已经原生支持外部控制器插槽
+
+另外已经补上“外部算法接入验收”：
+- launch:
+  - `human_follow_bringup/stage1_external_ingress_regression.launch`
+- smoke:
+  - `env/run_stage1_external_ingress_smoke.bash`
+
+目的不是再造一条假线，而是快速确认：
+- 你的算法是否真的挂进了真线
+- 是否真的发了 `/follow/control/cmd_body`
+- 是否真的走出了 `follow/search/lost`
+- 规划类算法是否真的发了 `/follow/planning/debug_path`
+
+ROS 规划/感知类算法:
+- 可以直接复用仿真输入:
+  - `/follow/lidar/points`
+  - `/follow/fusion/target_world`
+  - `/follow/sim/vehicle_odom`
+  - 后续部署线可切到 `/follow/lio/odom`
+- 你自己的模块可以替换:
+  - detector/tracker/fusion
+  - 或 controller 以上的规划层
+
+当前已经留好的唯一用户算法落点:
+- `src/human_follow_user`
+
+当前默认用户入口:
+- `human_follow_user/scripts/user_control_node.py`
+- `human_follow_user/scripts/user_planning_node.py`
+
+这两个入口当前先转接到已验过的模板，目的是先把“用户自己的包接进真线”做成标准事实。
+后续真实算法应直接替换这两个入口，而不是再去新造 launch 版本。
+
+当前真线里，规划/感知类外部控制器的 controller slot 已经统一转发:
+- `target_world_topic`
+- `odom_topic`
+- `pointcloud_topic`
+- `require_pointcloud`
+
+并且:
+- 仿真真线 `stage1_truth_fusion_controller_regression.launch` 已对规划类入口启用 `controller_require_pointcloud=true`
+- 部署真线 `stage1_live_core_real_fusion.launch` 已把 `/follow/lio/odom` 和真实点云 topic 转发进同一控制槽
+
+注意:
+- `/follow/sim/truth_target_body` 和 `/follow/sim/human_truth_world` 只适合做对照、评估、回归判据
+- 不应该作为真线规划算法的默认主输入
+- 否则 `hidden` 语义会被破坏，算法会等于直接偷看真值
+
+结论:
+- 这个标准不是只会启动官方 launch
+- 它明确规定了:
+  - 仿真输入从哪里来
+  - 下游链路怎么复用
+  - 你自己的算法应该接在哪一层
+
+================================================================
+8. 当前标准命令
+================================================================
+
+本地构建:
+- `source /home/coco/follwer_ws/env/source_local_mavros_overlay.bash && cd /home/coco/follwer_ws && catkin_make`
+
+标准回归:
+- `source /home/coco/follwer_ws/env/source_local_mavros_overlay.bash && source /home/coco/follwer_ws/devel/setup.bash && roslaunch human_follow_bringup stage1_truth_fusion_controller_regression.launch`
+
+带 RViz:
+- `source /home/coco/follwer_ws/env/source_local_mavros_overlay.bash && source /home/coco/follwer_ws/devel/setup.bash && roslaunch human_follow_bringup stage1_truth_fusion_controller_regression.launch rviz:=true`
+
+无 GUI smoke:
+- `source /home/coco/follwer_ws/env/source_local_mavros_overlay.bash && source /home/coco/follwer_ws/devel/setup.bash && /home/coco/follwer_ws/env/stage1_truth_demo_smoke.bash stage1_truth_visual_demo.launch`
+
+smoke 产物目录:
+- `/home/coco/follwer_ws/.codex/artifacts/stage1_demo_smoke/`
+
+================================================================
+9. 当前边界
+================================================================
+
+当前明确不做:
+- 重型 Gazebo / Unity / Unreal 仿真切换
+- Stage2 EGO / planner 集成
+- 真实相机视频生成
+- 真实硬件飞行
+- 大而全的多传感器世界建模
+
+先把这一版标准做成可反复用、可稳定回归、可作为自己算法接入口的 Stage1 仿真基线。

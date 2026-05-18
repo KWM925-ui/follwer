@@ -1,0 +1,18 @@
+<launch>
+  <arg name="video_path" default="" />
+  <arg name="image_topic" default="/follow/camera/image_raw" />
+  <arg name="publish_rate_hz" default="15.0" />
+  <arg name="detector_backend" default="hog" />
+  <arg name="enable_overlay" default="true" />
+
+  <include file="$(find human_follow_bringup)/launch/stage1_offline_video.launch">
+    <arg name="video_path" value="$(arg video_path)" />
+    <arg name="image_topic" value="$(arg image_topic)" />
+    <arg name="publish_rate_hz" value="$(arg publish_rate_hz)" />
+    <arg name="detector_backend" value="$(arg detector_backend)" />
+    <arg name="enable_overlay" value="$(arg enable_overlay)" />
+  </include>
+
+  <rosparam command="load" file="$(find human_follow_px4_bridge)/config/px4_bridge.yaml" />
+  <node pkg="human_follow_px4_bridge" type="follow_px4_bridge_node.py" name="human_follow_px4_bridge" output="screen" />
+</launch>

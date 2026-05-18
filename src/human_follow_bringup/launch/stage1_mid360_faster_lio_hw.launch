@@ -1,0 +1,56 @@
+<launch>
+  <arg name="bd_list" default="100000000000000" />
+  <arg name="xfer_format" default="1" />
+  <arg name="multi_topic" default="0" />
+  <arg name="data_src" default="0" />
+  <arg name="publish_freq" default="10.0" />
+  <arg name="output_type" default="0" />
+  <arg name="msg_frame_id" default="livox_frame" />
+  <arg name="lidar_bag" default="false" />
+  <arg name="imu_bag" default="false" />
+  <arg name="user_config_path" default="$(find human_follow_bringup)/config/mid360_driver_config.json" />
+  <arg name="faster_lio_config" default="$(find faster_lio)/config/mid360.yaml" />
+  <arg name="lio_odom_topic" default="/laserMapping/odometry" />
+  <arg name="follow_odom_topic" default="/follow/lio/odom" />
+  <arg name="mavros_odom_topic" default="/mavros/odometry/out" />
+  <arg name="odom_frame_id" default="odom" />
+  <arg name="odom_child_frame_id" default="base_link" />
+  <arg name="restamp_now" default="false" />
+  <arg name="rviz" default="false" />
+
+  <param name="xfer_format" value="$(arg xfer_format)" />
+  <param name="multi_topic" value="$(arg multi_topic)" />
+  <param name="data_src" value="$(arg data_src)" />
+  <param name="publish_freq" type="double" value="$(arg publish_freq)" />
+  <param name="output_data_type" value="$(arg output_type)" />
+  <param name="cmdline_str" type="string" value="$(arg bd_list)" />
+  <param name="cmdline_file_path" type="string" value="livox_test.lvx" />
+  <param name="user_config_path" type="string" value="$(arg user_config_path)" />
+  <param name="frame_id" type="string" value="$(arg msg_frame_id)" />
+  <param name="enable_lidar_bag" type="bool" value="$(arg lidar_bag)" />
+  <param name="enable_imu_bag" type="bool" value="$(arg imu_bag)" />
+
+  <node
+    name="livox_lidar_publisher2"
+    pkg="livox_ros_driver2"
+    type="livox_ros_driver2_node"
+    required="true"
+    output="screen"
+    args="$(arg bd_list)" />
+
+  <rosparam command="load" file="$(arg faster_lio_config)" />
+  <node pkg="faster_lio" type="run_mapping_online" name="laserMapping" output="screen" />
+
+  <node pkg="human_follow_bringup" type="odom_topic_relay_node.py" name="stage1_lio_odom_relay" output="screen">
+    <param name="input_topic" value="$(arg lio_odom_topic)" />
+    <param name="output_topic" value="$(arg mavros_odom_topic)" />
+    <param name="mirror_topic" value="$(arg follow_odom_topic)" />
+    <param name="frame_id_override" value="$(arg odom_frame_id)" />
+    <param name="child_frame_id_override" value="$(arg odom_child_frame_id)" />
+    <param name="restamp_now" value="$(arg restamp_now)" />
+  </node>
+
+  <group if="$(arg rviz)">
+    <node launch-prefix="nice" pkg="rviz" type="rviz" name="stage1_mid360_lio_rviz" args="-d $(find faster_lio)/rviz_cfg/loam_livox.rviz" />
+  </group>
+</launch>

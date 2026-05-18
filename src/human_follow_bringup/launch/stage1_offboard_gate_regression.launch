@@ -1,0 +1,14 @@
+<launch>
+  <arg name="max_duration_sec" default="8.0" />
+  <arg name="min_eligible_setpoints" default="10" />
+  <arg name="monitor_required" default="true" />
+
+  <include file="$(find human_follow_bringup)/launch/stage1_offboard_gate_bench.launch" />
+
+  <node pkg="human_follow_px4_bridge" type="fake_mavros_gate_harness_node.py" name="fake_mavros_gate_harness" output="screen" />
+
+  <node pkg="human_follow_px4_bridge" type="offboard_gate_regression_monitor_node.py" name="offboard_gate_regression_monitor" output="screen" required="$(arg monitor_required)">
+    <param name="max_duration_sec" value="$(arg max_duration_sec)" />
+    <param name="min_eligible_setpoints" value="$(arg min_eligible_setpoints)" />
+  </node>
+</launch>

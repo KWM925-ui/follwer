@@ -1,0 +1,11 @@
+human_follow_px4_bridge:
+  input_topic: /follow/control/cmd_body
+  output_topic: /follow/offboard/setpoint
+  output_frame_id: base_link
+  publish_rate_hz: 30.0
+  command_timeout_sec: 0.5
+  flip_lateral_sign: true
+  flip_yaw_rate_sign: true
+  forward_scale: 1.0
+  lateral_scale: 1.0
+  yaw_rate_scale: 1.0

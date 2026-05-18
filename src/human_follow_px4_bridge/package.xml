@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>human_follow_px4_bridge</name>
+  <version>0.0.1</version>
+  <description>Bridge staged human-follow body commands into PX4-style MAVROS raw setpoints.</description>
+
+  <maintainer email="codex@example.com">Codex</maintainer>
+  <license>Proprietary</license>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <depend>human_follow_msgs</depend>
+  <depend>mavros_msgs</depend>
+  <depend>geometry_msgs</depend>
+  <depend>rospy</depend>
+  <depend>std_msgs</depend>
+  <depend>quadrotor_msgs</depend>
+</package>

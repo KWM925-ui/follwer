@@ -1,0 +1,33 @@
+<launch>
+  <arg name="controller_provider" default="baseline" />
+  <arg name="controller_input_topic" default="/follow/fusion/target_body" />
+  <arg name="controller_command_topic" default="/follow/control/cmd_body" />
+  <arg name="controller_state_topic" default="/follow/state" />
+  <arg name="controller_target_world_topic" default="/follow/fusion/target_world" />
+  <arg name="controller_odom_topic" default="/follow/sim/vehicle_odom" />
+  <arg name="controller_pointcloud_topic" default="/follow/lidar/points" />
+  <arg name="controller_require_pointcloud" default="false" />
+  <arg name="controller_node_name" default="human_follow_controller" />
+  <arg name="external_controller_pkg" default="human_follow_control" />
+  <arg name="external_controller_type" default="control_algorithm_template_node.py" />
+
+  <group if="$(eval arg('controller_provider') == 'baseline')">
+    <node pkg="human_follow_control" type="follow_controller_node.py" name="$(arg controller_node_name)" output="screen">
+      <param name="input_topic" value="$(arg controller_input_topic)" />
+      <param name="command_topic" value="$(arg controller_command_topic)" />
+      <param name="state_topic" value="$(arg controller_state_topic)" />
+    </node>
+  </group>
+
+  <group if="$(eval arg('controller_provider') == 'external')">
+    <node pkg="$(arg external_controller_pkg)" type="$(arg external_controller_type)" name="$(arg controller_node_name)" output="screen">
+      <param name="input_topic" value="$(arg controller_input_topic)" />
+      <param name="command_topic" value="$(arg controller_command_topic)" />
+      <param name="state_topic" value="$(arg controller_state_topic)" />
+      <param name="target_world_topic" value="$(arg controller_target_world_topic)" />
+      <param name="odom_topic" value="$(arg controller_odom_topic)" />
+      <param name="pointcloud_topic" value="$(arg controller_pointcloud_topic)" />
+      <param name="require_pointcloud" value="$(arg controller_require_pointcloud)" />
+    </node>
+  </group>
+</launch>

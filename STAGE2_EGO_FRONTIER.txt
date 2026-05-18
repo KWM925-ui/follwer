@@ -1,0 +1,184 @@
+STAGE2 EGO FRONTIER
+UPDATED_AT: 2026-05-08 Asia/Shanghai
+
+LOCKED_FACTS
+- This frontier is project-side only and belongs to /home/coco/follwer_ws.
+- Any sim_plane independent ego_planner or ego_planner_swarm baseline is NOT project-side Stage2 completion evidence.
+- Stage1 project-side truth-driven follower chain already has fresh simulation evidence through the managed sim path.
+- Stage2 is still blocked from being called complete because no real project-side EGO planner deployment exists yet in /home/coco/follwer_ws.
+- Fresh managed Stage2 placeholder sim evidence now exists on the sim_plane side, but it is placeholder-chain proof only and not real EGO completion proof.
+- The current project-side source already exposes:
+  - /follow/fusion/target_world
+  - /follow/lio/odom
+  - /follow/lidar/points
+  - /follow/control/cmd_body
+  - /follow/offboard/setpoint
+- The current project-side source now exposes the minimum Stage2 skeleton:
+  - rolling follow-goal generator node
+  - Stage2 EGO topic adapter
+  - project-side EGO PositionCommand to MAVROS PositionTarget bridge
+  - Stage2 launch chain
+  - user-package bootstrap entry for later planner replacement
+- A local workspace-compatible quadrotor_msgs package now exists inside /home/coco/follwer_ws for PositionCommand contract stability.
+- Fresh local project-side regression evidence now exists for the Stage2 lower half:
+  - `timeout 25s roslaunch human_follow_bringup stage2_ego_bridge_regression.launch`
+  - PASS facts:
+    - ego bridge regression PASS
+    - offboard_gate regression PASS
+    - setpoint-source entry gating worked with fake MAVROS harness
+- Fresh local project-side regression evidence now exists for the Stage2 upper half:
+  - `timeout 20s roslaunch human_follow_bringup stage2_goal_adapter_regression.launch`
+  - PASS facts:
+    - rolling goal generation from target_world + odom produced valid /follow/stage2/goal
+    - Stage2 adapter correctly forwarded:
+      - /follow/stage2/goal -> /move_base_simple/goal
+      - /follow/lio/odom -> /odom_world
+      - /follow/lio/odom -> /grid_map/odom
+      - /follow/lidar/points -> /grid_map/cloud
+- Fresh local project-side placeholder full-chain skeleton evidence now exists:
+  - `timeout 25s roslaunch human_follow_bringup stage2_placeholder_full_chain_regression.launch`
+  - PASS facts:
+    - distinct Stage2 goals flowed through the full placeholder chain
+    - placeholder planner stub consumed:
+      - /move_base_simple/goal
+      - /odom_world
+      - /grid_map/cloud
+    - placeholder planner stub produced distinct `/follow/stage2/ego_position_cmd`
+    - bridge converted placeholder `PositionCommand` into `/follow/stage2/offboard/setpoint`
+    - gate forwarded into `/mavros/setpoint_raw/local`
+    - fake MAVROS harness entered OFFBOARD with exactly one request
+- The placeholder full-chain regression is contract evidence only.
+- The placeholder full-chain regression is NOT evidence of real EGO planner integration.
+- A fresh project-local minimal real EGO planner surface now exists inside `/home/coco/follwer_ws`:
+  - vendored planner packages:
+    - `src/ego_planner_vendor/plan_env`
+    - `src/ego_planner_vendor/path_searching`
+    - `src/ego_planner_vendor/bspline_opt`
+    - `src/ego_planner_vendor/traj_utils`
+    - `src/ego_planner_vendor/ego_planner`
+  - thin local ingress bridge:
+    - `src/human_follow_bringup/scripts/stage2_move_base_goal_to_waypoint_path_node.py`
+  - project-local real planner launches:
+    - `src/human_follow_bringup/launch/stage2_real_ego.launch`
+    - `src/human_follow_bringup/launch/stage2_real_ego_full_chain_regression.launch`
+- Fresh project-local real EGO build evidence now exists:
+  - `source /home/coco/follwer_ws/env/source_local_mavros_overlay.bash && catkin_make`
+  - PASS facts:
+    - `plan_env`, `path_searching`, `bspline_opt`, `traj_utils`, `ego_planner` all built inside this workspace
+    - `ego_planner_node` and `traj_server` linked successfully inside this workspace
+- Fresh project-local real EGO full-chain evidence now exists:
+  - `timeout 30s roslaunch human_follow_bringup stage2_real_ego_full_chain_regression.launch`
+  - PASS facts:
+    - real EGO consumed:
+      - `/move_base_simple/goal`
+      - `/waypoint_generator/waypoints`
+      - `/odom_world`
+      - `/grid_map/cloud`
+    - real EGO emitted distinct `quadrotor_msgs/PositionCommand`
+    - bridge converted real planner output into `/follow/stage2/offboard/setpoint`
+    - gate forwarded into `/mavros/setpoint_raw/local`
+    - fake MAVROS harness entered OFFBOARD with exactly one request
+    - monitor PASS:
+      - `stage2 real ego full-chain regression PASS distinct_goals=3 distinct_cmds=8 request_count=1`
+- Fresh project-local real EGO repeatability evidence now also exists:
+  - second run of `timeout 30s roslaunch human_follow_bringup stage2_real_ego_full_chain_regression.launch`
+  - PASS facts:
+    - `stage2 real ego full-chain regression PASS distinct_goals=3 distinct_cmds=8 request_count=1`
+- Fresh preservation evidence now exists after landing real EGO:
+  - `timeout 25s roslaunch human_follow_bringup stage2_placeholder_full_chain_regression.launch`
+  - PASS facts:
+    - `stage2 placeholder full-chain regression PASS distinct_goals=3 distinct_cmds=3 request_count=1`
+- Fresh project-local real EGO plus search full-chain evidence now also exists:
+  - `timeout 35s roslaunch human_follow_bringup stage2_real_ego_search_full_chain_regression.launch`
+  - PASS facts:
+    - `stage2 real ego full-chain regression PASS distinct_goals=4 distinct_cmds=8 request_count=1 search_goal_count=6 search_waypoint_count=6 search_cmd_count=147 goal_shift=0.555 waypoint_shift=0.555 cmd_shift=0.206`
+  - Meaning:
+    - Stage2 search-goal motion is no longer only proved at the goal-generator layer
+    - The same search phase now propagates through:
+      - `/follow/stage2/goal`
+      - `/move_base_simple/goal`
+      - `/waypoint_generator/waypoints`
+      - `quadrotor_msgs/PositionCommand`
+      - `/follow/stage2/offboard/setpoint`
+      - `/mavros/setpoint_raw/local`
+- Fresh local run-hygiene fix also exists:
+  - `env/source_local_mavros_overlay.bash` now sources local `devel/setup.bash` when present
+  - Meaning:
+    - local `roslaunch` / `rospack` verification commands can now see `human_follow_bringup` directly from this workspace while preserving the MAVROS overlay
+- The project-side Stage2 state is no longer blocked on the absence of a real planner inside this workspace.
+- The remaining Stage2 gap is no longer local real-planner ingress.
+- The remaining Stage2 gap is managed simulation acceptance of this real planner path and later detector/real-fusion widening.
+- Fresh managed Stage2 placeholder sim evidence also exists outside this workspace:
+  - `/home/coco/sim_plane/runs/px4_sih_quadx_human_follow_stage2_placeholder_20260506_052221/result.json`
+  - PASS facts:
+    - `status=passed`
+    - `ever_armed=true`
+    - `algorithm_adapter_offboard_mode_reached=true`
+    - `algorithm_adapter_stage2_goal_count=12`
+    - `algorithm_adapter_stage2_ego_cmd_count=60`
+    - `algorithm_adapter_stage2_nonzero_mavros_setpoint_count=102`
+- That managed Stage2 placeholder sim evidence is still NOT real EGO planner completion evidence.
+- Fresh managed Stage2 real-EGO sim evidence now also exists outside this workspace:
+  - managed launch:
+    - `/home/coco/sim_plane/sim_plane/ros/human_follow_stage2_real_ego_managed.launch`
+  - scenario:
+    - `/home/coco/sim_plane/scenarios/px4_sih_quadx_human_follow_stage2_real_ego.json`
+  - reference artifact:
+    - `/home/coco/sim_plane/runs/px4_sih_quadx_human_follow_stage2_real_ego_20260508_062640/result.json`
+  - PASS facts:
+    - `status=passed`
+    - `algorithm_adapter_completed_successfully=true`
+    - `algorithm_adapter_stage2_search_goal_observed=true`
+    - `algorithm_adapter_stage2_real_ego_path_observed=true`
+    - `algorithm_adapter_stage2_waypoint_count=14`
+    - `algorithm_adapter_stage2_distinct_goal_count=6`
+    - `algorithm_adapter_stage2_distinct_ego_cmd_count=8`
+- Fresh managed Stage2 real-EGO acceptance refresh now also exists outside this workspace:
+  - rerun artifact:
+    - `/home/coco/sim_plane/runs/px4_sih_quadx_human_follow_stage2_real_ego_20260508_102052/result.json`
+  - latest acceptance report:
+    - `/home/coco/sim_plane/runs/human_follow_stage2_acceptance/human_follow_stage2_acceptance_latest_20260508_102121_077539/report.json`
+  - PASS facts:
+    - `status=passed`
+    - `selection_mode=latest`
+    - `algorithm_adapter_stage2_search_goal_observed=true`
+    - `algorithm_adapter_stage2_real_ego_path_observed=true`
+    - `algorithm_adapter_stage2_waypoint_count=14`
+    - `algorithm_adapter_stage2_distinct_goal_count=6`
+    - `algorithm_adapter_stage2_distinct_ego_cmd_count=10`
+    - `issues=[]`
+- That managed Stage2 real-EGO sim evidence is sim-plane managed evidence for the project-side Stage2 chain.
+- That managed Stage2 real-EGO sim evidence must still stay separate from project-side local regression evidence.
+
+CURRENT_FRONTIER
+- The old widening question "can sim_plane consume the real planner path instead of placeholder" is no longer open.
+- The old refresh question "can managed acceptance be reproved cleanly on latest artifact" is also no longer open.
+- The current valid frontier is now acceptance packaging only:
+  - preserve the now-proven project-local and managed-sim Stage2 real-EGO evidence as separate layers
+  - do not reopen lower-layer interface questions
+- Do not widen to detector-in-the-loop, real-fusion, or hardware-backed claims from this current regression surface.
+
+FORBIDDEN
+- Do not claim detector-in-the-loop, real-fusion, or real-planner Stage2 evidence from this skeleton alone.
+- Do not count sim_plane independent ego_planner acceptance as project-side Stage2 completion.
+- Do not treat the placeholder full-chain regression as if it were real EGO proof.
+- Do not reopen the old placeholder-only widening branch as if the local real-EGO absence were still unresolved.
+- Do not reopen the older "sim-plane has not yet consumed the real-EGO chain" branch unless fresh contradictory evidence appears.
+- Do not break Stage1 topic names or Stage1 launch contracts.
+
+NEXT_ACTION
+- Preserve the new Stage2 regression surfaces as project-side evidence:
+  - stage2_goal_adapter_regression.launch
+  - stage2_ego_bridge_regression.launch
+- Preserve the placeholder full-chain regression surface as bounded contract evidence:
+  - stage2_placeholder_full_chain_regression.launch
+- Preserve the new real EGO full-chain regression surface as project-side real-planner evidence:
+  - stage2_real_ego_full_chain_regression.launch
+- Preserve the sim_plane managed Stage2 placeholder proof as separate evidence:
+  - `/home/coco/sim_plane/runs/px4_sih_quadx_human_follow_stage2_placeholder_20260506_052221/result.json`
+- Preserve the sim_plane managed Stage2 real-EGO proof as separate evidence:
+  - `/home/coco/sim_plane/runs/px4_sih_quadx_human_follow_stage2_real_ego_20260508_062640/result.json`
+- Preserve the refreshed sim-plane managed Stage2 real-EGO acceptance proof as separate evidence:
+  - `/home/coco/sim_plane/runs/px4_sih_quadx_human_follow_stage2_real_ego_20260508_102052/result.json`
+  - `/home/coco/sim_plane/runs/human_follow_stage2_acceptance/human_follow_stage2_acceptance_latest_20260508_102121_077539/report.json`
+- If more work is needed on the simulation branch, the next valid move must open a new frontier above the current acceptance package instead of re-proving this same Stage2 managed surface.

@@ -1,0 +1,25 @@
+<launch>
+  <arg name="image_topic" default="/camera/usb_cam/image_raw" />
+  <arg name="require_image_heartbeat" default="true" />
+  <arg name="image_rotation_deg" default="0" />
+  <arg name="flip_horizontal" default="false" />
+  <arg name="flip_vertical" default="false" />
+  <arg name="enable_mock_projection" default="true" />
+  <arg name="min_consecutive_valid_inputs" default="3" />
+  <arg name="max_duration_sec" default="8.0" />
+  <arg name="monitor_required" default="true" />
+
+  <include file="$(find human_follow_bringup)/launch/stage1_live_px4.launch">
+    <arg name="image_topic" value="$(arg image_topic)" />
+    <arg name="require_image_heartbeat" value="$(arg require_image_heartbeat)" />
+    <arg name="image_rotation_deg" value="$(arg image_rotation_deg)" />
+    <arg name="flip_horizontal" value="$(arg flip_horizontal)" />
+    <arg name="flip_vertical" value="$(arg flip_vertical)" />
+    <arg name="enable_mock_projection" value="$(arg enable_mock_projection)" />
+    <arg name="min_consecutive_valid_inputs" value="$(arg min_consecutive_valid_inputs)" />
+  </include>
+
+  <node pkg="human_follow_bringup" type="live_idle_safety_monitor_node.py" name="live_idle_safety_monitor" output="screen" required="$(arg monitor_required)">
+    <param name="max_duration_sec" value="$(arg max_duration_sec)" />
+  </node>
+</launch>

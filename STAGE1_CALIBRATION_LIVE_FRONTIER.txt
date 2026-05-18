@@ -1,0 +1,31 @@
+STAGE1 CALIBRATION LIVE FRONTIER
+UPDATED_AT: 2026-05-01 Asia/Shanghai
+
+LOCKED_FACTS
+- Current workspace: /home/coco/follwer_ws
+- Remote workspace: /home/nv/human_follow_ws
+- The current only verified usable calibration session is:
+  /home/nv/human_follow_ws/data/calibration/calib_session_20260429_0402/stage1_calibration_record.bag
+- The only retained U-disk calibration session is:
+  /media/coco/zl/human_follow_calibration_sessions/calib_session_20260429_0402/stage1_calibration_record.bag
+- Audit evidence for 20260429_0402:
+  usable_minimum=true
+  any_detection_frames=715
+  two_or_more_required_frames=616
+  all_required_frames=407
+- The older candidate 20260429_1556 has now been removed by user approval.
+- The abnormal-stop session 20260501_003449 has now been removed by user approval.
+- The invalid 20260501_015938 session and this round's related logs/artifacts were already removed.
+
+CURRENT_FRONTIER
+- Treat 20260429_0402 as the single canonical session.
+- There are no secondary calibration session directories left on remote or U-disk.
+- If a replacement capture is desired later, require live board-in-frame confirmation before recording.
+
+FORBIDDEN
+- Do not recreate or rely on removed sessions 20260429_1556, 20260501_003449, or 20260501_015938.
+- Do not record another bag without live board-in-frame confirmation first.
+
+NEXT_ACTION
+- Use 20260429_0402 as the only active calibration source.
+- If a better replacement is needed later, enforce live image confirmation and immediate post-record audit.

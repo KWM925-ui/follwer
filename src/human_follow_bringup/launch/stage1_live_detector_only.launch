@@ -1,0 +1,18 @@
+<launch>
+  <arg name="image_topic" default="/camera/usb_cam/image_raw" />
+  <arg name="require_image_heartbeat" default="true" />
+  <arg name="image_rotation_deg" default="180" />
+  <arg name="flip_horizontal" default="false" />
+  <arg name="flip_vertical" default="false" />
+
+  <rosparam command="load" file="$(find human_follow_perception)/config/perception.yaml" />
+
+  <node pkg="human_follow_perception" type="detector_node.py" name="human_follow_detector" output="screen">
+    <param name="image_topic" value="$(arg image_topic)" />
+    <param name="require_image_heartbeat" value="$(arg require_image_heartbeat)" />
+    <param name="image_rotation_deg" value="$(arg image_rotation_deg)" />
+    <param name="flip_horizontal" value="$(arg flip_horizontal)" />
+    <param name="flip_vertical" value="$(arg flip_vertical)" />
+    <param name="mock_valid_detection" value="false" />
+  </node>
+</launch>

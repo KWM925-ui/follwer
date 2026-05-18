@@ -1,0 +1,23 @@
+board_name: stage1_large_aruco_board
+dictionary: DICT_6X6_250
+board_width_m: 1.40
+board_height_m: 1.00
+marker_ids: [1, 2, 3, 4]
+
+# 必填：单个角标黑色外框边长，单位米。
+marker_size_m: 0.0
+
+# 推荐填写：四个 marker 中心在板坐标系下的位置，单位米。
+# 约定：
+# - 原点先放在板中心
+# - x 向右
+# - y 向上
+# - z 垂直板面朝向相机
+marker_centers_m:
+  id_1: [0.0, 0.0, 0.0]
+  id_2: [0.0, 0.0, 0.0]
+  id_3: [0.0, 0.0, 0.0]
+  id_4: [0.0, 0.0, 0.0]
+
+# 可选：如果你手上有原始设计图，直接把文件路径或来源记在这里。
+source_note: ""

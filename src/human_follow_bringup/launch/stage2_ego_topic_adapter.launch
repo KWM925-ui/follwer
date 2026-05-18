@@ -1,0 +1,29 @@
+<launch>
+  <arg name="goal_input_topic" default="/follow/stage2/goal" />
+  <arg name="goal_output_topic" default="/move_base_simple/goal" />
+  <arg name="odom_input_topic" default="/follow/lio/odom" />
+  <arg name="odom_output_topic" default="/odom_world" />
+  <arg name="grid_odom_output_topic" default="/grid_map/odom" />
+  <arg name="cloud_input_topic" default="/follow/lidar/points" />
+  <arg name="cloud_output_topic" default="/grid_map/cloud" />
+  <arg name="frame_id_override" default="" />
+  <arg name="cloud_to_world_enabled" default="false" />
+  <arg name="cloud_extrinsics_yaml" default="" />
+  <arg name="cloud_body_yaml" default="" />
+  <arg name="world_frame_id" default="map" />
+
+  <node pkg="human_follow_bringup" type="stage2_ego_topic_adapter_node.py" name="stage2_ego_topic_adapter" output="screen">
+    <param name="goal_input_topic" value="$(arg goal_input_topic)" />
+    <param name="goal_output_topic" value="$(arg goal_output_topic)" />
+    <param name="odom_input_topic" value="$(arg odom_input_topic)" />
+    <param name="odom_output_topic" value="$(arg odom_output_topic)" />
+    <param name="grid_odom_output_topic" value="$(arg grid_odom_output_topic)" />
+    <param name="cloud_input_topic" value="$(arg cloud_input_topic)" />
+    <param name="cloud_output_topic" value="$(arg cloud_output_topic)" />
+    <param name="frame_id_override" value="$(arg frame_id_override)" />
+    <param name="cloud_to_world_enabled" value="$(arg cloud_to_world_enabled)" />
+    <param name="cloud_extrinsics_yaml" value="$(arg cloud_extrinsics_yaml)" />
+    <param name="cloud_body_yaml" value="$(arg cloud_body_yaml)" />
+    <param name="world_frame_id" value="$(arg world_frame_id)" />
+  </node>
+</launch>

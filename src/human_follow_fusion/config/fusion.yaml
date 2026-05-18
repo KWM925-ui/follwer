@@ -1,0 +1,17 @@
+human_follow_target_fusion:
+  input_topic: /follow/tracker/selected_target
+  pointcloud_topic: /follow/lidar/points
+  output_topic: /follow/fusion/target_body
+  output_frame_id: base_link
+  intrinsics_yaml: ""
+  extrinsics_yaml: ""
+  pointcloud_timeout_sec: 0.3
+  min_depth_m: 0.1
+  min_support_points: 6
+  depth_percentile: 0.35
+  depth_band_m: 1.0
+  max_points_to_process: 30000
+  enable_mock_projection: true
+  mock_forward_depth_m: 6.0
+  mock_lateral_scale_m: 2.0
+  mock_support_points: 12

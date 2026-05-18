@@ -1,0 +1,39 @@
+<launch>
+  <arg name="max_duration_sec" default="8.0" />
+  <arg name="monitor_required" default="true" />
+  <arg name="follow_distance_m" default="3.5" />
+
+  <node pkg="human_follow_bringup" type="stage2_goal_input_fixture_node.py" name="stage2_goal_input_fixture" output="screen">
+    <param name="publish_rate_hz" value="15.0" />
+    <param name="loop" value="true" />
+    <param name="target_world_topic" value="/follow/fusion/target_world" />
+    <param name="odom_topic" value="/follow/lio/odom" />
+    <param name="cloud_topic" value="/follow/lidar/points" />
+  </node>
+
+  <include file="$(find human_follow_bringup)/launch/stage2_goal_slot.launch">
+    <arg name="goal_provider" value="baseline" />
+    <arg name="target_world_topic" value="/follow/fusion/target_world" />
+    <arg name="odom_topic" value="/follow/lio/odom" />
+    <arg name="goal_topic" value="/follow/stage2/goal" />
+    <arg name="debug_path_topic" value="/follow/stage2/debug_goal_path" />
+    <arg name="follow_distance_m" value="$(arg follow_distance_m)" />
+  </include>
+
+  <include file="$(find human_follow_bringup)/launch/stage2_ego_topic_adapter.launch">
+    <arg name="goal_input_topic" value="/follow/stage2/goal" />
+    <arg name="goal_output_topic" value="/move_base_simple/goal" />
+    <arg name="odom_input_topic" value="/follow/lio/odom" />
+    <arg name="odom_output_topic" value="/odom_world" />
+    <arg name="grid_odom_output_topic" value="/grid_map/odom" />
+    <arg name="cloud_input_topic" value="/follow/lidar/points" />
+    <arg name="cloud_output_topic" value="/grid_map/cloud" />
+  </include>
+
+  <node pkg="human_follow_bringup" type="stage2_goal_adapter_regression_monitor_node.py" name="stage2_goal_adapter_regression_monitor" output="screen" required="$(arg monitor_required)">
+    <param name="max_duration_sec" value="$(arg max_duration_sec)" />
+    <param name="follow_distance_m" value="$(arg follow_distance_m)" />
+    <param name="target_world_topic" value="/follow/fusion/target_world" />
+    <param name="odom_topic" value="/follow/lio/odom" />
+  </node>
+</launch>

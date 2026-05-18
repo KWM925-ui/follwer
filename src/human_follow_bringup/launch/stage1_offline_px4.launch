@@ -1,0 +1,12 @@
+<launch>
+  <arg name="image_topic" default="/follow/camera/image_raw" />
+  <arg name="detector_mock_valid" default="true" />
+
+  <include file="$(find human_follow_bringup)/launch/stage1_offline_core.launch">
+    <arg name="image_topic" value="$(arg image_topic)" />
+    <arg name="detector_mock_valid" value="$(arg detector_mock_valid)" />
+  </include>
+
+  <rosparam command="load" file="$(find human_follow_px4_bridge)/config/px4_bridge.yaml" />
+  <node pkg="human_follow_px4_bridge" type="follow_px4_bridge_node.py" name="human_follow_px4_bridge" output="screen" />
+</launch>

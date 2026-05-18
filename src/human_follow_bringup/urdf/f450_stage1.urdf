@@ -1,0 +1,145 @@
+<?xml version="1.0"?>
+<robot name="f450_stage1">
+  <material name="carbon_black">
+    <color rgba="0.08 0.09 0.10 1.0"/>
+  </material>
+  <material name="accent_orange">
+    <color rgba="0.95 0.42 0.14 1.0"/>
+  </material>
+  <material name="accent_blue">
+    <color rgba="0.12 0.62 0.95 1.0"/>
+  </material>
+  <material name="silver">
+    <color rgba="0.82 0.84 0.88 1.0"/>
+  </material>
+
+  <link name="base_link">
+    <visual>
+      <origin xyz="0.02 0.0 0.02" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.18 0.14 0.05"/>
+      </geometry>
+      <material name="carbon_black"/>
+    </visual>
+  </link>
+
+  <link name="arm_front">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.52 0.03 0.02"/>
+      </geometry>
+      <material name="silver"/>
+    </visual>
+  </link>
+  <joint name="arm_front_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="arm_front"/>
+    <origin xyz="0.0 0.0 0.02" rpy="0 0 0.785398"/>
+  </joint>
+
+  <link name="arm_back">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.52 0.03 0.02"/>
+      </geometry>
+      <material name="silver"/>
+    </visual>
+  </link>
+  <joint name="arm_back_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="arm_back"/>
+    <origin xyz="0.0 0.0 0.02" rpy="0 0 -0.785398"/>
+  </joint>
+
+  <link name="camera">
+    <visual>
+      <origin xyz="0.0 0.0 0.06" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.08 0.04 0.04"/>
+      </geometry>
+      <material name="accent_orange"/>
+    </visual>
+  </link>
+  <joint name="camera_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="camera"/>
+    <origin xyz="0.20 0.0 0.05" rpy="-1.570796 -1.570796 0.0"/>
+  </joint>
+
+  <link name="mid360">
+    <visual>
+      <origin xyz="0.0 0.0 0.03" rpy="0 0 0"/>
+      <geometry>
+        <cylinder radius="0.06" length="0.06"/>
+      </geometry>
+      <material name="accent_blue"/>
+    </visual>
+  </link>
+  <joint name="mid360_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="mid360"/>
+    <origin xyz="0.25 -0.10 0.05" rpy="-1.570796 -1.570796 0.0"/>
+  </joint>
+
+  <link name="rotor_fl">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <cylinder radius="0.06" length="0.01"/>
+      </geometry>
+      <material name="carbon_black"/>
+    </visual>
+  </link>
+  <joint name="rotor_fl_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="rotor_fl"/>
+    <origin xyz="0.23 0.23 0.04" rpy="1.570796 0 0"/>
+  </joint>
+
+  <link name="rotor_fr">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <cylinder radius="0.06" length="0.01"/>
+      </geometry>
+      <material name="carbon_black"/>
+    </visual>
+  </link>
+  <joint name="rotor_fr_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="rotor_fr"/>
+    <origin xyz="0.23 -0.23 0.04" rpy="1.570796 0 0"/>
+  </joint>
+
+  <link name="rotor_rl">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <cylinder radius="0.06" length="0.01"/>
+      </geometry>
+      <material name="carbon_black"/>
+    </visual>
+  </link>
+  <joint name="rotor_rl_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="rotor_rl"/>
+    <origin xyz="-0.23 0.23 0.04" rpy="1.570796 0 0"/>
+  </joint>
+
+  <link name="rotor_rr">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <cylinder radius="0.06" length="0.01"/>
+      </geometry>
+      <material name="carbon_black"/>
+    </visual>
+  </link>
+  <joint name="rotor_rr_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="rotor_rr"/>
+    <origin xyz="-0.23 -0.23 0.04" rpy="1.570796 0 0"/>
+  </joint>
+</robot>

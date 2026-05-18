@@ -1,0 +1,37 @@
+human_follow_detector:
+  image_topic: /follow/camera/image_raw
+  output_topic: /follow/detector/person_target
+  publish_rate_hz: 10.0
+  require_image_heartbeat: false
+  image_timeout_sec: 1.0
+  default_frame_id: camera
+  backend: hog
+  debug_log_every_n_frames: 30
+  image_rotation_deg: 0
+  flip_horizontal: false
+  flip_vertical: false
+  resize_width_px: 640
+  target_selection: largest_area
+  hog_stride_px: 8
+  hog_padding_px: 8
+  hog_scale: 1.05
+  hog_hit_threshold: 0.0
+  min_bbox_area_px: 4096
+  min_bbox_confidence: 0.0
+  mock_valid_detection: false
+  mock_track_id: 1
+  mock_confidence: 0.9
+  mock_cx: 0.5
+  mock_cy: 0.5
+  mock_width: 0.25
+  mock_height: 0.5
+
+human_follow_tracker:
+  input_topic: /follow/detector/person_target
+  output_topic: /follow/tracker/selected_target
+  status_topic: /follow/tracker/status
+  publish_rate_hz: 20.0
+  live_timeout_sec: 0.20
+  hold_timeout_sec: 0.50
+  min_hold_confidence: 0.15
+  status_log_period_sec: 1.0

@@ -1,0 +1,27 @@
+<launch>
+  <arg name="output_topic" default="/mavros/odometry/out" />
+  <arg name="frame_id" default="odom" />
+  <arg name="child_frame_id" default="base_link" />
+  <arg name="rate_hz" default="30.0" />
+  <arg name="position_x" default="0.0" />
+  <arg name="position_y" default="0.0" />
+  <arg name="position_z" default="0.0" />
+  <arg name="yaw_rad" default="0.0" />
+  <arg name="velocity_x" default="0.0" />
+  <arg name="velocity_y" default="0.0" />
+  <arg name="velocity_z" default="0.0" />
+
+  <node pkg="human_follow_bringup" type="external_odom_emulator_node.py" name="stage1_external_odom_emulator" output="screen">
+    <param name="output_topic" value="$(arg output_topic)" />
+    <param name="frame_id" value="$(arg frame_id)" />
+    <param name="child_frame_id" value="$(arg child_frame_id)" />
+    <param name="rate_hz" value="$(arg rate_hz)" />
+    <param name="position_x" value="$(arg position_x)" />
+    <param name="position_y" value="$(arg position_y)" />
+    <param name="position_z" value="$(arg position_z)" />
+    <param name="yaw_rad" value="$(arg yaw_rad)" />
+    <param name="velocity_x" value="$(arg velocity_x)" />
+    <param name="velocity_y" value="$(arg velocity_y)" />
+    <param name="velocity_z" value="$(arg velocity_z)" />
+  </node>
+</launch>

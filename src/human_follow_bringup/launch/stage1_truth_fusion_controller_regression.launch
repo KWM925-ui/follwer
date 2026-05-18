@@ -1,0 +1,282 @@
+<launch>
+  <arg name="intrinsics_yaml" default="$(find human_follow_fusion)/config/camera_intrinsics.example.yaml" />
+  <arg name="extrinsics_yaml" default="$(find human_follow_fusion)/config/camera_mid360_extrinsics.example.yaml" />
+  <arg name="camera_body_yaml" default="$(find human_follow_fusion)/config/camera_to_body_stage1_sim.yaml" />
+  <arg name="bridge_output_topic" default="/follow/offboard/setpoint" />
+  <arg name="max_duration_sec" default="24.0" />
+  <arg name="loop" default="false" />
+  <arg name="motion_mode" default="scripted_standard" />
+  <arg name="random_seed" default="13" />
+  <arg name="truth_source_mode" default="scripted" />
+  <arg name="rviz" default="false" />
+  <arg name="enable_monitor" default="true" />
+  <arg name="enable_image_debug" default="false" />
+  <arg name="open_image_view" default="false" />
+  <arg name="phase_visible_affects_tracking" default="true" />
+  <arg name="keyboard_display_visibility_controls_tracking" default="true" />
+  <arg name="enable_detector_node" default="false" />
+  <arg name="enable_synthetic_camera" default="$(arg enable_image_debug)" />
+  <arg name="detector_backend" default="hog" />
+  <arg name="detector_require_image_heartbeat" default="false" />
+  <arg name="scene_target_topic" default="/follow/detector/person_target" />
+  <arg name="debug_target_topic" default="/follow/sim/truth_target_2d" />
+  <arg name="scene_static_obstacle_layout" default="" />
+  <arg name="scene_static_obstacle_point_spacing_m" default="0.18" />
+  <arg name="scene_static_obstacle_max_depth_m" default="20.0" />
+  <arg name="scene_target_bbox_padding" default="1.12" />
+  <arg name="scene_min_projected_points" default="6" />
+  <arg name="scene_foreground_pointcloud_topic" default="/follow/lidar/foreground_points" />
+  <arg name="scene_obstacle_pointcloud_topic" default="/follow/lidar/obstacle_points" />
+  <arg name="fusion_pointcloud_timeout_sec" default="0.3" />
+  <arg name="fusion_min_support_points" default="6" />
+  <arg name="fusion_depth_percentile" default="0.35" />
+  <arg name="fusion_depth_band_m" default="1.0" />
+  <arg name="tracker_input_topic" default="/follow/detector/person_target" />
+  <arg name="tracker_live_timeout_sec" default="0.20" />
+  <arg name="tracker_hold_timeout_sec" default="0.50" />
+  <arg name="tracker_min_hold_confidence" default="0.15" />
+  <arg name="monitor_required" default="true" />
+  <arg name="enable_case_validation" default="false" />
+  <arg name="validation_case" default="" />
+  <arg name="case_max_duration_sec" default="12.0" />
+  <arg name="controller_provider" default="baseline" />
+  <arg name="controller_node_name" default="human_follow_controller" />
+  <arg name="external_controller_pkg" default="human_follow_control" />
+  <arg name="external_controller_type" default="control_algorithm_template_node.py" />
+  <arg name="enable_stage1_controller_chain" default="true" />
+  <arg name="enable_stage1_px4_bridge" default="true" />
+  <arg name="vehicle_input_topic" default="/follow/control/cmd_body" />
+  <arg name="vehicle_input_mode" default="follow_command" />
+  <arg name="controller_search_timeout_sec" default="10.6" />
+  <arg name="controller_lost_timeout_sec" default="7.0" />
+  <arg name="controller_search_yaw_rate_rps" default="0.5" />
+  <arg name="controller_search_sweep_span_deg" default="120.0" />
+  <arg name="controller_search_sweep_pass_count" default="2" />
+  <arg name="controller_search_return_to_center" default="false" />
+  <arg name="controller_kp_forward" default="0.90" />
+  <arg name="controller_kp_lateral" default="0.82" />
+  <arg name="controller_kp_yaw" default="0.52" />
+  <arg name="controller_kd_forward" default="0.12" />
+  <arg name="controller_kd_lateral" default="0.08" />
+  <arg name="controller_kd_yaw" default="0.05" />
+  <arg name="controller_max_forward_mps" default="1.20" />
+  <arg name="controller_max_lateral_mps" default="0.95" />
+  <arg name="controller_max_yaw_rate_rps" default="0.65" />
+  <arg name="controller_distance_deadband_m" default="0.03" />
+  <arg name="controller_lateral_deadband_m" default="0.03" />
+  <arg name="controller_yaw_deadband_m" default="0.02" />
+  <arg name="vehicle_linear_velocity_scale" default="0.78" />
+  <arg name="vehicle_velocity_tau_sec" default="0.35" />
+  <arg name="vehicle_yaw_rate_tau_sec" default="0.22" />
+  <arg name="vehicle_position_kp_xy" default="0.80" />
+  <arg name="vehicle_position_kp_z" default="1.00" />
+  <arg name="vehicle_yaw_kp" default="1.20" />
+  <arg name="vehicle_max_yaw_rate_rps" default="0.80" />
+  <arg name="vehicle_max_world_speed_mps" default="1.50" />
+  <arg name="vehicle_max_vertical_mps" default="0.80" />
+  <arg name="vehicle_initial_x_m" default="0.0" />
+  <arg name="vehicle_initial_y_m" default="0.0" />
+  <arg name="vehicle_initial_z_m" default="1.2" />
+  <arg name="vehicle_initial_yaw_deg" default="0.0" />
+  <arg name="keyboard_initial_x_m" default="4.0" />
+  <arg name="keyboard_initial_y_m" default="0.0" />
+  <arg name="keyboard_initial_z_m" default="-1.6" />
+  <arg name="keyboard_publish_default_target_on_startup" default="true" />
+  <arg name="keyboard_clamp_goal_to_visible_envelope" default="false" />
+  <arg name="keyboard_goal_min_forward_m" default="3.0" />
+  <arg name="keyboard_goal_max_forward_m" default="10.0" />
+  <arg name="keyboard_goal_max_lateral_abs_m" default="2.2" />
+  <arg name="visualizer_stage2_ego_cmd_topic" default="/follow/stage2/ego_position_cmd" />
+  <rosparam command="load" file="$(find human_follow_perception)/config/perception.yaml" />
+  <rosparam command="load" file="$(find human_follow_control)/config/control.yaml" />
+  <rosparam command="load" file="$(find human_follow_px4_bridge)/config/px4_bridge.yaml" />
+
+  <param name="/human_follow_controller/search_timeout_sec" value="$(arg controller_search_timeout_sec)" />
+  <param name="/human_follow_controller/lost_timeout_sec" value="$(arg controller_lost_timeout_sec)" />
+  <param name="/human_follow_controller/search_yaw_rate_rps" value="$(arg controller_search_yaw_rate_rps)" />
+  <param name="/human_follow_controller/search_sweep_span_deg" value="$(arg controller_search_sweep_span_deg)" />
+  <param name="/human_follow_controller/search_sweep_pass_count" value="$(arg controller_search_sweep_pass_count)" />
+  <param name="/human_follow_controller/search_return_to_center" value="$(arg controller_search_return_to_center)" />
+  <param name="/human_follow_controller/kp_forward" value="$(arg controller_kp_forward)" />
+  <param name="/human_follow_controller/kp_lateral" value="$(arg controller_kp_lateral)" />
+  <param name="/human_follow_controller/kp_yaw" value="$(arg controller_kp_yaw)" />
+  <param name="/human_follow_controller/kd_forward" value="$(arg controller_kd_forward)" />
+  <param name="/human_follow_controller/kd_lateral" value="$(arg controller_kd_lateral)" />
+  <param name="/human_follow_controller/kd_yaw" value="$(arg controller_kd_yaw)" />
+  <param name="/human_follow_controller/max_forward_mps" value="$(arg controller_max_forward_mps)" />
+  <param name="/human_follow_controller/max_lateral_mps" value="$(arg controller_max_lateral_mps)" />
+  <param name="/human_follow_controller/max_yaw_rate_rps" value="$(arg controller_max_yaw_rate_rps)" />
+  <param name="/human_follow_controller/distance_deadband_m" value="$(arg controller_distance_deadband_m)" />
+  <param name="/human_follow_controller/lateral_deadband_m" value="$(arg controller_lateral_deadband_m)" />
+  <param name="/human_follow_controller/yaw_deadband_m" value="$(arg controller_yaw_deadband_m)" />
+  <param name="/vehicle_kinematic_sim/linear_velocity_scale" value="$(arg vehicle_linear_velocity_scale)" />
+  <param name="/vehicle_kinematic_sim/velocity_tau_sec" value="$(arg vehicle_velocity_tau_sec)" />
+  <param name="/vehicle_kinematic_sim/yaw_rate_tau_sec" value="$(arg vehicle_yaw_rate_tau_sec)" />
+  <param name="/vehicle_kinematic_sim/position_kp_xy" value="$(arg vehicle_position_kp_xy)" />
+  <param name="/vehicle_kinematic_sim/position_kp_z" value="$(arg vehicle_position_kp_z)" />
+  <param name="/vehicle_kinematic_sim/yaw_kp" value="$(arg vehicle_yaw_kp)" />
+  <param name="/vehicle_kinematic_sim/max_yaw_rate_rps" value="$(arg vehicle_max_yaw_rate_rps)" />
+  <param name="/vehicle_kinematic_sim/max_world_speed_mps" value="$(arg vehicle_max_world_speed_mps)" />
+  <param name="/vehicle_kinematic_sim/max_vertical_mps" value="$(arg vehicle_max_vertical_mps)" />
+
+  <param name="robot_description" textfile="$(find human_follow_bringup)/urdf/f450_stage1.urdf" />
+  <node pkg="robot_state_publisher" type="robot_state_publisher" name="stage1_robot_state_publisher" output="screen">
+    <param name="publish_frequency" value="20.0" />
+  </node>
+  <node pkg="tf2_ros" type="static_transform_publisher" name="camera_optical_static_tf" args="0 0 0 -0.5 0.5 0.5 0.5 camera camera_optical_frame" />
+  <node pkg="tf2_ros" type="static_transform_publisher" name="mid360_optical_static_tf" args="0 0 0 -0.5 0.5 0.5 0.5 mid360 mid360_optical_frame" />
+
+  <group if="$(eval arg('truth_source_mode') == 'scripted')">
+    <node pkg="human_follow_bringup" type="human_truth_sequence_publisher_node.py" name="human_truth_sequence_publisher" output="screen">
+      <param name="loop" value="$(arg loop)" />
+      <param name="motion_mode" value="$(arg motion_mode)" />
+      <param name="random_seed" value="$(arg random_seed)" />
+    </node>
+  </group>
+
+  <group if="$(eval arg('truth_source_mode') == 'keyboard')">
+    <node pkg="human_follow_bringup" type="human_truth_keyboard_teleop_node.py" name="human_truth_keyboard_teleop" output="screen" required="true">
+      <param name="publish_rate_hz" value="20.0" />
+      <param name="display_visibility_controls_tracking" value="$(arg keyboard_display_visibility_controls_tracking)" />
+      <param name="initial_x_m" value="$(arg keyboard_initial_x_m)" />
+      <param name="initial_y_m" value="$(arg keyboard_initial_y_m)" />
+      <param name="initial_z_m" value="$(arg keyboard_initial_z_m)" />
+      <param name="publish_default_target_on_startup" value="$(arg keyboard_publish_default_target_on_startup)" />
+      <param name="clamp_goal_to_visible_envelope" value="$(arg keyboard_clamp_goal_to_visible_envelope)" />
+      <param name="goal_min_forward_m" value="$(arg keyboard_goal_min_forward_m)" />
+      <param name="goal_max_forward_m" value="$(arg keyboard_goal_max_forward_m)" />
+      <param name="goal_max_lateral_abs_m" value="$(arg keyboard_goal_max_lateral_abs_m)" />
+    </node>
+  </group>
+
+  <node pkg="human_follow_bringup" type="vehicle_kinematic_sim_node.py" name="vehicle_kinematic_sim" output="screen">
+    <param name="input_topic" value="$(arg vehicle_input_topic)" />
+    <param name="input_mode" value="$(arg vehicle_input_mode)" />
+    <param name="initial_x_m" value="$(arg vehicle_initial_x_m)" />
+    <param name="initial_y_m" value="$(arg vehicle_initial_y_m)" />
+    <param name="initial_z_m" value="$(arg vehicle_initial_z_m)" />
+    <param name="initial_yaw_deg" value="$(arg vehicle_initial_yaw_deg)" />
+  </node>
+
+  <node pkg="human_follow_bringup" type="body_truth_world_projector_node.py" name="body_truth_world_projector" output="screen" />
+
+  <group if="$(arg enable_synthetic_camera)">
+    <node pkg="human_follow_perception" type="synthetic_camera_canvas_node.py" name="synthetic_camera_canvas" output="screen">
+      <param name="intrinsics_yaml" value="$(arg intrinsics_yaml)" />
+      <param name="target_topic" value="$(arg scene_target_topic)" />
+    </node>
+  </group>
+
+  <node pkg="human_follow_fusion" type="truth_driven_scene_publisher_node.py" name="truth_driven_scene_publisher" output="screen">
+    <param name="intrinsics_yaml" value="$(arg intrinsics_yaml)" />
+    <param name="extrinsics_yaml" value="$(arg extrinsics_yaml)" />
+    <param name="camera_body_yaml" value="$(arg camera_body_yaml)" />
+    <param name="odom_topic" value="/follow/sim/vehicle_odom" />
+    <param name="phase_visible_affects_tracking" value="$(arg phase_visible_affects_tracking)" />
+    <param name="foreground_pointcloud_topic" value="$(arg scene_foreground_pointcloud_topic)" />
+    <param name="obstacle_pointcloud_topic" value="$(arg scene_obstacle_pointcloud_topic)" />
+    <param name="target_topic" value="$(arg scene_target_topic)" />
+    <param name="debug_target_topic" value="$(arg debug_target_topic)" />
+    <param name="static_obstacle_layout" value="$(arg scene_static_obstacle_layout)" />
+    <param name="static_obstacle_point_spacing_m" value="$(arg scene_static_obstacle_point_spacing_m)" />
+    <param name="static_obstacle_max_depth_m" value="$(arg scene_static_obstacle_max_depth_m)" />
+    <param name="target_bbox_padding" value="$(arg scene_target_bbox_padding)" />
+    <param name="min_projected_points" value="$(arg scene_min_projected_points)" />
+  </node>
+
+  <node pkg="human_follow_fusion" type="truth_follow_visualizer_node.py" name="truth_follow_visualizer" output="screen">
+    <param name="intrinsics_yaml" value="$(arg intrinsics_yaml)" />
+    <param name="camera_frame_id" value="camera_optical_frame" />
+    <param name="camera_mesh_frame_id" value="camera" />
+    <param name="lidar_mesh_frame_id" value="mid360" />
+    <param name="stage2_ego_cmd_topic" value="$(arg visualizer_stage2_ego_cmd_topic)" />
+  </node>
+
+  <group if="$(arg enable_detector_node)">
+    <node pkg="human_follow_perception" type="detector_node.py" name="human_follow_detector" output="screen">
+      <param name="backend" value="$(arg detector_backend)" />
+      <param name="require_image_heartbeat" value="$(arg detector_require_image_heartbeat)" />
+    </node>
+  </group>
+
+  <node pkg="human_follow_perception" type="tracker_node.py" name="human_follow_tracker" output="screen">
+    <param name="input_topic" value="$(arg tracker_input_topic)" />
+    <param name="live_timeout_sec" value="$(arg tracker_live_timeout_sec)" />
+    <param name="hold_timeout_sec" value="$(arg tracker_hold_timeout_sec)" />
+    <param name="min_hold_confidence" value="$(arg tracker_min_hold_confidence)" />
+  </node>
+
+  <group if="$(arg enable_image_debug)">
+    <node pkg="human_follow_perception" type="target_overlay_node.py" name="target_overlay_node" output="screen" />
+  </group>
+
+  <node pkg="human_follow_fusion" type="target_fusion_node.py" name="human_follow_target_fusion" output="screen">
+    <param name="enable_mock_projection" value="false" />
+    <param name="intrinsics_yaml" value="$(arg intrinsics_yaml)" />
+    <param name="extrinsics_yaml" value="$(arg extrinsics_yaml)" />
+    <param name="pointcloud_topic" value="$(arg scene_foreground_pointcloud_topic)" />
+    <param name="output_topic" value="/follow/fusion/target_camera" />
+    <param name="output_frame_id" value="camera_optical_frame" />
+    <param name="pointcloud_timeout_sec" value="$(arg fusion_pointcloud_timeout_sec)" />
+    <param name="min_support_points" value="$(arg fusion_min_support_points)" />
+    <param name="depth_percentile" value="$(arg fusion_depth_percentile)" />
+    <param name="depth_band_m" value="$(arg fusion_depth_band_m)" />
+  </node>
+
+  <node pkg="human_follow_fusion" type="target_frame_adapter_node.py" name="target_frame_adapter" output="screen">
+    <param name="input_topic" value="/follow/fusion/target_camera" />
+    <param name="output_topic" value="/follow/fusion/target_body" />
+    <param name="transform_yaml" value="$(arg camera_body_yaml)" />
+  </node>
+
+  <node pkg="human_follow_bringup" type="target_world_projector_node.py" name="target_world_projector" output="screen">
+    <param name="input_topic" value="/follow/fusion/target_body" />
+    <param name="odom_topic" value="/follow/sim/vehicle_odom" />
+    <param name="output_topic" value="/follow/fusion/target_world" />
+  </node>
+
+  <group if="$(arg enable_stage1_controller_chain)">
+    <include file="$(find human_follow_bringup)/launch/stage1_controller_slot.launch">
+      <arg name="controller_provider" value="$(arg controller_provider)" />
+      <arg name="controller_input_topic" value="/follow/fusion/target_body" />
+      <arg name="controller_command_topic" value="/follow/control/cmd_body" />
+      <arg name="controller_state_topic" value="/follow/state" />
+      <arg name="controller_target_world_topic" value="/follow/fusion/target_world" />
+      <arg name="controller_odom_topic" value="/follow/sim/vehicle_odom" />
+      <arg name="controller_pointcloud_topic" value="/follow/lidar/points" />
+      <arg name="controller_require_pointcloud" value="true" />
+      <arg name="controller_node_name" value="$(arg controller_node_name)" />
+      <arg name="external_controller_pkg" value="$(arg external_controller_pkg)" />
+      <arg name="external_controller_type" value="$(arg external_controller_type)" />
+    </include>
+  </group>
+
+  <group if="$(arg enable_stage1_px4_bridge)">
+    <node pkg="human_follow_px4_bridge" type="follow_px4_bridge_node.py" name="human_follow_px4_bridge" output="screen">
+      <param name="output_topic" value="$(arg bridge_output_topic)" />
+    </node>
+  </group>
+
+  <group if="$(arg enable_monitor)">
+    <node pkg="human_follow_px4_bridge" type="truth_chain_regression_monitor_node.py" name="truth_chain_regression_monitor" output="screen" required="$(arg monitor_required)">
+      <param name="max_duration_sec" value="$(arg max_duration_sec)" />
+      <rosparam param="required_visible_phase_labels">[approach_center, reacquire_right, reacquire_left]</rosparam>
+      <rosparam param="required_hidden_phase_labels">[short_occlusion, long_loss]</rosparam>
+    </node>
+  </group>
+
+  <group if="$(arg enable_case_validation)">
+    <node pkg="human_follow_bringup" type="truth_case_validation_monitor_node.py" name="truth_case_validation_monitor" output="screen" required="$(arg monitor_required)">
+      <param name="validation_case" value="$(arg validation_case)" />
+      <param name="max_duration_sec" value="$(arg case_max_duration_sec)" />
+    </node>
+  </group>
+
+  <group if="$(arg rviz)">
+    <node pkg="rviz" type="rviz" name="stage1_truth_follow_rviz" args="-d $(find human_follow_bringup)/rviz/stage1_truth_follow.rviz" />
+  </group>
+
+  <group if="$(arg open_image_view)">
+    <node pkg="image_view" type="image_view" name="stage1_overlay_image_view" args="image:=/follow/debug/overlay_image" />
+  </group>
+</launch>

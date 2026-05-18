@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>human_follow_control</name>
+  <version>0.0.1</version>
+  <description>Controller and state machine for stage1 human follow.</description>
+
+  <maintainer email="codex@example.com">Codex</maintainer>
+  <license>Proprietary</license>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <depend>geometry_msgs</depend>
+  <depend>human_follow_msgs</depend>
+  <depend>nav_msgs</depend>
+  <depend>rospy</depend>
+  <depend>sensor_msgs</depend>
+  <depend>std_msgs</depend>
+</package>

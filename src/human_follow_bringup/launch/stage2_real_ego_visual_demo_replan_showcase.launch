@@ -1,0 +1,16 @@
+<launch>
+  <arg name="rviz" default="true" />
+  <arg name="open_image_view" default="false" />
+  <arg name="enable_image_debug" default="false" />
+
+  <include file="$(find human_follow_bringup)/launch/stage2_real_ego_visual_demo.launch">
+    <arg name="rviz" value="$(arg rviz)" />
+    <arg name="open_image_view" value="$(arg open_image_view)" />
+    <arg name="enable_image_debug" value="$(arg enable_image_debug)" />
+    <arg name="truth_source_mode" value="scripted" />
+    <arg name="truth_motion_mode" value="stage2_visual_ego_replan_showcase" />
+    <arg name="scene_static_obstacle_layout" value="ego_demo_replan_slalom" />
+    <arg name="scene_static_obstacle_point_spacing_m" value="0.12" />
+    <arg name="stage2_follow_distance_m" value="3.2" />
+  </include>
+</launch>

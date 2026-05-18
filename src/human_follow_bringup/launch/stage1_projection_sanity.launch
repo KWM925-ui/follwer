@@ -1,0 +1,10 @@
+<launch>
+  <arg name="intrinsics_yaml" default="$(find human_follow_fusion)/config/camera_intrinsics.example.yaml" />
+  <arg name="extrinsics_yaml" default="$(find human_follow_fusion)/config/camera_mid360_extrinsics.example.yaml" />
+  <arg name="monitor_required" default="true" />
+
+  <node pkg="human_follow_fusion" type="projection_sanity_node.py" name="projection_sanity_node" output="screen" required="$(arg monitor_required)">
+    <param name="intrinsics_yaml" value="$(arg intrinsics_yaml)" />
+    <param name="extrinsics_yaml" value="$(arg extrinsics_yaml)" />
+  </node>
+</launch>

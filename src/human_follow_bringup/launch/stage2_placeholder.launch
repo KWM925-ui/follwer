@@ -1,0 +1,107 @@
+<launch>
+  <!--
+    Stage2 now has a project-side skeleton, but not a completed planner fusion.
+    This launch is the stable integration point for:
+    - rolling follow-goal generation from /follow/fusion/target_world
+    - fresh clean EGO planner ingress
+    - planner PositionCommand to PX4/MAVROS bridge
+    It is still not proof of completed Stage2 until a real planner is attached and verified.
+  -->
+  <arg name="stage2_enabled" default="false" />
+  <arg name="goal_provider" default="baseline" />
+  <arg name="goal_node_name" default="stage2_follow_goal_generator" />
+  <arg name="external_goal_pkg" default="human_follow_bringup" />
+  <arg name="external_goal_type" default="stage2_follow_goal_generator_node.py" />
+  <arg name="goal_topic" default="/follow/stage2/goal" />
+  <arg name="debug_goal_path_topic" default="/follow/stage2/debug_goal_path" />
+  <arg name="goal_world_frame_id" default="map" />
+  <arg name="goal_rate_hz" default="15.0" />
+  <arg name="goal_target_timeout_sec" default="0.35" />
+  <arg name="goal_odom_timeout_sec" default="0.6" />
+  <arg name="follow_distance_m" default="3.5" />
+  <arg name="goal_lateral_bias_m" default="0.0" />
+  <arg name="goal_vertical_bias_m" default="0.0" />
+  <arg name="goal_min_shift_m" default="0.08" />
+  <arg name="goal_face_target_yaw" default="true" />
+  <arg name="goal_search_timeout_sec" default="2.0" />
+  <arg name="goal_lost_timeout_sec" default="5.0" />
+  <arg name="goal_search_mode" default="target_orbit" />
+  <arg name="goal_search_yaw_rate_rps" default="0.25" />
+  <arg name="goal_search_sweep_span_deg" default="0.0" />
+  <arg name="goal_search_sweep_pass_count" default="0" />
+  <arg name="goal_search_return_to_center" default="false" />
+  <arg name="goal_search_radius_m" default="1.0" />
+  <arg name="goal_search_observation_distance_m" default="-1.0" />
+  <arg name="goal_require_initial_occupancy_before_planning" default="false" />
+  <arg name="planner_command_topic" default="/follow/stage2/ego_position_cmd" />
+  <arg name="bridge_output_topic" default="/follow/stage2/offboard/setpoint" />
+  <arg name="mavros_setpoint_topic" default="/mavros/setpoint_raw/local" />
+  <arg name="set_mode_service" default="/mavros/set_mode" />
+  <arg name="odom_topic" default="/follow/lio/odom" />
+  <arg name="target_world_topic" default="/follow/fusion/target_world" />
+  <arg name="enable_ego_topic_adapter" default="true" />
+  <arg name="ego_goal_topic" default="/move_base_simple/goal" />
+  <arg name="ego_odom_topic" default="/odom_world" />
+  <arg name="ego_grid_odom_topic" default="/grid_map/odom" />
+  <arg name="ego_cloud_topic" default="/grid_map/cloud" />
+  <arg name="ego_cloud_input_topic" default="/follow/lidar/points" />
+  <arg name="ego_cloud_to_world_enabled" default="false" />
+  <arg name="ego_cloud_extrinsics_yaml" default="" />
+  <arg name="ego_cloud_body_yaml" default="" />
+  <arg name="ego_world_frame_id" default="map" />
+
+  <group if="$(arg stage2_enabled)">
+    <include file="$(find human_follow_bringup)/launch/stage2_goal_slot.launch">
+      <arg name="goal_provider" value="$(arg goal_provider)" />
+      <arg name="goal_node_name" value="$(arg goal_node_name)" />
+      <arg name="external_goal_pkg" value="$(arg external_goal_pkg)" />
+      <arg name="external_goal_type" value="$(arg external_goal_type)" />
+      <arg name="target_world_topic" value="$(arg target_world_topic)" />
+      <arg name="odom_topic" value="$(arg odom_topic)" />
+      <arg name="goal_topic" value="$(arg goal_topic)" />
+      <arg name="debug_path_topic" value="$(arg debug_goal_path_topic)" />
+      <arg name="world_frame_id" value="$(arg goal_world_frame_id)" />
+      <arg name="rate_hz" value="$(arg goal_rate_hz)" />
+      <arg name="target_timeout_sec" value="$(arg goal_target_timeout_sec)" />
+      <arg name="odom_timeout_sec" value="$(arg goal_odom_timeout_sec)" />
+      <arg name="follow_distance_m" value="$(arg follow_distance_m)" />
+      <arg name="lateral_bias_m" value="$(arg goal_lateral_bias_m)" />
+      <arg name="vertical_bias_m" value="$(arg goal_vertical_bias_m)" />
+      <arg name="min_goal_shift_m" value="$(arg goal_min_shift_m)" />
+      <arg name="face_target_yaw" value="$(arg goal_face_target_yaw)" />
+      <arg name="search_timeout_sec" value="$(arg goal_search_timeout_sec)" />
+      <arg name="lost_timeout_sec" value="$(arg goal_lost_timeout_sec)" />
+      <arg name="search_mode" value="$(arg goal_search_mode)" />
+      <arg name="search_yaw_rate_rps" value="$(arg goal_search_yaw_rate_rps)" />
+      <arg name="search_sweep_span_deg" value="$(arg goal_search_sweep_span_deg)" />
+      <arg name="search_sweep_pass_count" value="$(arg goal_search_sweep_pass_count)" />
+      <arg name="search_return_to_center" value="$(arg goal_search_return_to_center)" />
+      <arg name="search_goal_radius_m" value="$(arg goal_search_radius_m)" />
+      <arg name="search_observation_distance_m" value="$(arg goal_search_observation_distance_m)" />
+      <arg name="require_initial_occupancy_before_planning" value="$(arg goal_require_initial_occupancy_before_planning)" />
+    </include>
+
+    <group if="$(arg enable_ego_topic_adapter)">
+      <include file="$(find human_follow_bringup)/launch/stage2_ego_topic_adapter.launch">
+        <arg name="goal_input_topic" value="$(arg goal_topic)" />
+        <arg name="goal_output_topic" value="$(arg ego_goal_topic)" />
+        <arg name="odom_input_topic" value="$(arg odom_topic)" />
+        <arg name="odom_output_topic" value="$(arg ego_odom_topic)" />
+        <arg name="grid_odom_output_topic" value="$(arg ego_grid_odom_topic)" />
+        <arg name="cloud_input_topic" value="$(arg ego_cloud_input_topic)" />
+        <arg name="cloud_output_topic" value="$(arg ego_cloud_topic)" />
+        <arg name="cloud_to_world_enabled" value="$(arg ego_cloud_to_world_enabled)" />
+        <arg name="cloud_extrinsics_yaml" value="$(arg ego_cloud_extrinsics_yaml)" />
+        <arg name="cloud_body_yaml" value="$(arg ego_cloud_body_yaml)" />
+        <arg name="world_frame_id" value="$(arg ego_world_frame_id)" />
+      </include>
+    </group>
+
+    <include file="$(find human_follow_bringup)/launch/stage2_px4_ego_bridge.launch">
+      <arg name="planner_command_topic" value="$(arg planner_command_topic)" />
+      <arg name="bridge_output_topic" value="$(arg bridge_output_topic)" />
+      <arg name="mavros_setpoint_topic" value="$(arg mavros_setpoint_topic)" />
+      <arg name="set_mode_service" value="$(arg set_mode_service)" />
+    </include>
+  </group>
+</launch>

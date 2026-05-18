@@ -1,0 +1,26 @@
+<launch>
+  <arg name="command_topic" default="/follow/control/cmd_body" />
+  <arg name="internal_setpoint_topic" default="/follow/offboard/setpoint" />
+  <arg name="mavros_setpoint_topic" default="/mavros/setpoint_raw/local" />
+  <arg name="set_mode_service" default="/mavros/set_mode" />
+
+  <rosparam command="load" file="$(find human_follow_px4_bridge)/config/px4_bridge.yaml" />
+  <rosparam command="load" file="$(find human_follow_px4_bridge)/config/offboard_gate.yaml" />
+
+  <node pkg="human_follow_px4_bridge" type="bridge_command_sequence_publisher_node.py" name="bridge_command_sequence_publisher" output="screen">
+    <param name="output_topic" value="$(arg command_topic)" />
+    <param name="loop" value="true" />
+  </node>
+
+  <node pkg="human_follow_px4_bridge" type="follow_px4_bridge_node.py" name="human_follow_px4_bridge" output="screen">
+    <param name="input_topic" value="$(arg command_topic)" />
+    <param name="output_topic" value="$(arg internal_setpoint_topic)" />
+  </node>
+
+  <node pkg="human_follow_px4_bridge" type="offboard_mode_gate_node.py" name="human_follow_offboard_gate" output="screen">
+    <param name="command_topic" value="$(arg command_topic)" />
+    <param name="input_setpoint_topic" value="$(arg internal_setpoint_topic)" />
+    <param name="output_setpoint_topic" value="$(arg mavros_setpoint_topic)" />
+    <param name="set_mode_service" value="$(arg set_mode_service)" />
+  </node>
+</launch>

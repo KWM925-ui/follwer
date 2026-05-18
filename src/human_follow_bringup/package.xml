@@ -1,0 +1,33 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>human_follow_bringup</name>
+  <version>0.0.1</version>
+  <description>Bringup package for stage1 and stage2 orchestration.</description>
+
+  <maintainer email="codex@example.com">Codex</maintainer>
+  <license>Proprietary</license>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <depend>geometry_msgs</depend>
+  <depend>human_follow_msgs</depend>
+  <depend>nav_msgs</depend>
+  <depend>quadrotor_msgs</depend>
+  <depend>rospy</depend>
+  <depend>sensor_msgs</depend>
+  <depend>std_msgs</depend>
+  <depend>tf2_ros</depend>
+  <depend>tf</depend>
+
+  <exec_depend>human_follow_control</exec_depend>
+  <exec_depend>human_follow_fusion</exec_depend>
+  <exec_depend>human_follow_px4_bridge</exec_depend>
+  <exec_depend>human_follow_perception</exec_depend>
+  <exec_depend>ego_planner</exec_depend>
+  <exec_depend>mavros</exec_depend>
+  <exec_depend>mavros_msgs</exec_depend>
+  <exec_depend>usb_cam</exec_depend>
+  <exec_depend>rviz</exec_depend>
+  <exec_depend>robot_state_publisher</exec_depend>
+  <exec_depend>image_view</exec_depend>
+</package>

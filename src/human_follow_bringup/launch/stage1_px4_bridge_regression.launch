@@ -1,0 +1,8 @@
+<launch>
+  <arg name="monitor_required" default="true" />
+  <rosparam command="load" file="$(find human_follow_px4_bridge)/config/px4_bridge.yaml" />
+
+  <node pkg="human_follow_px4_bridge" type="bridge_command_sequence_publisher_node.py" name="bridge_command_sequence_publisher" output="screen" />
+  <node pkg="human_follow_px4_bridge" type="follow_px4_bridge_node.py" name="human_follow_px4_bridge" output="screen" />
+  <node pkg="human_follow_px4_bridge" type="bridge_output_regression_monitor_node.py" name="bridge_output_regression_monitor" output="screen" required="$(arg monitor_required)" />
+</launch>

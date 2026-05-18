@@ -1,0 +1,433 @@
+Panels:
+  - Class: rviz/Displays
+    Help Height: 85
+    Name: Displays
+    Property Tree Widget:
+      Expanded: ~
+      Splitter Ratio: 0.5
+    Tree Height: 320
+  - Class: rviz/Tool Properties
+    Expanded:
+      - /2D Nav Goal1
+    Name: Tool Properties
+    Splitter Ratio: 0.5886790156364441
+  - Class: rviz/Views
+    Expanded:
+      - /Current View1
+    Name: Views
+    Splitter Ratio: 0.5
+Preferences:
+  PromptSaveOnExit: true
+Toolbars:
+  toolButtonStyle: 2
+Visualization Manager:
+  Class: ""
+  Displays:
+    - Alpha: 0.44999998807907104
+      Cell Size: 1
+      Class: rviz/Grid
+      Color: 115; 122; 136
+      Enabled: true
+      Line Style:
+        Line Width: 0.012000000104308128
+        Value: Lines
+      Name: Grid
+      Normal Cell Count: 0
+      Offset:
+        X: 0
+        Y: 0
+        Z: 0
+      Plane: XY
+      Plane Cell Count: 40
+      Reference Frame: map
+      Value: true
+    - Alpha: 1
+      Class: rviz/RobotModel
+      Collision Enabled: false
+      Enabled: true
+      Links:
+        All Links Enabled: true
+        Expand Joint Details: false
+        Expand Link Details: false
+        Expand Tree: false
+        Link Tree Style: Links in Alphabetic Order
+      Name: VehicleModel
+      Robot Description: robot_description
+      TF Prefix: ""
+      Update Interval: 0
+      Value: true
+      Visual Enabled: true
+    - Class: rviz/TF
+      Enabled: true
+      Filter (blacklist): ""
+      Filter (whitelist): ""
+      Frame Timeout: 15
+      Frames:
+        All Enabled: false
+        base_link:
+          Value: true
+        camera:
+          Value: true
+        camera_optical_frame:
+          Value: true
+        map:
+          Value: true
+        mid360:
+          Value: true
+      Marker Alpha: 0.6
+      Marker Scale: 0.75
+      Name: TF
+      Show Arrows: true
+      Show Axes: true
+      Show Names: true
+      Tree:
+        {}
+      Update Interval: 0
+      Value: true
+    - Alpha: 0.9200000166893005
+      Autocompute Intensity Bounds: true
+      Autocompute Value Bounds:
+        Max Value: 2.5
+        Min Value: -0.2
+        Value: false
+      Axis: Z
+      Channel Name: intensity
+      Class: rviz/PointCloud2
+      Color: 160; 160; 160
+      Color Transformer: AxisColor
+      Decay Time: 0
+      Enabled: true
+      Invert Rainbow: false
+      Max Color: 255; 255; 255
+      Max Intensity: 4096
+      Min Color: 0; 0; 0
+      Min Intensity: 0
+      Name: Planner Input Cloud [Gray]
+      Position Transformer: XYZ
+      Queue Size: 2
+      Selectable: true
+      Size (Pixels): 4
+      Size (m): 0.07000000029802322
+      Style: Boxes
+      Topic: /grid_map/cloud
+      Unreliable: false
+      Use Fixed Frame: true
+      Use rainbow: true
+      Value: true
+    - Alpha: 1
+      Autocompute Intensity Bounds: true
+      Autocompute Value Bounds:
+        Max Value: 2.4
+        Min Value: 0.0
+        Value: false
+      Axis: Z
+      Channel Name: intensity
+      Class: rviz/PointCloud2
+      Color: 40; 245; 255
+      Color Transformer: AxisColor
+      Decay Time: 0
+      Enabled: true
+      Invert Rainbow: false
+      Max Color: 255; 255; 255
+      Max Intensity: 4096
+      Min Color: 0; 0; 0
+      Min Intensity: 0
+      Name: Inflated Obstacles [Cyan]
+      Position Transformer: XYZ
+      Queue Size: 10
+      Selectable: true
+      Size (Pixels): 4
+      Size (m): 0.10000000149011612
+      Style: Boxes
+      Topic: /grid_map/occupancy_inflate
+      Unreliable: false
+      Use Fixed Frame: true
+      Use rainbow: true
+      Value: true
+    - Alpha: 0.550000011920929
+      Autocompute Intensity Bounds: true
+      Autocompute Value Bounds:
+        Max Value: 1
+        Min Value: 0
+        Value: false
+      Axis: Z
+      Channel Name: intensity
+      Class: rviz/PointCloud2
+      Color: 235; 235; 235
+      Color Transformer: FlatColor
+      Decay Time: 0
+      Enabled: false
+      Invert Rainbow: false
+      Max Color: 255; 255; 255
+      Max Intensity: 1
+      Min Color: 0; 0; 0
+      Min Intensity: 0
+      Name: Raw Occupancy [White]
+      Position Transformer: XYZ
+      Queue Size: 10
+      Selectable: true
+      Size (Pixels): 3
+      Size (m): 0.07000000029802322
+      Style: Flat Squares
+      Topic: /grid_map/occupancy
+      Unreliable: false
+      Use Fixed Frame: true
+      Use rainbow: false
+      Value: false
+    - Class: rviz/MarkerArray
+      Enabled: true
+      Marker Topic: /follow/viz/markers
+      Name: State And Sensor Markers
+      Namespaces:
+        camera_frustum: true
+        camera_sensor: true
+        command: true
+        follow_state_text: true
+        fusion: true
+        lidar_sensor: true
+        phase_text: true
+        stage2_state_text: true
+        stage2_ego_cmd: true
+        stage2_ego_goal: true
+        stage2_goal: true
+        truth: true
+        vehicle_heading: true
+        vehicle_outline: true
+      Queue Size: 10
+      Value: true
+    - Alpha: 1
+      Buffer Length: 1
+      Class: rviz/Path
+      Color: 35; 255; 70
+      Enabled: true
+      Head Diameter: 0.05000000074505806
+      Head Length: 0.07999999821186066
+      Length: 0.20000000298023224
+      Line Style: Billboards
+      Line Width: 0.04500000178813934
+      Name: Human Truth Path [Green]
+      Offset:
+        X: 0
+        Y: 0
+        Z: 0
+      Pose Color: 255; 85; 255
+      Pose Style: None
+      Queue Size: 10
+      Radius: 0.05000000074505806
+      Shaft Diameter: 0.05000000074505806
+      Shaft Length: 0.14000000149011612
+      Topic: /follow/viz/truth_path
+      Unreliable: false
+      Value: true
+    - Alpha: 1
+      Buffer Length: 1
+      Class: rviz/Path
+      Color: 255; 130; 20
+      Enabled: true
+      Head Diameter: 0.05000000074505806
+      Head Length: 0.07999999821186066
+      Length: 0.20000000298023224
+      Line Style: Billboards
+      Line Width: 0.04500000178813934
+      Name: Fused Target Path [Orange]
+      Offset:
+        X: 0
+        Y: 0
+        Z: 0
+      Pose Color: 85; 170; 255
+      Pose Style: None
+      Queue Size: 10
+      Radius: 0.05000000074505806
+      Shaft Diameter: 0.05000000074505806
+      Shaft Length: 0.14000000149011612
+      Topic: /follow/viz/fusion_path
+      Unreliable: false
+      Value: true
+    - Alpha: 0.800000011920929
+      Buffer Length: 1
+      Class: rviz/Path
+      Color: 120; 180; 255
+      Enabled: true
+      Head Diameter: 0.03999999910593033
+      Head Length: 0.05999999865889549
+      Length: 0.15000000596046448
+      Line Style: Billboards
+      Line Width: 0.03500000014901161
+      Name: Vehicle Actual Path [Blue]
+      Offset:
+        X: 0
+        Y: 0
+        Z: 0
+      Pose Color: 120; 180; 255
+      Pose Style: None
+      Queue Size: 10
+      Radius: 0.040000000552965164
+      Shaft Diameter: 0.040000000552965164
+      Shaft Length: 0.12000000149011612
+      Topic: /follow/viz/vehicle_path
+      Unreliable: false
+      Value: true
+    - Alpha: 1
+      Buffer Length: 1
+      Class: rviz/Path
+      Color: 255; 245; 0
+      Enabled: true
+      Head Diameter: 0.09000000074505806
+      Head Length: 0.14000000149011612
+      Length: 0.26000000715255737
+      Line Style: Billboards
+      Line Width: 0.06000000074505806
+      Name: Stage2 Rolling Or Search Goal [Yellow]
+      Offset:
+        X: 0
+        Y: 0
+        Z: 0
+      Pose Color: 255; 220; 90
+      Pose Style: None
+      Queue Size: 10
+      Radius: 0.06000000074505806
+      Shaft Diameter: 0.06000000074505806
+      Shaft Length: 0.14000000149011612
+      Topic: /follow/stage2/debug_goal_path
+      Unreliable: false
+      Value: true
+    - Alpha: 1
+      Buffer Length: 1
+      Class: rviz/Path
+      Color: 255; 0; 160
+      Enabled: true
+      Head Diameter: 0.10000000149011612
+      Head Length: 0.16000000149011612
+      Length: 0.26000000715255737
+      Line Style: Billboards
+      Line Width: 0.06000000074505806
+      Name: EGO Input Waypoints [Magenta]
+      Offset:
+        X: 0
+        Y: 0
+        Z: 0
+      Pose Color: 255; 80; 160
+      Pose Style: Axes
+      Queue Size: 10
+      Radius: 0.07000000014901161
+      Shaft Diameter: 0.06000000074505806
+      Shaft Length: 0.14000000149011612
+      Topic: /waypoint_generator/waypoints
+      Unreliable: false
+      Value: true
+    - Alpha: 1
+      Buffer Length: 1
+      Class: rviz/Path
+      Color: 255; 60; 60
+      Enabled: true
+      Head Diameter: 0.07000000029802322
+      Head Length: 0.10999999940395355
+      Length: 0.22000000298023224
+      Line Style: Billboards
+      Line Width: 0.03500000014901161
+      Name: EGO Bspline Executed Path [Red]
+      Offset:
+        X: 0
+        Y: 0
+        Z: 0
+      Pose Color: 255; 120; 120
+      Pose Style: None
+      Queue Size: 10
+      Radius: 0.05000000074505806
+      Shaft Diameter: 0.05000000074505806
+      Shaft Length: 0.12000000149011612
+      Topic: /follow/stage2/ego_bspline_path
+      Unreliable: false
+      Value: true
+    - Class: rviz/Marker
+      Enabled: true
+      Marker Topic: /ego_planner_node/goal_point
+      Name: EGO Goal Point
+      Namespaces:
+        "": true
+      Queue Size: 100
+      Value: true
+    - Class: rviz/Marker
+      Enabled: true
+      Marker Topic: /ego_planner_node/global_list
+      Name: EGO Global Reference [Teal]
+      Namespaces:
+        "": true
+      Queue Size: 100
+      Value: true
+    - Class: rviz/Marker
+      Enabled: true
+      Marker Topic: /ego_planner_node/optimal_list
+      Name: EGO Optimal Local Trajectory [Red]
+      Namespaces:
+        "": true
+      Queue Size: 100
+      Value: true
+    - Class: rviz/Marker
+      Enabled: true
+      Marker Topic: /ego_planner_node/a_star_list
+      Name: EGO AStar Detour Seed [Yellow]
+      Namespaces:
+        "": true
+      Queue Size: 100
+      Value: true
+    - Class: rviz/Marker
+      Enabled: true
+      Marker Topic: /ego_planner_node/init_list
+      Name: EGO Initial Local Candidate [Blue]
+      Namespaces:
+        "": true
+      Queue Size: 100
+      Value: true
+  Enabled: true
+  Global Options:
+    Background Color: 22; 26; 33
+    Default Light: true
+    Fixed Frame: map
+    Frame Rate: 30
+  Name: root
+  Tools:
+    - Class: rviz/Interact
+      Hide Inactive Objects: true
+    - Class: rviz/MoveCamera
+    - Class: rviz/Select
+    - Class: rviz/SetGoal
+      Topic: /move_base_simple/goal
+  Value: true
+  Views:
+    Current:
+      Class: rviz/Orbit
+      Distance: 12.0
+      Enable Stereo Rendering:
+        Stereo Eye Separation: 0.05999999865889549
+        Stereo Focal Distance: 1
+        Swap Stereo Eyes: false
+        Value: false
+      Field of View: 0.7853981852531433
+      Focal Point:
+        X: 2.0
+        Y: 0.0
+        Z: 1.3
+      Focal Shape Fixed Size: true
+      Focal Shape Size: 0.05000000074505806
+      Invert Z Axis: false
+      Name: Current View
+      Near Clip Distance: 0.009999999776482582
+      Pitch: 0.95
+      Target Frame: map
+      Yaw: 3.14
+    Saved: ~
+Window Geometry:
+  Displays:
+    collapsed: false
+  Height: 1009
+  Hide Left Dock: false
+  Hide Right Dock: false
+  QMainWindow State: 000000ff00000000fd00000001000000000000018800000389fc0200000003fb000000100044006900730070006c0061007900730100000047000001ae000000f100fffffffb0000000a0056006900650077007301000001fc00000120000000c200fffffffb0000001e0054006f006f006c002000500072006f00700065007200740069006500730100000323000000ad0000006e00ffffff000005b10000038900000004000000040000000800000008fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
+  Tool Properties:
+    collapsed: false
+  Views:
+    collapsed: false
+  Width: 1856
+  X: 64
+  Y: 34

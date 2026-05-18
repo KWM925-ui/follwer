@@ -1,0 +1,22 @@
+<launch>
+  <arg name="max_duration_sec" default="8.0" />
+  <arg name="monitor_required" default="true" />
+
+  <include file="$(find human_follow_bringup)/launch/stage2_ego_bridge_bench.launch" />
+
+  <node pkg="human_follow_px4_bridge" type="fake_mavros_gate_harness_node.py" name="fake_mavros_gate_harness" output="screen" />
+
+  <node pkg="human_follow_px4_bridge" type="ego_bridge_regression_monitor_node.py" name="ego_bridge_regression_monitor" output="screen" required="$(arg monitor_required)">
+    <param name="max_duration_sec" value="$(arg max_duration_sec)" />
+  </node>
+
+  <node pkg="human_follow_px4_bridge" type="offboard_gate_regression_monitor_node.py" name="stage2_offboard_gate_regression_monitor" output="screen" required="$(arg monitor_required)">
+    <param name="command_topic" value="" />
+    <param name="eligibility_source" value="setpoint" />
+    <param name="forwarded_setpoint_topic" value="/mavros/setpoint_raw/local" />
+    <param name="min_entry_setpoint_norm" value="0.05" />
+    <param name="min_eligible_setpoints" value="10" />
+    <param name="exit_on_pass" value="false" />
+    <param name="max_duration_sec" value="$(arg max_duration_sec)" />
+  </node>
+</launch>

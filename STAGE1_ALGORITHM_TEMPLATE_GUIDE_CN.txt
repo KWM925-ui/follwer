@@ -1,0 +1,277 @@
+STAGE1 真线接入说明
+WORKSPACE: /home/coco/follwer_ws
+
+================================================================
+1. 目的
+================================================================
+
+这个文件只回答一件事：
+
+- 你自己的算法，应该接到这套平台的哪条真线上
+
+现在只保留两条线：
+
+1. 真仿真链
+2. 真部署链
+
+不再保留模板演示线、假隐藏线、随机游走演示线作为日常入口。
+
+================================================================
+2. 真仿真链
+================================================================
+
+唯一仿真演示入口：
+- `roslaunch human_follow_bringup stage1_truth_visual_demo.launch`
+
+这一条线的意义：
+- 人是手动控制的
+- 飞机是按真实跟踪逻辑响应的
+- `hidden` 的语义是真遮挡，不是假隐藏
+- 这条线用于看效果、调算法、做回归
+
+仿真输入：
+- `/follow/sim/truth_target_body`
+- `/follow/sim/human_truth_world`
+- `/follow/sim/vehicle_odom`
+- `/follow/lidar/points`
+
+主链中间量：
+- `/follow/tracker/selected_target`
+- `/follow/fusion/target_body`
+
+控制输出：
+- `/follow/control/cmd_body`
+- `/follow/offboard/setpoint`
+
+可视化：
+- `/follow/viz/markers`
+- `/follow/viz/truth_path`
+- `/follow/viz/fusion_path`
+- `/follow/viz/vehicle_path`
+- `/follow/planning/debug_path`
+
+核心语义：
+- `shown` = 算法看得见人，正常跟踪
+- `hidden` = 真实遮挡，算法失去目标，飞机开始搜人
+
+键控语义：
+- 人的位置通过 RViz 的 `2D Nav Goal` 设置
+- 默认取点击落点的世界坐标作为人体位置
+- 拖拽出来的朝向不会被用于人体朝向控制
+- `Space` 清空面板状态提示，不改当前人体位置
+- `R` 重置人到默认位置
+- `V` 切换 `shown/hidden`
+- `Esc` 或 `Q` 退出键盘面板
+
+如果你要把自己的算法接到仿真链：
+
+- 控制类算法：
+  - 订阅 `/follow/fusion/target_body`
+  - 发布 `/follow/control/cmd_body`
+  - 发布 `/follow/state`
+
+- 规划/感知类算法：
+  - 订阅 `/follow/sim/vehicle_odom`
+  - 订阅 `/follow/lidar/points`
+  - 订阅 `/follow/fusion/target_world`
+  - 最终发布 `/follow/control/cmd_body`
+  - 可选发布 `/follow/planning/debug_path`
+
+================================================================
+3. 真部署链
+================================================================
+
+唯一部署主入口：
+- `roslaunch human_follow_bringup stage1_live_px4_to_mavros_real_fusion.launch`
+
+这一条线的意义：
+- 真相机
+- 真雷达/点云
+- 真融合
+- 真 PX4/MAVROS 下发
+- 后续部署只走这条线
+
+如果你自己的算法最终要上机：
+- 仿真阶段先按真仿真链接
+- 部署阶段保持 topic/接口一致，直接切到真部署链
+
+================================================================
+3.1 当前已经做好的控制接入槽
+================================================================
+
+现在真仿真链和真部署链都已经支持两种控制器来源：
+
+- `controller_provider:=baseline`
+  - 使用当前平台自带基线控制器
+  - 节点是 `human_follow_control/follow_controller_node.py`
+
+- `controller_provider:=external`
+  - 使用你自己的外部控制算法节点
+  - 只要它遵守同一套 topic 约定，就可以直接挂进主线
+
+统一控制槽 launch：
+- `human_follow_bringup/launch/stage1_controller_slot.launch`
+
+默认外部控制模板：
+- `human_follow_control/control_algorithm_template_node.py`
+
+这个模板不是额外假线，只是一个“可替换示例控制器”。
+它走的仍然是同一条真线：
+- 同样订阅 `/follow/fusion/target_body`
+- 同样发布 `/follow/control/cmd_body`
+- 同样发布 `/follow/state`
+- 下游 RViz、运动学仿真、PX4 bridge 全部复用
+
+如果你接的是规划/感知类算法，现在也已经有对应模板：
+- `human_follow_control/planning_algorithm_template_node.py`
+
+它的主输入不是 truth，而是：
+- `/follow/fusion/target_world`
+- `/follow/sim/vehicle_odom`
+- `/follow/lidar/points`
+
+这样才符合我们锁定的真线语义：
+- `hidden` 时，算法不能“看穿遮挡”
+- 规划算法使用的是融合结果，而不是直接偷看真值
+
+所以后面接你自己的控制程序时，不需要再去手拆基线主线，只需要：
+
+1. 让你的节点遵守 topic 约定
+2. 启动时设 `controller_provider:=external`
+3. 把 `external_controller_pkg` 和 `external_controller_type` 指向你的节点
+
+================================================================
+3.2 真实算法建议放法
+================================================================
+
+如果你接下来要放自己的真实算法，建议直接按下面方式做：
+
+1. 控制类算法
+- 放到你自己的包里
+- 节点至少发布：
+  - `/follow/control/cmd_body`
+  - `/follow/state`
+- 节点至少订阅：
+  - `/follow/fusion/target_body`
+
+2. 规划/感知类算法
+- 放到你自己的包里
+- 节点至少发布：
+  - `/follow/control/cmd_body`
+  - `/follow/state`
+- 建议额外发布：
+  - `/follow/planning/debug_path`
+- 节点至少订阅：
+  - `/follow/fusion/target_world`
+  - `/follow/sim/vehicle_odom`
+  - `/follow/lidar/points`
+
+不要去改主线节点名或主线 topic。
+你自己的算法只要遵守这层接口，就可以直接挂到真线上。
+
+当前已经给你留好的默认位置：
+- `src/human_follow_user`
+
+建议你后续只在这个包里放你自己的算法。
+当前已准备好的用户入口：
+- `human_follow_user/scripts/user_control_node.py`
+- `human_follow_user/scripts/user_planning_node.py`
+
+这两个入口目前先转接到已经验过的模板，作用是先把“你自己的包接入真线”这件事做实。
+后面你只需要改这两个脚本，不要再去改主线 launch 结构。
+
+================================================================
+3.3 外部算法接入验收
+================================================================
+
+现在已经补好一套“外部算法接入验收”入口。
+
+统一验收 launch：
+- `human_follow_bringup/stage1_external_ingress_regression.launch`
+
+统一 smoke 脚本：
+- `env/run_stage1_external_ingress_smoke.bash`
+
+这套验收会检查：
+- 外部算法节点是否真的接进主线
+- `/follow/state` 是否经过 `target_acquired/follow/search/lost`
+- `/follow/control/cmd_body` 是否真的输出了有效命令
+- 如果是规划类算法，还会检查 `/follow/planning/debug_path`
+
+================================================================
+4. 常用命令
+================================================================
+
+本地构建：
+- `source /home/coco/follwer_ws/env/source_local_mavros_overlay.bash && cd /home/coco/follwer_ws && catkin_make`
+
+仿真演示：
+- `source /home/coco/follwer_ws/env/source_local_mavros_overlay.bash && source /home/coco/follwer_ws/devel/setup.bash && roslaunch human_follow_bringup stage1_truth_visual_demo.launch`
+
+外部控制模板演示：
+- `source /home/coco/follwer_ws/env/source_local_mavros_overlay.bash && source /home/coco/follwer_ws/devel/setup.bash && roslaunch human_follow_bringup stage1_truth_visual_demo.launch controller_provider:=external external_controller_pkg:=human_follow_control external_controller_type:=control_algorithm_template_node.py`
+
+外部规划模板演示：
+- `source /home/coco/follwer_ws/env/source_local_mavros_overlay.bash && source /home/coco/follwer_ws/devel/setup.bash && roslaunch human_follow_bringup stage1_truth_visual_demo.launch controller_provider:=external external_controller_pkg:=human_follow_control external_controller_type:=planning_algorithm_template_node.py`
+
+带图像调试窗：
+- `source /home/coco/follwer_ws/env/source_local_mavros_overlay.bash && source /home/coco/follwer_ws/devel/setup.bash && roslaunch human_follow_bringup stage1_truth_visual_demo.launch open_image_view:=true`
+
+标准回归：
+- `source /home/coco/follwer_ws/env/source_local_mavros_overlay.bash && source /home/coco/follwer_ws/devel/setup.bash && roslaunch human_follow_bringup stage1_truth_fusion_controller_regression.launch`
+
+外部控制模板回归：
+- `source /home/coco/follwer_ws/env/source_local_mavros_overlay.bash && source /home/coco/follwer_ws/devel/setup.bash && roslaunch human_follow_bringup stage1_truth_fusion_controller_regression.launch controller_provider:=external external_controller_pkg:=human_follow_control external_controller_type:=control_algorithm_template_node.py`
+
+外部规划模板回归：
+- `source /home/coco/follwer_ws/env/source_local_mavros_overlay.bash && source /home/coco/follwer_ws/devel/setup.bash && roslaunch human_follow_bringup stage1_truth_fusion_controller_regression.launch controller_provider:=external external_controller_pkg:=human_follow_control external_controller_type:=planning_algorithm_template_node.py enable_monitor:=false`
+
+外部控制算法接入验收：
+- `source /home/coco/follwer_ws/env/source_local_mavros_overlay.bash && source /home/coco/follwer_ws/devel/setup.bash && roslaunch human_follow_bringup stage1_external_ingress_regression.launch external_controller_type:=control_algorithm_template_node.py`
+
+外部规划算法接入验收：
+- `source /home/coco/follwer_ws/env/source_local_mavros_overlay.bash && source /home/coco/follwer_ws/devel/setup.bash && roslaunch human_follow_bringup stage1_external_ingress_regression.launch external_controller_type:=planning_algorithm_template_node.py require_planning_path:=true`
+
+用户包控制入口验收：
+- `source /home/coco/follwer_ws/env/source_local_mavros_overlay.bash && source /home/coco/follwer_ws/devel/setup.bash && roslaunch human_follow_bringup stage1_external_ingress_regression.launch external_controller_pkg:=human_follow_user external_controller_type:=user_control_node.py`
+
+用户包规划入口验收：
+- `source /home/coco/follwer_ws/env/source_local_mavros_overlay.bash && source /home/coco/follwer_ws/devel/setup.bash && roslaunch human_follow_bringup stage1_external_ingress_regression.launch external_controller_pkg:=human_follow_user external_controller_type:=user_planning_node.py require_planning_path:=true`
+
+一键 smoke：
+- `source /home/coco/follwer_ws/env/run_stage1_external_ingress_smoke.bash control_algorithm_template_node.py`
+- `source /home/coco/follwer_ws/env/run_stage1_external_ingress_smoke.bash planning_algorithm_template_node.py`
+- `source /home/coco/follwer_ws/env/run_stage1_external_ingress_smoke.bash user_control_node.py human_follow_user`
+- `source /home/coco/follwer_ws/env/run_stage1_external_ingress_smoke.bash user_planning_node.py human_follow_user`
+
+无 GUI smoke：
+- `source /home/coco/follwer_ws/env/source_local_mavros_overlay.bash && source /home/coco/follwer_ws/devel/setup.bash && /home/coco/follwer_ws/env/stage1_truth_demo_smoke.bash stage1_truth_visual_demo.launch`
+
+单项能力验证：
+- `roslaunch human_follow_bringup stage1_truth_fusion_controller_regression.launch loop:=true enable_monitor:=false enable_case_validation:=true validation_case:=acquire_center motion_mode:=acquire_center`
+- `roslaunch human_follow_bringup stage1_truth_fusion_controller_regression.launch loop:=true enable_monitor:=false enable_case_validation:=true validation_case:=search_reacquire_right motion_mode:=search_reacquire_right`
+- `roslaunch human_follow_bringup stage1_truth_fusion_controller_regression.launch loop:=true enable_monitor:=false enable_case_validation:=true validation_case:=search_reacquire_left motion_mode:=search_reacquire_left`
+- `roslaunch human_follow_bringup stage1_truth_fusion_controller_regression.launch loop:=true enable_monitor:=false enable_case_validation:=true validation_case:=person_approach_retreat motion_mode:=person_approach_retreat`
+- `roslaunch human_follow_bringup stage1_truth_fusion_controller_regression.launch loop:=true enable_monitor:=false enable_case_validation:=true validation_case:=person_depart_follow motion_mode:=person_depart_follow`
+- `roslaunch human_follow_bringup stage1_truth_fusion_controller_regression.launch loop:=true enable_monitor:=false enable_case_validation:=true validation_case:=lateral_left_track motion_mode:=lateral_left_track`
+- `roslaunch human_follow_bringup stage1_truth_fusion_controller_regression.launch loop:=true enable_monitor:=false enable_case_validation:=true validation_case:=lateral_right_track motion_mode:=lateral_right_track`
+
+单项自动判定：
+- `env/run_stage1_truth_case_suite.bash`
+
+================================================================
+5. 当前建议
+================================================================
+
+如果你只是先看平台是否工作：
+- 先开 `stage1_truth_visual_demo.launch`
+
+如果你最近要接的是控制类算法：
+- 直接接入真仿真链或真部署链的标准 topic
+
+如果你最近要接的是订阅 odom/cloud 的算法：
+- 直接接入真仿真链或真部署链的标准 topic
+- 如果你有自己的轨迹结果，发布到 `/follow/planning/debug_path`
+
+如果你暂时不方便开 RViz，但想确认这条真仿真链是不是活的：
+- 直接跑 `env/stage1_truth_demo_smoke.bash stage1_truth_visual_demo.launch`

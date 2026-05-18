@@ -1,0 +1,9 @@
+<launch>
+  <include file="$(find human_follow_bringup)/launch/stage2_real_ego_visual_demo.launch">
+    <arg name="manual_hidden_affects_tracking" value="true" />
+    <arg name="scene_static_obstacle_layout" value="ego_demo_three_boxes" />
+    <arg name="demo_goal_target_timeout_sec" value="0.45" />
+    <arg name="demo_tracker_live_timeout_sec" value="0.18" />
+    <arg name="demo_tracker_hold_timeout_sec" value="0.40" />
+  </include>
+</launch>

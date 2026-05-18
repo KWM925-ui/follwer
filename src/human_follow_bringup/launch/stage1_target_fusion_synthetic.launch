@@ -1,0 +1,21 @@
+<launch>
+  <arg name="intrinsics_yaml" default="$(find human_follow_fusion)/config/camera_intrinsics.example.yaml" />
+  <arg name="extrinsics_yaml" default="$(find human_follow_fusion)/config/camera_mid360_extrinsics.example.yaml" />
+  <arg name="monitor_required" default="true" />
+
+  <node pkg="human_follow_fusion" type="fusion_synthetic_scene_publisher_node.py" name="fusion_synthetic_scene_publisher" output="screen">
+    <param name="intrinsics_yaml" value="$(arg intrinsics_yaml)" />
+    <param name="extrinsics_yaml" value="$(arg extrinsics_yaml)" />
+  </node>
+
+  <node pkg="human_follow_fusion" type="target_fusion_node.py" name="human_follow_target_fusion" output="screen">
+    <param name="enable_mock_projection" value="false" />
+    <param name="intrinsics_yaml" value="$(arg intrinsics_yaml)" />
+    <param name="extrinsics_yaml" value="$(arg extrinsics_yaml)" />
+    <param name="output_frame_id" value="camera_optical_frame" />
+  </node>
+
+  <node pkg="human_follow_fusion" type="fusion_output_regression_monitor_node.py" name="fusion_output_regression_monitor" output="screen" required="$(arg monitor_required)">
+    <param name="expected_frame_id" value="camera_optical_frame" />
+  </node>
+</launch>

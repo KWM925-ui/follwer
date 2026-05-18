@@ -1,0 +1,380 @@
+STAGE1 FULL SYSTEM SIM FRONTIER
+UPDATED_AT: 2026-05-10 Asia/Shanghai
+
+MISSION_LOCK
+- User-selected top route:
+  - first complete Stage1 full-system simulation
+  - first prove truth-to-control + PX4 managed acceptance
+  - then upgrade to detector/tracker-in-loop
+  - only after Stage1 full-system simulation is stable, widen to EGO
+- User-selected acceptance shape:
+  - scenario matrix
+  - acceptance report
+  - explicit metric budgets
+- User-selected sim-plane edit boundary:
+  - sim_plane may edit `/home/coco/sim_plane`
+  - sim_plane may edit its managed mirror workspace
+  - sim_plane must not edit `/home/coco/follwer_ws`
+
+LOCKED_FACTS
+- Current Stage2 simulation branch is already packaged:
+  - project-local real-EGO + search regression exists
+  - sim-plane managed real-EGO acceptance exists
+- Current Stage1 truth-to-control managed acceptance already exists on sim_plane:
+  - latest known report:
+    - `/home/coco/sim_plane/runs/human_follow_stage1_acceptance/human_follow_stage1_acceptance_latest_20260506_051740_864986/report.json`
+  - status:
+    - `passed`
+  - this means truth-to-control is not an unproven concept branch
+- Current Stage1 truth launch in `/home/coco/follwer_ws` is:
+  - `src/human_follow_bringup/launch/stage1_truth_fusion_controller_regression.launch`
+- In the current Stage1 truth launch:
+  - tracker is in the live chain
+  - detector is NOT in the live chain
+  - `truth_driven_scene_publisher` writes `Target2D` directly to `/follow/detector/person_target`
+- Current synthetic image publisher is not sufficient for detector-in-loop:
+  - `synthetic_camera_canvas_node.py` only draws a generic canvas
+  - it does not yet render a synthetic person target that a detector can recover
+- Fresh project-side truth-to-control local regression still passes after the new Stage1 launch parameterization:
+  - command:
+    - `source /home/coco/follwer_ws/env/source_local_mavros_overlay.bash && timeout 35s roslaunch human_follow_bringup stage1_truth_fusion_controller_regression.launch`
+  - PASS facts:
+    - `truth_chain regression PASS tracker_states=['hold', 'timeout', 'valid'] follow_states=['follow', 'idle', 'lost', 'search', 'target_acquired'] truth_visible=121 truth_hidden=246 max_error=0.043`
+- Fresh project-side detector/tracker-in-loop local regression now also exists:
+  - launch:
+    - `src/human_follow_bringup/launch/stage1_truth_detector_tracker_controller_regression.launch`
+  - chain meaning:
+    - `/follow/sim/truth_target_body`
+    - truth-derived `/follow/sim/truth_target_2d`
+    - synthetic rendered image
+    - `detector_node.py` with `synthetic_box` backend
+    - `tracker_node.py`
+    - `target_fusion_node.py`
+    - `follow_controller_node.py`
+    - `follow_px4_bridge_node.py`
+  - PASS facts:
+    - `truth_chain regression PASS tracker_states=['hold', 'timeout', 'valid'] follow_states=['follow', 'idle', 'lost', 'search', 'target_acquired'] truth_visible=114 truth_hidden=246 max_error=0.245`
+- Fresh stronger project-side detector/tracker-in-loop proof now also exists:
+  - same launch:
+    - `src/human_follow_bringup/launch/stage1_truth_detector_tracker_controller_regression.launch`
+  - stricter monitor conditions:
+    - detector must publish valid detections
+    - detector source must include `synthetic_box`
+    - tracker source must include `synthetic_box`
+  - PASS facts:
+    - `truth_chain regression PASS tracker_states=['hold', 'timeout', 'valid'] follow_states=['follow', 'idle', 'lost', 'search', 'target_acquired'] truth_visible=119 truth_hidden=246 max_error=0.226`
+- Therefore the current project-side detector-in-loop proof is no longer ambiguous direct truth passthrough:
+  - the render path produced synthetic image detections
+  - detector emitted `synthetic_box`-sourced targets
+  - tracker carried that source into the downstream chain
+- The earliest missing layer is no longer project-side detector-in-loop existence.
+- The next missing layer is managed sim-plane acceptance of the preserved truth-to-control surface, then managed widening to the new detector-in-loop surface.
+- Fresh sim-plane managed Stage1 truth-to-control rerun on 2026-05-09 produced:
+  - full-chain artifact:
+    - `/home/coco/sim_plane/runs/px4_sih_quadx_human_follow_truth_full_chain_20260509_160136`
+  - seven-case matrix artifacts:
+    - `/home/coco/sim_plane/runs/px4_sih_quadx_human_follow_case_acquire_center_20260509_160237`
+    - `/home/coco/sim_plane/runs/px4_sih_quadx_human_follow_case_search_reacquire_right_20260509_160304`
+    - `/home/coco/sim_plane/runs/px4_sih_quadx_human_follow_case_search_reacquire_left_20260509_160332`
+    - `/home/coco/sim_plane/runs/px4_sih_quadx_human_follow_case_person_approach_retreat_20260509_160401`
+    - `/home/coco/sim_plane/runs/px4_sih_quadx_human_follow_case_person_depart_follow_20260509_160428`
+    - `/home/coco/sim_plane/runs/px4_sih_quadx_human_follow_case_lateral_left_track_20260509_160454`
+    - `/home/coco/sim_plane/runs/px4_sih_quadx_human_follow_case_lateral_right_track_20260509_160520`
+  - latest acceptance report:
+    - `/home/coco/sim_plane/runs/human_follow_stage1_acceptance/human_follow_stage1_acceptance_latest_20260509_160731_368057/report.json`
+- The fresh sim-plane managed Stage1 failure is not a full-chain execution failure:
+  - report status:
+    - `failed`
+  - only issue:
+    - `metric max_altitude_m increased by 0.287 beyond allowed 0.15`
+  - earliest failing scenario:
+    - `px4_sih_quadx_human_follow_case_lateral_left_track`
+- The failing managed scenario still completed successfully as a scenario run:
+  - run status in artifact result:
+    - `passed`
+  - adapter completed successfully:
+    - `algorithm_adapter_completed_successfully=true`
+  - follow behavior was present:
+    - `algorithm_adapter_follow_valid_command_seen=true`
+    - `algorithm_adapter_follow_state_name=follow`
+- Current-vs-reference evidence on the lateral cases now points to a sim-plane acceptance/reference issue, not an obvious project-side algorithm break:
+  - current left metrics:
+    - `max_altitude_m=0.349`
+    - `max_speed_mps=0.265`
+  - current right metrics:
+    - `max_altitude_m=0.318`
+    - `max_speed_mps=0.262`
+  - reference right metrics:
+    - `max_altitude_m=0.256`
+    - `max_speed_mps=0.406`
+  - reference left metrics:
+    - `max_altitude_m=0.062`
+    - `max_speed_mps=0.399`
+- The reference left artifact is currently the asymmetric outlier:
+  - reference left artifact:
+    - `/home/coco/sim_plane/runs/px4_sih_quadx_human_follow_case_lateral_left_track_20260505_143952`
+  - current left and current right both climb into the same altitude band near `0.32m~0.35m`
+  - reference right also climbs into the same altitude band near `0.26m`
+  - only reference left remains far lower at `0.062m`
+- Fresh project-side local Stage1 case validation on 2026-05-10 confirms the current follower logic itself is still symmetric and passing:
+  - left local command:
+    - `source /home/coco/follwer_ws/env/source_local_mavros_overlay.bash && timeout 35s roslaunch human_follow_bringup stage1_truth_fusion_controller_regression.launch motion_mode:=lateral_left_track enable_monitor:=false enable_case_validation:=true validation_case:=lateral_left_track case_max_duration_sec:=12.0 monitor_required:=true`
+  - left PASS fact:
+    - `truth_case_validation PASS case=lateral_left_track ... dy=[0.000,0.991] cmd_lateral=[0.000,0.950]`
+  - right local command:
+    - `source /home/coco/follwer_ws/env/source_local_mavros_overlay.bash && timeout 35s roslaunch human_follow_bringup stage1_truth_fusion_controller_regression.launch motion_mode:=lateral_right_track enable_monitor:=false enable_case_validation:=true validation_case:=lateral_right_track case_max_duration_sec:=12.0 monitor_required:=true`
+  - right PASS fact:
+    - `truth_case_validation PASS case=lateral_right_track ... dy=[-0.994,0.000] cmd_lateral=[-0.950,0.000]`
+- Sim-plane later produced a fresh managed Stage1 truth-to-control PASS after the lateral-left reference repair:
+  - latest PASS acceptance report:
+    - `/home/coco/sim_plane/runs/human_follow_stage1_acceptance/human_follow_stage1_acceptance_latest_20260509_161825_507929/report.json`
+  - status:
+    - `passed`
+  - repaired lateral-left reference now points to:
+    - `/home/coco/sim_plane/runs/px4_sih_quadx_human_follow_case_lateral_left_track_20260509_161647`
+- Sim-plane then produced a later fresh managed Stage1 truth-to-control FAIL on another rerun:
+  - later FAIL acceptance report:
+    - `/home/coco/sim_plane/runs/human_follow_stage1_acceptance/human_follow_stage1_acceptance_latest_20260509_164535_325604/report.json`
+  - earliest failing scenario:
+    - `px4_sih_quadx_human_follow_case_lateral_left_track`
+  - failing artifact:
+    - `/home/coco/sim_plane/runs/px4_sih_quadx_human_follow_case_lateral_left_track_20260509_164441`
+  - failure class:
+    - not behavior regression
+    - not reference mismatch
+    - managed startup/offboard handoff instability
+  - concrete failing note:
+    - `The algorithm adapter failed before completion: Stage1 ROS follow probe failed at wait_ready`
+  - failing probe facts:
+    - `follow_valid_command_seen=true`
+    - `setpoint_count=22`
+    - `nonzero_setpoint_count=22`
+    - warmup threshold remained `25`
+    - `offboard_requested=false`
+    - `arm_command_sent=false`
+    - `current_mode=AUTO.LOITER`
+    - `ever_armed=false`
+- The current strongest interpretation is now split into two layers:
+  - project-side Stage1 truth-to-control behavior is still valid
+  - sim-plane managed Stage1 truth-to-control is functionally provable but not yet stable enough to be called closed
+- The new failure mode is not isolated to truth-to-control only:
+  - detector/tracker managed full-chain first failed at:
+    - `/home/coco/sim_plane/runs/px4_sih_quadx_human_follow_detector_tracker_full_chain_20260509_162838`
+  - same failure class:
+    - `Stage1 ROS follow probe failed at wait_ready`
+  - then detector/tracker managed full-chain later passed at:
+    - `/home/coco/sim_plane/runs/px4_sih_quadx_human_follow_detector_tracker_full_chain_20260509_163202`
+  - therefore detector/tracker managed proof exists, but the shared managed startup chain is also flaky there
+- Therefore the current best-supported interpretation is:
+  - reference-side lateral-left mismatch was real and has already been repaired on sim-plane side
+  - the remaining blocker is managed startup stability around MAVROS/probe/offboard warmup
+  - this is a sim-plane-side packaging/probe/orchestration frontier, not a project-side control-law frontier
+- Sim-plane later produced a newer managed Stage1 latest PASS under changed acceptance semantics:
+  - latest PASS acceptance report:
+    - `/home/coco/sim_plane/runs/human_follow_stage1_acceptance/human_follow_stage1_acceptance_latest_20260509_183513_866342/report.json`
+  - status:
+    - `passed`
+  - all seven Stage1 scenarios now set:
+    - `backend_options.allow_early_stop_on_adapter_success=true`
+  - Stage1 latest-vs-reference regression budgets are now only:
+    - `max_altitude_m`
+    - `max_speed_mps`
+  - the following metrics still exist as per-run threshold minima, but no longer participate in latest-vs-reference regression gating:
+    - `telemetry_count`
+    - `mode_changes`
+    - `algorithm_adapter_follow_non_hold_count`
+- Fresh audit of the latest PASS shows it is not a pure "runtime root cause fixed" proof:
+ - Fresh audit of the latest PASS shows it is not a pure "runtime root cause fixed" proof:
+  - the immediately prior latest report:
+    - `/home/coco/sim_plane/runs/human_follow_stage1_acceptance/human_follow_stage1_acceptance_latest_20260509_183353_679551/report.json`
+  - failed only on:
+    - `telemetry_count` regression drops
+    - `mode_changes` regression drops
+  - the next latest report:
+    - `/home/coco/sim_plane/runs/human_follow_stage1_acceptance/human_follow_stage1_acceptance_latest_20260509_183513_866342/report.json`
+  - passed after those regression gates were removed
+- Backend code confirms the semantic impact of the new scenario setting:
+  - `sim_plane/sim_plane/backends/px4_sih.py` now stops telemetry collection as soon as:
+    - adapter thread exits successfully
+  - therefore reduced `telemetry_count` and `mode_changes` are expected under this contract and are not directly comparable to the older full-duration references
+- The latest PASS is therefore best interpreted as:
+ - The latest PASS is therefore best interpreted as:
+  - sim-plane has aligned the Stage1 acceptance contract to an early-stop packaging model
+  - core managed behavior gates still remain enforced:
+    - connected
+    - offboard requested/reached
+    - arm requested/sent/reached
+    - estimator valid
+    - follow valid command seen
+    - correct motion mode
+    - correct validation case
+    - bounded `max_altitude_m`
+    - bounded `max_speed_mps`
+  - but repeated-run startup stability has NOT yet been freshly demonstrated under this new frozen contract
+- That repeated-run proof has now been freshly supplied on 2026-05-10 under the frozen early-stop contract:
+ - That repeated-run proof has now been freshly supplied on 2026-05-10 under the frozen early-stop contract:
+  - latest Stage1 acceptance report:
+    - `/home/coco/sim_plane/runs/human_follow_stage1_acceptance/human_follow_stage1_acceptance_latest_20260509_185801_710595/report.json`
+  - status:
+    - `passed`
+  - repeated managed `lateral_left_track` evidence now includes at least five consecutive PASS artifacts:
+    - `/home/coco/sim_plane/runs/px4_sih_quadx_human_follow_case_lateral_left_track_20260509_185354`
+    - `/home/coco/sim_plane/runs/px4_sih_quadx_human_follow_case_lateral_left_track_20260509_185407`
+    - `/home/coco/sim_plane/runs/px4_sih_quadx_human_follow_case_lateral_left_track_20260509_185421`
+    - `/home/coco/sim_plane/runs/px4_sih_quadx_human_follow_case_lateral_left_track_20260509_185434`
+    - `/home/coco/sim_plane/runs/px4_sih_quadx_human_follow_case_lateral_left_track_20260509_185447`
+  - repeated managed detector/tracker full-chain evidence now includes at least five consecutive PASS artifacts:
+    - `/home/coco/sim_plane/runs/px4_sih_quadx_human_follow_detector_tracker_full_chain_20260509_185511`
+    - `/home/coco/sim_plane/runs/px4_sih_quadx_human_follow_detector_tracker_full_chain_20260509_185543`
+    - `/home/coco/sim_plane/runs/px4_sih_quadx_human_follow_detector_tracker_full_chain_20260509_185616`
+    - `/home/coco/sim_plane/runs/px4_sih_quadx_human_follow_detector_tracker_full_chain_20260509_185649`
+    - `/home/coco/sim_plane/runs/px4_sih_quadx_human_follow_detector_tracker_full_chain_20260509_185722`
+  - fresh Stage1 seven-case matrix remained green under the same frozen contract
+  - no new `wait_ready`, warmup, launch-exit, or MAVROS disconnect failure artifact was produced in that repeated-run batch
+- Detector/tracker-in-loop managed acceptance packaging has now also been formalized as a first-class Stage1 surface on sim_plane:
+ - Detector/tracker-in-loop managed acceptance packaging has now also been formalized as a first-class Stage1 surface on sim_plane:
+  - acceptance matrix:
+    - `/home/coco/sim_plane/configs/human_follow_stage1_detector_tracker_acceptance_matrix.json`
+  - acceptance implementation:
+    - `/home/coco/sim_plane/sim_plane/human_follow_stage1_detector_tracker_acceptance.py`
+  - CLI command:
+    - `python3 -m sim_plane human-follow-stage1-detector-tracker-acceptance --latest --artifact-root runs --json`
+  - fresh managed full-chain artifact:
+    - `/home/coco/sim_plane/runs/px4_sih_quadx_human_follow_detector_tracker_full_chain_20260509_191613`
+  - fresh acceptance report:
+    - `/home/coco/sim_plane/runs/human_follow_stage1_detector_tracker_acceptance/human_follow_stage1_detector_tracker_acceptance_latest_20260509_191701_296089/report.json`
+  - status:
+    - `passed`
+  - core managed gates observed in the report:
+    - adapter completed successfully
+    - offboard requested and reached
+    - arm command sent
+    - follow valid command seen
+    - detector/tracker launch name preserved as:
+      - `stage1_truth_detector_tracker_controller_regression.launch`
+- Stage2 / real-EGO integrated managed acceptance has now also been formalized and passed on sim_plane:
+ - Stage2 / real-EGO integrated managed acceptance has now also been formalized and passed on sim_plane:
+  - integrated scenario:
+    - `/home/coco/sim_plane/scenarios/px4_sih_quadx_human_follow_stage2_real_ego_integrated.json`
+  - integrated acceptance matrix:
+    - `/home/coco/sim_plane/configs/human_follow_stage2_integrated_acceptance_matrix.json`
+  - integrated acceptance implementation:
+    - `/home/coco/sim_plane/sim_plane/human_follow_stage2_integrated_acceptance.py`
+  - integrated adapter:
+    - `/home/coco/sim_plane/sim_plane/adapters/human_follow_ros_stage2.py`
+  - CLI command:
+    - `python3 -m sim_plane human-follow-stage2-integrated-acceptance --latest --artifact-root runs --json`
+  - fresh integrated artifact:
+    - `/home/coco/sim_plane/runs/px4_sih_quadx_human_follow_stage2_real_ego_integrated_20260509_200452`
+  - latest integrated acceptance report:
+    - `/home/coco/sim_plane/runs/human_follow_stage2_integrated_acceptance/human_follow_stage2_integrated_acceptance_latest_20260509_200559_527102/report.json`
+  - status:
+    - `passed`
+  - fresh audit confirms this is not placeholder regression:
+    - `algorithm_adapter_stage2_variant=real_ego`
+    - `algorithm_adapter_stage2_search_goal_observed=true`
+    - `algorithm_adapter_stage2_lost_hold_observed=true`
+    - `algorithm_adapter_stage2_real_ego_path_observed=true`
+    - `algorithm_adapter_stage2_waypoint_count=30`
+    - `algorithm_adapter_stage2_distinct_goal_count=13`
+    - `algorithm_adapter_stage2_distinct_ego_cmd_count=16`
+    - notes explicitly state:
+      - real Stage2 chain
+      - rolling follow goals
+      - search goals after target loss
+      - lost/hold behavior after search timeout
+      - not a sim-plane independent ego baseline
+  - the remaining Stage2 probe naming debt has also now been cleared:
+    - probe path is now:
+      - `/home/coco/sim_plane/scripts/ros_stage2_integrated_probe.py`
+    - adapter reference now points to the integrated probe name
+    - fresh minimal rerun remained green:
+      - scenario artifact:
+        - `/home/coco/sim_plane/runs/px4_sih_quadx_human_follow_stage2_real_ego_integrated_20260509_201915`
+      - latest acceptance pointer:
+        - `/home/coco/sim_plane/runs/human_follow_stage2_integrated_acceptance/latest_latest.json`
+      - latest acceptance report dir:
+        - `/home/coco/sim_plane/runs/human_follow_stage2_integrated_acceptance/human_follow_stage2_integrated_acceptance_latest_20260509_201915_939776`
+      - status:
+        - `passed`
+
+CURRENT_FRONTIER
+- The current single valid frontier is:
+  - preserve the already-proved Stage1 truth-to-control and detector/tracker project-side surfaces
+  - preserve the existence proof of sim-plane managed truth-to-control PASS
+  - preserve the existence proof of sim-plane managed detector/tracker full-chain PASS
+  - preserve the fact that the newest Stage1 latest PASS was achieved under early-stop acceptance semantics
+  - preserve the fact that repeated managed startup stability has now been demonstrated under that frozen contract
+  - preserve the fact that detector/tracker-in-loop managed acceptance is now formalized and green
+  - preserve the fact that Stage2 / real-EGO integrated acceptance is now formalized and green
+  - the simulation branch as a whole can now be treated as closed
+  - the next frontier is no longer simulation packaging; it is either:
+    - return to the hardware/mainline branch
+    - or stop the simulation side path entirely
+- The intended minimal upgraded chain is:
+  - truth body target
+  - truth-derived 2D target only as hidden sim-side render input
+  - synthetic image render
+  - detector node
+  - tracker node
+  - fusion node
+  - controller
+  - PX4 bridge
+- Do not widen to EGO from this frontier.
+- Do not patch follower project-side Stage1 control logic in reaction to the current managed lateral-left failure unless new evidence disproves the local symmetric PASS results.
+- Do not treat the current managed lateral-left acceptance failure as proof that the project-side algorithm is broken.
+- The next required widening step is now outside the simulation branch:
+  - return to the hardware/mainline branch with simulation treated as done
+  - optionally clean the remaining sim-plane naming debt before leaving the branch
+
+FORBIDDEN
+- Do not reopen whether Stage2 real-EGO managed acceptance is done.
+- Do not widen to detector-in-the-loop inside sim_plane before the project-side launch and contract exist.
+- Do not replace detector-in-loop with pure direct topic passthrough and call it image-based proof.
+- Do not make sim_plane modify `/home/coco/follwer_ws`.
+- Do not change the current project-side lateral controller gains just to chase the current managed lateral-left reference mismatch.
+- Do not declare Stage1 managed truth-to-control closed solely because one PASS report exists while a later rerun still shows wait_ready instability.
+- Do not widen to Stage2/EGO from the current sim frontier until the managed Stage1 startup instability is bounded.
+- Do not declare Stage1 managed startup stable solely because `human_follow_stage1_acceptance_latest_20260509_183513_866342` passed once.
+- Do not further relax the Stage1 acceptance matrix or Stage1 scenario semantics before repeated reruns have been attempted under the current `183513` contract.
+- Do not reopen the managed startup-stability suspicion branch unless a fresh repeated-run failure reappears under the frozen contract.
+- Do not reopen the Stage1 detector/tracker packaging branch unless its new acceptance surface produces a fresh failing artifact.
+- Do not reopen the Stage2 integrated acceptance branch unless a fresh integrated artifact fails or contradicts the current report.
+- Do not remove core managed gating metrics such as:
+  - offboard requested/reached
+  - arm requested/sent/reached
+  - estimator valid
+  - follow valid command seen
+  - motion mode
+  - validation case
+
+NEXT_ACTION
+- On project side:
+  - preserve the old truth-to-control launch unchanged as the baseline
+  - preserve the new detector-in-loop local regression surface
+  - keep the fresh local left/right lateral PASS evidence attached to the frontier
+  - do not widen or retune the Stage1 controller in response to the current managed acceptance mismatch
+- On sim-plane side:
+  - treat the reference repair as done
+  - treat the `183513` contract shift as audited and now accepted
+  - preserve the current Stage1 matrix and current Stage1 scenario semantics:
+    - no more edits to `human_follow_stage1_acceptance_matrix.json`
+    - no more edits to the seven Stage1 scenario json files
+  - preserve the fresh repeated-run proof:
+    - `lateral_left_track`: 5/5 PASS
+    - `detector_tracker_full_chain`: 5/5 PASS
+    - fresh seven-case matrix: 7/7 PASS
+    - fresh latest acceptance: PASS
+  - preserve the new detector/tracker managed acceptance surface:
+    - `human_follow_stage1_detector_tracker_acceptance_matrix.json`
+    - `human-follow-stage1-detector-tracker-acceptance`
+    - fresh PASS report at `...191701_296089`
+  - preserve the new Stage2 integrated acceptance surface:
+    - `human_follow_stage2_integrated_acceptance_matrix.json`
+    - `human-follow-stage2-integrated-acceptance`
+    - fresh PASS report at `...200559_527102`
+  - preserve the cleared hygiene state:
+    - Stage2 probe name is now integrated-specific
+    - minimal rerun after rename stayed green
+  - do not spend more cycles creating or polishing simulation acceptance surfaces right now
+  - return effort to the hardware/mainline branch

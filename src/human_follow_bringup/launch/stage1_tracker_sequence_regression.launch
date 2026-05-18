@@ -1,0 +1,14 @@
+<launch>
+  <arg name="max_duration_sec" default="20.0" />
+  <arg name="min_timeout_count" default="1" />
+  <arg name="min_reacquire_count" default="1" />
+  <arg name="monitor_required" default="true" />
+
+  <include file="$(find human_follow_bringup)/launch/stage1_tracker_sequence.launch" />
+
+  <node pkg="human_follow_bringup" type="sequence_regression_monitor_node.py" name="sequence_regression_monitor" output="screen" required="$(arg monitor_required)">
+    <param name="max_duration_sec" value="$(arg max_duration_sec)" />
+    <param name="min_timeout_count" value="$(arg min_timeout_count)" />
+    <param name="min_reacquire_count" value="$(arg min_reacquire_count)" />
+  </node>
+</launch>

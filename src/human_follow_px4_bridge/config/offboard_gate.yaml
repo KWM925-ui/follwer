@@ -1,0 +1,12 @@
+human_follow_offboard_gate:
+  input_setpoint_topic: /follow/offboard/setpoint
+  output_setpoint_topic: /mavros/setpoint_raw/local
+  command_topic: /follow/control/cmd_body
+  mavros_state_topic: /mavros/state
+  estimator_status_topic: /mavros/estimator_status
+  set_mode_service: /mavros/set_mode
+  require_armed: true
+  min_entry_command_norm: 0.05
+  min_eligible_setpoints: 10
+  mode_request_retry_sec: 1.0
+  allow_search_entry: false

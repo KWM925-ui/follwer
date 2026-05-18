@@ -1,0 +1,59 @@
+board_name: lab_large_aruco_hole_board
+geometry_status: fully_locked_from_user_confirmed_drawing_for_stage1_calibration_use
+
+dictionary: DICT_6X6_250
+board_width_m: 1.40
+board_height_m: 1.00
+board_thickness_m: 0.015
+
+# Assumption locked from the user-provided board drawing:
+# - "二维码20cm" means the outer black square edge length of each marker.
+# - "二维码距边5cm" means marker outer black square to board outer edge.
+marker_size_m: 0.20
+marker_margin_from_edge_m: 0.05
+
+# Physical corner-to-id mapping locked from the current corrected camera image.
+marker_ids:
+  top_left: 1
+  top_right: 2
+  bottom_left: 3
+  bottom_right: 4
+
+# Board frame convention:
+# - origin at board center
+# - x to the board's right
+# - y to the board's up
+# - z out of the board plane toward the camera
+marker_centers_m:
+  id_1: [-0.55, 0.35, 0.0]
+  id_2: [0.55, 0.35, 0.0]
+  id_3: [-0.55, -0.35, 0.0]
+  id_4: [0.55, -0.35, 0.0]
+
+derived_checks:
+  marker_center_dx_m: 1.10
+  marker_center_dy_m: 0.70
+
+holes:
+  diameter_m: 0.24
+  geometry_status: locked_from_user_confirmed_drawing
+  center_to_center_dx_m: 0.50
+  center_to_center_dy_m: 0.40
+  top_margin_to_center_m: 0.30
+  left_margin_to_center_m: 0.45
+  right_margin_to_center_m: 0.45
+  bottom_margin_to_center_m: 0.30
+  vertical_edge_gap_between_left_holes_m: 0.16
+  centers_m:
+    top_left: [-0.25, 0.20, 0.0]
+    top_right: [0.25, 0.20, 0.0]
+    bottom_left: [-0.25, -0.20, 0.0]
+    bottom_right: [0.25, -0.20, 0.0]
+  notes:
+    - 50cm means top-left hole center to top-right hole center, and likewise for the bottom pair.
+    - 40cm vertical center spacing is locked from user confirmation.
+    - 16cm is the vertical edge-to-edge gap between the left pair of 24cm holes.
+    - 45cm and 30cm are right and bottom center-to-edge distances for the lower-right and lower-left holes respectively.
+
+required_physical_confirmation:
+  - user confirmed the annotated values are the intended physical build values
