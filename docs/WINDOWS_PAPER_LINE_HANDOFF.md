@@ -33,6 +33,14 @@ bringup assumptions.
 - Do not assume Windows MATLAB outputs are flight-ready.
 - Treat MATLAB work as algorithm prototyping, metrics, and paper figures first.
 
+## Branch Split
+
+- `main`: Ubuntu mainline and hardware/calibration work.
+- `paper-line`: Windows-side research line for MATLAB, prediction, scoring,
+  state machine, figures, and paper/proposal drafting.
+- Windows Codex should start from `paper-line`, not from a fresh re-derivation
+  of the Ubuntu chat context.
+
 ## Research Direction
 
 Target direction:
@@ -143,4 +151,3 @@ Possible software copyright module name:
 - Keep generated figures/data under ignored output folders:
   - `research/outputs/`
   - `research/figures_generated/`
-
