@@ -24,6 +24,9 @@
 /artifacts/live_demo_isolated/ros_home/
 /artifacts/live_demo_isolated/ros_home_verify*/
 /artifacts/camera_snapshots/
+/research/outputs/
+/research/figures_generated/
+/research/runs/
 
 # Codex/session machine-local state
 /.codex/
