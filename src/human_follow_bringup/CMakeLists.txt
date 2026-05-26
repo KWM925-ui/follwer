@@ -45,6 +45,7 @@ catkin_install_python(
     scripts/stage2_placeholder_full_chain_regression_monitor_node.py
     scripts/stage2_move_base_goal_to_waypoint_path_node.py
     scripts/stage2_real_ego_full_chain_regression_monitor_node.py
+    scripts/stage2_paper_line_regression_monitor_node.py
     scripts/stage2_real_ego_search_full_chain_regression_monitor_node.py
     scripts/stage2_visual_demo_goal_replay_node.py
     scripts/external_controller_ingress_monitor_node.py

@@ -29,6 +29,9 @@ ROS1 deployment adapter:
 - `src/human_follow_user/scripts/user_stage2_goal_node.py`
 - `docs/PAPER_LINE_ROS1_STAGE2_ADAPTER.md`
 - `research/scripts/smoke_ros1_stage2_adapter_core.py`
+- `research/scripts/smoke_ros1_stage2_adapter_scenarios.py`
+- `research/scripts/run_paper_line_ros1_regression.sh`
+- `src/human_follow_bringup/launch/stage2_paper_line_real_ego_regression.launch`
 
 Ignored generated research outputs:
 
@@ -83,6 +86,51 @@ Observed result:
 ```text
 offline smoke PASS candidate=behind score=0.806 margin=0.846
 ```
+
+Offline scenario smoke:
+
+```bash
+python3 research/scripts/smoke_ros1_stage2_adapter_scenarios.py
+```
+
+Observed result:
+
+```text
+scenario smoke PASS normal=behind short_loss=predict_hold long_loss=search_safe_viewpoint expired_loss=hold_safe hard_filter=behind_rejected cooldown=blocked_then_expired
+```
+
+Formal paper-line real-EGO regression:
+
+```bash
+roslaunch human_follow_bringup stage2_paper_line_real_ego_regression.launch
+```
+
+Repeated runner:
+
+```bash
+research/scripts/run_paper_line_ros1_regression.sh 5
+```
+
+Latest repeated evidence on 2026-05-26:
+
+- Artifact:
+  `.codex/artifacts/paper_line_ros1_adapter_20260526/formal_real_ego_regression_234357`
+- Result: 5/5 PASS.
+- Each run: `distinct_goals=3`, `distinct_cmds=3`, `request_count=1`.
+- Each run sampled `/planning/bspline` and `/follow/stage2/ego_position_cmd`.
+- `/follow/stage2/offboard/setpoint` and `/mavros/setpoint_raw/local` were
+  confirmed by the paper-line monitor contract and `offboard_mode_gate` logs.
+- Fresh formal runs counted `final_plan_success=0` as `0` and
+  `final_plan_success=1` as `22, 22, 22, 22, 23`.
+- No `ERROR`, `FATAL`, `Traceback`, or `in obstacle` lines were counted by the
+  runner.
+- Process cleanup was clean in all runs.
+
+Build caveat on this host:
+
+- Plain `catkin_make` hit a CMake 4.2 / `/usr/src/googletest` compatibility
+  error before package configuration.
+- `catkin_make -DCMAKE_POLICY_VERSION_MINIMUM=3.5` passed.
 
 MATLAB tests and static checks should be refreshed before handoff when MATLAB is
 available. The runtime machine does not need MATLAB.
@@ -150,6 +198,18 @@ rostopic echo /move_base_simple/goal
 rostopic echo /follow/stage2/ego_position_cmd
 ```
 
+7. For the formal paper-line regression entry, prefer:
+
+```bash
+roslaunch human_follow_bringup stage2_paper_line_real_ego_regression.launch
+```
+
+8. For repeated evidence, run:
+
+```bash
+research/scripts/run_paper_line_ros1_regression.sh 5
+```
+
 ## What To Record Next
 
 For paper and patent evidence, record:
@@ -161,6 +221,10 @@ For paper and patent evidence, record:
 - obstacle-near behavior and any over-conservative cases;
 - repeated planner failure bursts with and without planner feedback;
 - concrete failure cases where candidate cooldown helps or hurts.
+- per-run `summary.json` with ROS chain results and metric fields.
+- baseline/ablation comparisons:
+  original Stage2 baseline, paper-line without prediction, paper-line without
+  dynamic margin, paper-line without hard filter, and full paper-line adapter.
 
 ## Current Claim Boundary
 
