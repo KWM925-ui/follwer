@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
 import math
+import os
 import struct
 import time
 
 import rospy
+import yaml
 from nav_msgs.msg import Odometry
 from sensor_msgs.msg import PointCloud2, PointField
 from std_msgs.msg import Header, String
@@ -51,7 +53,8 @@ class Stage2GoalInputFixtureNode:
         self.loop = bool(rospy.get_param("~loop", True))
         self.frame_id = rospy.get_param("~frame_id", "map")
         self.cloud_frame_id = rospy.get_param("~cloud_frame_id", "map")
-        self.phases = rospy.get_param("~phases", DEFAULT_PHASES)
+        self.scenario_yaml = rospy.get_param("~scenario_yaml", "")
+        self.phases = self._load_phases()
 
         if not self.phases:
             raise RuntimeError("stage2 goal input fixture phases cannot be empty")
@@ -76,14 +79,27 @@ class Stage2GoalInputFixtureNode:
         self.timer = rospy.Timer(rospy.Duration(1.0 / max(self.publish_rate_hz, 1e-3)), self._tick)
 
         rospy.loginfo(
-            "stage2_goal_input_fixture ready target=%s odom=%s cloud=%s phase=%s phases=%d loop=%s",
+            "stage2_goal_input_fixture ready target=%s odom=%s cloud=%s phase=%s phases=%d loop=%s scenario=%s",
             self.target_world_topic,
             self.odom_topic,
             self.cloud_topic,
             self.phase_label_topic,
             len(self.compiled_phases),
             self.loop,
+            self.scenario_yaml or "inline_param",
         )
+
+    def _load_phases(self):
+        if not self.scenario_yaml:
+            return rospy.get_param("~phases", DEFAULT_PHASES)
+        if not os.path.isfile(self.scenario_yaml):
+            raise RuntimeError("stage2 fixture scenario yaml not found: %s" % self.scenario_yaml)
+        with open(self.scenario_yaml, "r", encoding="utf-8") as handle:
+            data = yaml.safe_load(handle) or {}
+        phases = data.get("phases")
+        if not phases:
+            raise RuntimeError("stage2 fixture scenario yaml has no phases: %s" % self.scenario_yaml)
+        return phases
 
     def _phase_for_elapsed(self, elapsed_sec):
         if self.loop:

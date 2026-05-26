@@ -6,6 +6,8 @@ if ! [[ "${RUN_COUNT}" =~ ^[0-9]+$ ]] || [[ "${RUN_COUNT}" -lt 1 ]]; then
   echo "RUN_COUNT must be a positive integer" >&2
   exit 2
 fi
+shift || true
+LAUNCH_ARGS=("$@")
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
@@ -96,10 +98,15 @@ for run_idx in $(seq 1 "${RUN_COUNT}"); do
   export ROS_LOG_DIR="${RUN_DIR}/ros_log"
 
   printf 'ROS_MASTER_URI=%s\n' "${ROS_MASTER_URI}" > "${RUN_DIR}/environment.txt"
-  printf 'roslaunch human_follow_bringup stage2_paper_line_real_ego_regression.launch max_duration_sec:=%s\n' "${MONITOR_DURATION_SEC}" > "${RUN_DIR}/command.txt"
+  printf 'roslaunch human_follow_bringup stage2_paper_line_real_ego_regression.launch max_duration_sec:=%s' "${MONITOR_DURATION_SEC}" > "${RUN_DIR}/command.txt"
+  if [[ "${#LAUNCH_ARGS[@]}" -gt 0 ]]; then
+    printf ' %q' "${LAUNCH_ARGS[@]}" >> "${RUN_DIR}/command.txt"
+  fi
+  printf '\n' >> "${RUN_DIR}/command.txt"
 
   setsid roslaunch human_follow_bringup stage2_paper_line_real_ego_regression.launch \
     max_duration_sec:="${MONITOR_DURATION_SEC}" \
+    "${LAUNCH_ARGS[@]}" \
     > "${RUN_DIR}/roslaunch.log" 2>&1 &
   LAUNCH_PID="$!"
   echo "${LAUNCH_PID}" > "${RUN_DIR}/roslaunch.pid"

@@ -1,0 +1,37 @@
+description: Paper-line Stage2 fixture with short and long target-loss windows.
+phases:
+  - label: loss_target_visible_start
+    duration_sec: 1.4
+    target_xyz: [6.0, 0.0, 1.7]
+    odom_xyz: [1.0, 0.0, 1.2]
+    odom_yaw_deg: 0.0
+    target_valid: true
+    publish_target: true
+  - label: short_dropout_predict_hold
+    duration_sec: 0.8
+    target_xyz: [6.3, 0.2, 1.7]
+    odom_xyz: [1.2, 0.0, 1.2]
+    odom_yaw_deg: 3.0
+    target_valid: false
+    publish_target: false
+  - label: reacquired_after_short_loss
+    duration_sec: 1.4
+    target_xyz: [6.6, 0.5, 1.7]
+    odom_xyz: [1.5, 0.1, 1.2]
+    odom_yaw_deg: 6.0
+    target_valid: true
+    publish_target: true
+  - label: long_dropout_search
+    duration_sec: 2.2
+    target_xyz: [7.0, 0.8, 1.7]
+    odom_xyz: [1.8, 0.2, 1.2]
+    odom_yaw_deg: 10.0
+    target_valid: false
+    publish_target: false
+  - label: reacquired_after_search
+    duration_sec: 1.6
+    target_xyz: [7.2, 1.0, 1.7]
+    odom_xyz: [2.0, 0.4, 1.2]
+    odom_yaw_deg: 12.0
+    target_valid: true
+    publish_target: true

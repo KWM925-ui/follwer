@@ -28,10 +28,13 @@ ROS1 deployment adapter:
 
 - `src/human_follow_user/scripts/user_stage2_goal_node.py`
 - `docs/PAPER_LINE_ROS1_STAGE2_ADAPTER.md`
+- `docs/PAPER_LINE_EXPERIMENT_MATRIX.md`
 - `research/scripts/smoke_ros1_stage2_adapter_core.py`
 - `research/scripts/smoke_ros1_stage2_adapter_scenarios.py`
 - `research/scripts/run_paper_line_ros1_regression.sh`
 - `src/human_follow_bringup/launch/stage2_paper_line_real_ego_regression.launch`
+- `src/human_follow_bringup/config/paper_line_stage2_normal.yaml`
+- `src/human_follow_bringup/config/paper_line_stage2_target_loss.yaml`
 
 Ignored generated research outputs:
 
@@ -146,6 +149,26 @@ Latest Windows/WSL-side MATLAB refresh:
   `runPaperLineStressBatch(Seeds=1, SaveOutputs=false)` both returned
   nonempty summaries.
 
+Latest Ubuntu-side scenario widening on 2026-05-27:
+
+- `stage2_goal_input_fixture_node.py` can load scenario phases from YAML via
+  `fixture_scenario_yaml`.
+- Default formal regression now uses
+  `src/human_follow_bringup/config/paper_line_stage2_normal.yaml`, preserving
+  the previous three-phase chain behavior.
+- The paper-line monitor supports a full-duration evidence mode with required
+  state and phase checks.
+- Target-loss full-duration evidence passed once:
+  `.codex/artifacts/paper_line_ros1_adapter_20260527/target_loss_full_duration_010748`
+  - observed states: `follow`, `predict_hold`, `search_safe_viewpoint`
+  - observed candidates: `behind`, `left`, `right`, `search_reacquire_1`,
+    `search_reacquire_5`
+  - all five target-loss phase labels were observed
+  - `distinct_goals=32`, `distinct_cmds=23`, `request_count=1`
+  - many `final_plan_success=0` lines appeared during the harder
+    target-loss/search window, so this is state-sequence evidence, not robust
+    planner recovery proof.
+
 ## First Steps On Ubuntu 20.04 + ROS1
 
 1. Pull the branch:
@@ -208,6 +231,17 @@ roslaunch human_follow_bringup stage2_paper_line_real_ego_regression.launch
 
 ```bash
 research/scripts/run_paper_line_ros1_regression.sh 5
+```
+
+9. For target-loss full-duration state-sequence evidence, run:
+
+```bash
+MONITOR_DURATION_SEC=9.5 LAUNCH_TIMEOUT_SEC=25 \
+research/scripts/run_paper_line_ros1_regression.sh 1 \
+  fixture_scenario_yaml:=$(pwd)/src/human_follow_bringup/config/paper_line_stage2_target_loss.yaml \
+  monitor_full_duration_evidence:=true \
+  monitor_required_state_names:=follow,predict_hold,search_safe_viewpoint \
+  monitor_required_phase_labels:=loss_target_visible_start,short_dropout_predict_hold,reacquired_after_short_loss,long_dropout_search,reacquired_after_search
 ```
 
 ## What To Record Next

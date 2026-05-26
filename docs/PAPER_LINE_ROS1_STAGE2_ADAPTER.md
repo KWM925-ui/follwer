@@ -103,6 +103,15 @@ The runner writes ignored artifacts under:
 .codex/artifacts/paper_line_ros1_adapter_<date>/formal_real_ego_regression_<time>/
 ```
 
+The runner also accepts extra `roslaunch` arguments after the run count. This is
+used for scenario-specific evidence, for example:
+
+```bash
+research/scripts/run_paper_line_ros1_regression.sh 1 \
+  fixture_scenario_yaml:=$(pwd)/src/human_follow_bringup/config/paper_line_stage2_target_loss.yaml \
+  monitor_full_duration_evidence:=true
+```
+
 ## Verification Status
 
 Completed in the current workspace on `paper-line` commit `daaf3bb`:
@@ -147,6 +156,24 @@ Formal real-EGO regression:
 - No `ERROR`, `FATAL`, `Traceback`, or `in obstacle` lines were counted by the
   runner in these five formal runs.
 - Process cleanup was clean in all five runs.
+
+Scenario widening on `paper-line` commit after `962be77`:
+
+- `stage2_goal_input_fixture_node.py` can load scenario phases from YAML.
+- Default regression scenario:
+  `src/human_follow_bringup/config/paper_line_stage2_normal.yaml`.
+- Target-loss scenario:
+  `src/human_follow_bringup/config/paper_line_stage2_target_loss.yaml`.
+- Paper-line monitor can run in full-duration evidence mode and require state
+  names or phase labels before passing.
+- Latest target-loss full-duration artifact:
+  `.codex/artifacts/paper_line_ros1_adapter_20260527/target_loss_full_duration_010748`
+  - observed states: `follow`, `predict_hold`, `search_safe_viewpoint`
+  - observed candidates: `behind`, `left`, `right`, `search_reacquire_1`,
+    `search_reacquire_5`
+  - `distinct_goals=32`, `distinct_cmds=23`, `request_count=1`
+  - many `final_plan_success=0` lines occurred during the harder search window,
+    so this is scenario-state evidence, not robust recovery proof.
 
 ## Experiment Data Interface
 

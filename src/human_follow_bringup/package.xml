@@ -12,6 +12,7 @@
   <depend>geometry_msgs</depend>
   <depend>human_follow_msgs</depend>
   <depend>nav_msgs</depend>
+  <depend>python3-yaml</depend>
   <depend>quadrotor_msgs</depend>
   <depend>rospy</depend>
   <depend>sensor_msgs</depend>
