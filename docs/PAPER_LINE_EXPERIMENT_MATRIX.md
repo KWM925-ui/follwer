@@ -31,6 +31,7 @@ Do not claim:
 | offline scenario smoke | state/filter/cooldown unit-like scenarios | `research/scripts/smoke_ros1_stage2_adapter_scenarios.py` |
 | ROS chain regression | Stage2 goal to EGO/PX4-bridge topic contract | `stage2_paper_line_real_ego_regression.launch` |
 | ROS full-duration scenario evidence | run scenario long enough to observe required states/phases | same launch with `monitor_full_duration_evidence:=true` |
+| Ubuntu local 2-D simulation | quick no-MATLAB check for safety and feedback effects | `research/scripts/run_paper_line_local_sim.py` |
 | MATLAB batch/stress | broad baseline and ablation tables | Windows-side MATLAB only |
 
 ## ROS1 Scenario Fixtures
@@ -95,6 +96,45 @@ Important limitation:
 - this run counted many `final_plan_success=0` lines during the harder
   target-loss/search window. Treat that as a planning stress observation, not as
   proof of robust recovery.
+
+## Current Ubuntu Local Simulation
+
+Ubuntu now has a small no-MATLAB 2-D simulation:
+
+```bash
+python3 research/scripts/run_paper_line_local_sim.py --seeds 1,2,3,4,5
+```
+
+Outputs are ignored and written to:
+
+- `research/outputs/local_sim/local_sim_runs.csv`
+- `research/outputs/local_sim/local_sim_summary.csv`
+- `research/outputs/local_sim/local_sim_summary.json`
+- `research/outputs/local_sim/local_sim_summary.md`
+- `research/outputs/local_sim/local_sim_traces_seed1.json`
+
+Latest local result summary:
+
+| scenario | condition | near-miss | planner failures | max failure burst | task success |
+|---|---|---:|---:|---:|---:|
+| planner_feedback | proposed | 0.00 | 2.80 | 1.00 | 1.00 |
+| planner_feedback | no_planner_feedback | 0.00 | 27.60 | 5.40 | 0.40 |
+| safety_margin | proposed | 39.00 | 0.00 | 0.00 | 0.00 |
+| safety_margin | fixed_margin | 60.60 | 0.00 | 0.00 | 0.00 |
+| target_loss | proposed | 0.00 | 0.00 | 0.00 | 1.00 |
+| target_loss | fixed_margin | 16.20 | 0.00 | 0.00 | 0.00 |
+
+Plain reading:
+
+- planner feedback/cooldown clearly reduces repeated failed commands in this
+  local simulation;
+- dynamic safety margin reduces near-miss count compared with a fixed margin in
+  the safety-margin scenario;
+- the proposed method still has near-miss events in the harder safety-margin
+  case, so this is not a robustness result;
+- this simulation is useful for choosing the next engineering changes before
+  Windows/MATLAB, but final paper tables still need the MATLAB batch/stress
+  workflow.
 
 ## Required Paper/Patent Baselines
 
