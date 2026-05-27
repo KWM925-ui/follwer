@@ -46,6 +46,7 @@ Add these only when the work actually needs them:
 - `docs/PAPER_LINE_ROUTE_BOOK_CN.md`
 - `docs/PAPER_LINE_TECHNICAL_ROUTE.md`
 - `docs/PAPER_LINE_PATENT_PREP.md`
+- `docs/PAPER_LINE_MATLAB_EXPERIMENT_PLAN_CN.md`
 - `docs/PAPER_LINE_ROS1_STAGE2_ADAPTER.md`
 - `docs/PAPER_LINE_UBUNTU20_HANDOFF.md`
 - `research/notes/2026-05-22_rebuilt_research_dossier.md`

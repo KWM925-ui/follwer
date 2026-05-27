@@ -8,6 +8,8 @@ Current structure:
 - `tests/` for class-based `matlab.unittest` tests
 - `runPaperLineDemo.m` for the first end-to-end deterministic demo
 - `runPaperLineBatch.m` for stage-one scenarios, baselines, and ablations
+- `runPaperLineStressBatch.m` for stress scenarios
+- `summarizePaperLineResults.m` for post-run key comparisons
 
 Rules:
 
@@ -52,6 +54,12 @@ Generated stress outputs:
 - `../outputs/paper_line_stress/stress_by_condition.csv`
 - `../outputs/paper_line_stress/stress_by_scenario_condition.csv`
 - `../figures_generated/paper_line_stress/stress_condition_summary.png`
+
+After batch and stress outputs exist, print the key comparisons:
+
+```matlab
+report = summarizePaperLineResults;
+```
 
 Current diagnostic status:
 

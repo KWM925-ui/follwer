@@ -5,6 +5,10 @@ Status: initial ROS1 evidence matrix, 2026-05-27.
 Purpose: turn paper-line work into paper/patent evidence, not only a chain-alive
 ROS smoke test.
 
+For the Windows/MATLAB execution plan, read:
+
+- `docs/PAPER_LINE_MATLAB_EXPERIMENT_PLAN_CN.md`
+
 ## Claim Boundary
 
 Current ROS1 evidence supports only these claims:

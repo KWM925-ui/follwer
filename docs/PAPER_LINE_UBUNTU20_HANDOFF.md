@@ -14,6 +14,7 @@ Research and route:
 - `docs/PAPER_LINE_ROUTE_BOOK_CN.md`
 - `docs/PAPER_LINE_TECHNICAL_ROUTE.md`
 - `docs/PAPER_LINE_PATENT_PREP.md`
+- `docs/PAPER_LINE_MATLAB_EXPERIMENT_PLAN_CN.md`
 - `research/notes/`
 - `research/prompts/`
 
@@ -148,6 +149,14 @@ Latest Windows/WSL-side MATLAB refresh:
   `runPaperLineBatch(Seeds=1, SaveOutputs=false)` and
   `runPaperLineStressBatch(Seeds=1, SaveOutputs=false)` both returned
   nonempty summaries.
+
+Before moving to Windows/MATLAB, read:
+
+- `docs/PAPER_LINE_MATLAB_EXPERIMENT_PLAN_CN.md`
+
+That file is the current execution plan for the algorithm-only MATLAB
+experiments: what to run, what to compare, which metrics matter, and which
+claims are allowed.
 
 Latest Ubuntu-side scenario widening on 2026-05-27:
 

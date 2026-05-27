@@ -188,6 +188,7 @@ Repository:
 First read:
 - FOLLOWER_ROUTE_MASTER.txt
 - docs/WINDOWS_PAPER_LINE_HANDOFF.md
+- docs/PAPER_LINE_MATLAB_EXPERIMENT_PLAN_CN.md
 
 Hard boundary:
 - Do not touch the Ubuntu mainline or hardware/calibration work.
@@ -213,12 +214,10 @@ Your job:
   vague summary.
 
 What to produce first:
-- A clean system diagram.
-- A 2D or 2.5D MATLAB simulation prototype.
-- A predictor baseline: constant velocity, then a stronger baseline if needed.
-- A follow-point scoring function.
-- A recovery state machine with follow/search/lost/reacquire/hold/failsafe.
-- A first-cut paper outline and experiment table.
+- First follow `docs/PAPER_LINE_MATLAB_EXPERIMENT_PLAN_CN.md`.
+- Run tests, smoke, batch, and stress experiments in that order.
+- Bring back generated CSV summaries, figures, and any surprising failure cases.
+- Do not rewrite the contribution claims until the MATLAB results are inspected.
 
 How to think about the stack:
 - Use fast LIO or low-latency odom as a supporting perception/localization base.
