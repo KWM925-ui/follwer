@@ -29,7 +29,6 @@ ROS1 deployment adapter:
 - `src/human_follow_user/scripts/user_stage2_goal_node.py`
 - `docs/PAPER_LINE_ROS1_STAGE2_ADAPTER.md`
 - `docs/PAPER_LINE_EXPERIMENT_MATRIX.md`
-- `research/scripts/run_paper_line_local_sim.py`
 - `research/scripts/smoke_ros1_stage2_adapter_core.py`
 - `research/scripts/smoke_ros1_stage2_adapter_scenarios.py`
 - `research/scripts/run_paper_line_ros1_regression.sh`
@@ -169,14 +168,6 @@ Latest Ubuntu-side scenario widening on 2026-05-27:
   - many `final_plan_success=0` lines appeared during the harder
     target-loss/search window, so this is state-sequence evidence, not robust
     planner recovery proof.
-- A small no-MATLAB Ubuntu local 2-D simulation was added:
-  `python3 research/scripts/run_paper_line_local_sim.py --seeds 1,2,3,4,5`
-  - outputs are ignored under `research/outputs/local_sim/`
-  - planner feedback/cooldown reduced repeated failed commands in the local
-    planner-feedback case;
-  - dynamic safety margin reduced, but did not eliminate, near-miss events in
-    the local safety-margin case;
-  - treat this as a pre-MATLAB screening simulation, not final paper evidence.
 
 ## First Steps On Ubuntu 20.04 + ROS1
 
