@@ -284,3 +284,6 @@ Ubuntu 本地这条算法仿真准备线只剩：
 做完这些，就该去 Windows/MATLAB 跑实验。
 
 Gazebo + RViz 严格全链路仿真是后续系统级验证，不属于这轮算法仿真的前置阻塞。
+
+Windows 端入口文档是 `docs/WINDOWS_PAPER_LINE_HANDOFF.md`。到 Windows 后先让
+Codex 读那份文件，再按本文件第 8 节的 MATLAB 顺序执行。

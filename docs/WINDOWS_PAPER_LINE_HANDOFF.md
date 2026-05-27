@@ -1,231 +1,268 @@
 # Windows Paper-Line Handoff
 
-## Purpose
+状态：Windows/MATLAB 执行入口，2026-05-27。
 
-This document is for a Windows-side Codex/MATLAB session. The Ubuntu
-workspace remains the main hardware/calibration line. The Windows side should
-work on the paper/patent/software-copyright line without changing hardware
-bringup assumptions.
+这份文件给 Windows 端 Codex 直接使用。用户不需要重新解释 Ubuntu
+这边的长对话；Windows 端先读本文件，再按下面顺序执行。
 
-## Current Project State
+## 一句话结论
 
-- Workspace: `/home/coco/follwer_ws`
-- ROS version used on Ubuntu: ROS Noetic style catkin workspace.
-- Stage1: human detection/tracking/fusion/controller simulation and hardware
-  bringup assets exist.
-- Stage2: EGO planner integration exists under `src/human_follow_bringup` and
-  `src/ego_planner_vendor`.
-- Stage2/EGO simulation branch has strict no-GUI evidence under the current
-  simulation contract:
-  - real EGO nodes active
-  - `/planning/bspline` active and replanning
-  - converted path `/follow/stage2/ego_bspline_path` active
-  - simulated odom/grid odom aligned
-  - command/odom/path did not enter inflated/static obstacle in the strict
-    repeated probes
-  - scripted replan showcase passed
-- This is simulation evidence, not hardware flight proof.
+Ubuntu 这边的算法仿真准备已经做到可以交给 Windows/MATLAB 的程度。
 
-## Do Not Mix With Mainline
+下一步不是继续在 Ubuntu 上搭临时仿真，也不是现在做 Gazebo + RViz
+严格全链路仿真。下一步是在 Windows/MATLAB 运行现有实验，拿到数据，
+再判断哪些模块能写进论文和专利主线。
 
-- Do not modify calibration or hardware launch files unless the Ubuntu mainline
-  explicitly requests it.
-- Do not assume Windows MATLAB outputs are flight-ready.
-- Treat MATLAB work as algorithm prototyping, metrics, and paper figures first.
+## 仓库和分支
 
-## Branch Split
+- GitHub: `https://github.com/KWM925-ui/follwer.git`
+- Windows 端必须使用分支：`paper-line`
+- Ubuntu 当前工作区：`/home/coco/follower_paper_ws`
+- 仓库历史文档里可能出现旧路径 `/home/coco/follwer_ws`，不要把它当成
+  Windows 端必须复现的路径。
 
-- `main`: Ubuntu mainline and hardware/calibration work.
-- `paper-line`: Windows-side research line for MATLAB, prediction, scoring,
-  state machine, figures, and paper/proposal drafting.
-- Windows Codex should start from `paper-line`, not from a fresh re-derivation
-  of the Ubuntu chat context.
+Windows 端建议先做：
 
-## Research Direction
+```bash
+git clone https://github.com/KWM925-ui/follwer.git
+cd follwer
+git checkout paper-line
+git pull --ff-only origin paper-line
+```
 
-Target direction:
+如果仓库已经存在，就进入仓库后执行：
 
-- Short-horizon human motion prediction.
-- Safety-aware follow-point generation.
-- Follow quality score and quantitative evaluation.
-- Failure protection state machine for target loss, planning failure, and
-  reacquisition.
+```bash
+git fetch origin
+git checkout paper-line
+git pull --ff-only origin paper-line
+```
 
-Recommended claim shape:
+## 当前已经完成什么
 
-- The contribution is not "we used Point-LIO" or "we used EGO".
-- The contribution is a low-latency human-following decision layer that uses
-  prediction, quality scoring, safe follow-point selection, and failure
-  recovery on top of a fast odom/perception/planning stack.
+已完成的，是“算法决策部分”的 MATLAB 实验准备，不是完整无人机系统已经
+完成。
 
-## MATLAB First Tasks
+当前已有 MATLAB 入口：
 
-1. Build a simple 2D/2.5D simulation of:
-   - human trajectory
-   - UAV trajectory
-   - static obstacles
-   - perception dropout windows
-   - planner failure windows
-2. Implement predictors:
-   - constant velocity baseline
-   - constant acceleration baseline
-   - Kalman filter or alpha-beta filter
-3. Implement follow-point candidates:
-   - behind target
-   - left/right offset
-   - farther safety point
-   - search/reacquire point
-4. Implement a follow quality score:
-   - distance error
-   - viewing angle
-   - predicted occlusion risk
-   - obstacle clearance
-   - control effort / smoothness
-   - target visibility confidence
-5. Implement a state machine:
-   - `FOLLOW`
-   - `PREDICT_HOLD`
-   - `SEARCH_SAFE_VIEWPOINT`
-   - `REACQUIRE`
-   - `HOLD_SAFE`
-   - `FAILSAFE`
-6. Produce plots:
-   - target and UAV trajectories
-   - selected follow points
-   - score curves
-   - state transitions
-   - prediction error
-   - clearance over time
+- `research/matlab/runPaperLineDemo.m`
+- `research/matlab/runPaperLineBatch.m`
+- `research/matlab/runPaperLineStressBatch.m`
+- `research/matlab/summarizePaperLineResults.m`
+- `research/matlab/tests/tPaperLineCore.m`
 
-## Suggested Metrics
+当前已有核心函数：
 
-- Mean and max target-following distance error.
-- Mean and max view angle error.
-- Minimum obstacle clearance.
-- Number of obstacle safety-shell violations.
-- Reacquisition time after target loss.
-- Planner failure recovery time.
-- Trajectory smoothness.
-- End-to-end decision latency.
-- Percentage of time target remains inside desired camera field of view.
+- `research/matlab/+paperline/makeScenario.m`
+- `research/matlab/+paperline/simulateRun.m`
+- `research/matlab/+paperline/generateCandidates.m`
+- `research/matlab/+paperline/filterCandidates.m`
+- `research/matlab/+paperline/scoreCandidates.m`
+- `research/matlab/+paperline/updateFsm.m`
+- `research/matlab/+paperline/predictTarget.m`
+- `research/matlab/+paperline/computeMetrics.m`
 
-## Paper Skeleton
+之前助手临时做过的 Ubuntu 本地算法仿真已经被用户否定，并且相关提交已经
+回退。Windows 端不要重开那条路。
 
-Working title:
+## 当前实验到底要验证什么
 
-`A Prediction-Scored Safety Follow-Point Generation and Recovery Framework for Low-Latency UAV Human Following`
+这轮 MATLAB 实验只验证上层算法决策，不验证机体、真实传感器、PX4、
+Gazebo、RViz 或 EGO 内部优化。
 
-Core sections:
+主要回答三件事：
 
-1. Introduction.
-2. Related work:
-   - UAV human following
-   - short-term human trajectory prediction
-   - safe local planning
-   - failure recovery state machines
-3. System overview.
-4. Short-horizon human prediction.
-5. Safety-aware follow-point generation and quality score.
-6. Failure recovery state machine.
-7. Simulation and experimental setup.
-8. Results and ablation.
-9. Discussion and limitations.
-10. Conclusion.
+1. 动态安全边界有没有必要；
+2. planner 反馈和失败候选 cooldown 有没有必要；
+3. 目标丢失、遮挡、planner 失败时，上层决策是否比简单基线更稳。
 
-## Patent / Software Copyright Angle
+当前最稳的论文/专利主线是：
 
-Possible patent idea:
+- 动态安全边界；
+- 硬安全过滤先于评分；
+- planner command-health feedback；
+- 失败候选 cooldown / blacklist；
+- failure burst 指标。
 
-`A safety-aware UAV human-following method based on short-horizon target prediction, multi-candidate follow-point quality scoring, and failure-state recovery.`
+现在不要把下面这些直接写成主贡献：
 
-Possible software copyright module name:
+- “预测一定提升跟随效果”；
+- “遮挡评分是独立创新”；
+- “可见性评分是独立创新”；
+- “恢复状态机是独立创新”；
+- “proposed 全面优于所有 baseline”。
 
-`Low-Latency UAV Human Following Prediction and Safety Decision System`
+这些点可以保留为系统组成，但必须等实验结果支持后才能升级成论文/专利
+主张。
 
-## How To Use This Repository On Windows
+## Windows 端先读哪些文件
 
-- Clone the GitHub repository to Windows for code reading and MATLAB modeling.
-- Do not try to build ROS Noetic natively on Windows unless explicitly needed.
-- Put MATLAB prototypes under a separate folder such as:
-  - `research/matlab_follow_prediction/`
-- Keep generated figures/data under ignored output folders:
-  - `research/outputs/`
-  - `research/figures_generated/`
+按这个顺序读：
 
-## Research Hygiene
+1. `docs/WINDOWS_PAPER_LINE_HANDOFF.md`
+2. `docs/PAPER_LINE_MATLAB_EXPERIMENT_PLAN_CN.md`
+3. `research/matlab/README.md`
+4. `docs/PAPER_LINE_ROUTE_BOOK_CN.md`
+5. `docs/PAPER_LINE_PATENT_PREP.md`
 
-- Treat the repo as the first source of truth.
-- If a question depends on current MATLAB, ROS, EGO planner, package, or
-  literature behavior, verify it on the web before guessing.
-- Prefer primary sources:
-  - MathWorks documentation
-  - ROS documentation
-  - source repos or release notes for EGO-related code
-  - the relevant paper itself when available
-- Record the exact links or paper names in your notes or commit messages.
-- If something is still unclear after checking the repo and the web, ask for
-  the smallest concrete clarification instead of inventing assumptions.
+`FOLLOWER_ROUTE_MASTER.txt` 是整机路线背景，不是这轮 MATLAB 实验的直接
+执行说明。需要了解总路线时再读。
 
-## Recommended Windows Startup Sequence
+## MATLAB 执行顺序
 
-1. Clone `https://github.com/KWM925-ui/follwer.git`.
-2. `git checkout paper-line`.
-3. Read `FOLLOWER_ROUTE_MASTER.txt`.
-4. Read this file.
-5. Start with the 2D/2.5D MATLAB prototype and keep all outputs in `research/`.
+在 MATLAB 里进入：
 
-## Copy-Paste Startup Prompt For Windows Codex
+```matlab
+cd research/matlab
+```
 
-Use this exact prompt on the Windows side:
+如果 MATLAB 当前不在仓库根目录，就用 Windows 的绝对路径进入
+`research/matlab`。
+
+第一步，跑单元测试：
+
+```matlab
+runtests("tests")
+```
+
+第二步，跑最小 smoke：
+
+```matlab
+demo = runPaperLineDemo(ShowFigures=false);
+batch1 = runPaperLineBatch(Seeds=1, SaveOutputs=false);
+stress1 = runPaperLineStressBatch(Seeds=1, SaveOutputs=false);
+```
+
+第三步，跑正式小批量：
+
+```matlab
+batch3 = runPaperLineBatch(Seeds=1:3, SaveOutputs=true);
+stress3 = runPaperLineStressBatch(Seeds=1:3, SaveOutputs=true);
+```
+
+第四步，如果 3-seed 没有明显异常，再跑 5-seed：
+
+```matlab
+batch5 = runPaperLineBatch(Seeds=1:5, SaveOutputs=true);
+stress5 = runPaperLineStressBatch(Seeds=1:5, SaveOutputs=true);
+```
+
+第五步，打印关键对比：
+
+```matlab
+report = summarizePaperLineResults;
+```
+
+不要一上来就加大 seed。先确认 3-seed 方向稳定，再跑 5-seed。
+
+## 应该拿回哪些结果
+
+Windows 端跑完后，至少要把这些结果带回来：
+
+- `runtests("tests")` 的通过/失败信息；
+- `runPaperLineDemo`、`runPaperLineBatch`、`runPaperLineStressBatch` 是否报错；
+- `summarizePaperLineResults` 打印的关键对比；
+- 下面 CSV 的主要结论；
+- 生成的图是否正常；
+- 任何失败、反直觉、或者 proposed 不占优的场景。
+
+普通 batch 输出：
+
+- `research/outputs/paper_line_batch/stage1_runs.csv`
+- `research/outputs/paper_line_batch/stage1_by_condition.csv`
+- `research/outputs/paper_line_batch/stage1_by_scenario_condition.csv`
+- `research/figures_generated/paper_line_batch/stage1_condition_summary.png`
+
+压力 batch 输出：
+
+- `research/outputs/paper_line_stress/stress_runs.csv`
+- `research/outputs/paper_line_stress/stress_by_condition.csv`
+- `research/outputs/paper_line_stress/stress_by_scenario_condition.csv`
+- `research/figures_generated/paper_line_stress/stress_condition_summary.png`
+
+这些生成文件默认被 `.gitignore` 忽略。先不要为了提交结果随便改
+`.gitignore`。如果需要长期保存结果，先把关键结论写成小的 Markdown
+记录，再决定是否挑选少量论文图另存。
+
+## 怎么判断实验结果
+
+动态安全边界重点比较：
+
+- `proposed`
+- `fixed_safety_margin`
+
+如果 `fixed_safety_margin` 的 `nearMissCount` 明显更高，或
+`minClearance` 明显更低，动态安全边界就可以作为主贡献。
+
+planner 反馈和 cooldown 重点比较：
+
+- `proposed`
+- `no_planner_feedback`
+
+如果 `no_planner_feedback` 的 `plannerFailureBurstMax` 明显更大，
+planner feedback 和 failed-candidate cooldown 就可以作为主贡献。
+
+预测重点比较：
+
+- `proposed`
+- `no_prediction`
+- `ca_kf`
+
+如果 `no_prediction` 不差，甚至更好，就不要把预测写成主贡献。预测最多
+写成给动态安全边界提供不确定性。
+
+遮挡评分、可见性评分、恢复状态机重点比较：
+
+- `proposed`
+- `no_occlusion_score`
+- `no_visibility_score`
+- `no_recovery_fsm`
+
+如果差异不明显，就只写成工程组成，不写成独立创新。
+
+## 和 Gazebo/RViz 的关系
+
+Gazebo + RViz 严格全链路仿真是后面的系统级验证。
+
+当前顺序是：
+
+1. 先把 MATLAB 算法决策实验跑完；
+2. 根据结果收紧论文和专利主线；
+3. 必要时补 MATLAB 图表和统计；
+4. 再回 Ubuntu 做 Gazebo + RViz + EGO + 跟踪的严格全链路验证。
+
+不要把第 4 步提前到当前 MATLAB 结果之前。
+
+## Windows Codex 启动词
+
+到 Windows 后，可以直接把下面这段发给 Codex：
 
 ```text
-You are working on the paper-line of the follwer project.
+你现在接手 follwer 项目的 paper-line 分支。请先拉取远端最新代码，不要让我重复解释 Ubuntu 这边的长对话。
 
-Repository:
-- GitHub: https://github.com/KWM925-ui/follwer.git
-- Branch to use: paper-line
+仓库：
+- https://github.com/KWM925-ui/follwer.git
+- 分支：paper-line
 
-First read:
-- FOLLOWER_ROUTE_MASTER.txt
+请先读：
 - docs/WINDOWS_PAPER_LINE_HANDOFF.md
 - docs/PAPER_LINE_MATLAB_EXPERIMENT_PLAN_CN.md
+- research/matlab/README.md
+- docs/PAPER_LINE_ROUTE_BOOK_CN.md
 
-Hard boundary:
-- Do not touch the Ubuntu mainline or hardware/calibration work.
-- Treat the Ubuntu side as the source of truth for the deployed ROS stack.
-- Do not rewrite the long Ubuntu chat history into Windows.
-- Keep all research artifacts under research/ or another ignored research
-  folder.
+边界：
+- 这轮只做 Windows/MATLAB 的算法决策实验。
+- 不改 Ubuntu 主线、硬件标定、PX4、Gazebo、RViz、EGO 内部代码。
+- 不重开之前被否定的 Ubuntu 本地临时仿真。
+- 生成的 CSV 和图片默认不要提交，先汇总结果给我看。
 
-Current project status:
-- Stage2/EGO simulation on Ubuntu has already been validated under a strict no-GUI contract.
-- That evidence is simulation-contract evidence only, not hardware flight proof.
+请按文档顺序执行：
+1. 检查当前分支和工作区状态；
+2. 在 MATLAB 进入 research/matlab；
+3. 依次运行 runtests("tests")、runPaperLineDemo、runPaperLineBatch、runPaperLineStressBatch；
+4. 先跑 Seeds=1，再跑 Seeds=1:3，稳定后再跑 Seeds=1:5；
+5. 运行 report = summarizePaperLineResults；
+6. 把测试结果、CSV 摘要、生成图路径、异常场景、以及哪些论文/专利主张被数据支持讲清楚。
 
-Your job:
-- Build the research/paper/prototype line only.
-- Focus on short-horizon human motion prediction.
-- Focus on safety-aware follow-point generation.
-- Focus on follow-quality scoring.
-- Focus on target-loss / planning-failure protection state machines.
-- Treat MATLAB/Simulink as the main prototyping environment.
-- If a technical detail is uncertain or version-sensitive, search the web first
-  and prefer current official documentation or primary sources over memory.
-- When you browse, bring back the link and the specific conclusion, not just a
-  vague summary.
-
-What to produce first:
-- First follow `docs/PAPER_LINE_MATLAB_EXPERIMENT_PLAN_CN.md`.
-- Run tests, smoke, batch, and stress experiments in that order.
-- Bring back generated CSV summaries, figures, and any surprising failure cases.
-- Do not rewrite the contribution claims until the MATLAB results are inspected.
-
-How to think about the stack:
-- Use fast LIO or low-latency odom as a supporting perception/localization base.
-- Do not make the paper contribution be "we used Point-LIO" or "we used EGO".
-- The contribution is the prediction + scoring + safe follow-point + recovery layer.
-
-If you need code context from Ubuntu:
-- Read the repo files.
-- Ask for a small exported artifact or summary.
-- Do not ask to move the whole Ubuntu conversation over.
+说人话汇报：先告诉我通过没通过，再告诉我哪些结果支持动态安全边界、planner feedback/cooldown，哪些结果不支持预测或其他模块作为主贡献。
 ```
