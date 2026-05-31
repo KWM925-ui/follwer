@@ -259,13 +259,27 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("bag", help="Path to ROS1 bag")
     parser.add_argument("--output-dir", default="", help="Output directory; default is next to bag")
+    parser.add_argument(
+        "--topics-json",
+        default="",
+        help="Optional JSON file overriding topic names by logical key.",
+    )
     args = parser.parse_args()
 
     bag_path = Path(args.bag)
     output_dir = Path(args.output_dir) if args.output_dir else bag_path.with_suffix("").parent / (bag_path.stem + "_metrics")
     output_dir.mkdir(parents=True, exist_ok=True)
 
-    data, topic_counts, bag_start, bag_end = _read_bag(bag_path, DEFAULT_TOPICS)
+    topics = dict(DEFAULT_TOPICS)
+    if args.topics_json:
+        with Path(args.topics_json).open("r", encoding="utf-8") as handle:
+            topic_overrides = json.load(handle)
+        for key, value in topic_overrides.items():
+            if key not in topics:
+                raise SystemExit("unknown topic key in --topics-json: %s" % key)
+            topics[key] = str(value)
+
+    data, topic_counts, bag_start, bag_end = _read_bag(bag_path, topics)
     metrics = _compute_metrics(data, bag_start, bag_end)
 
     with (output_dir / "metrics.json").open("w", encoding="utf-8") as handle:

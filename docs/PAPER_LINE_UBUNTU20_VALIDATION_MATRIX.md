@@ -138,6 +138,12 @@ Bag analysis command:
 python3 research/scripts/analyze_stage2_rosbag_metrics.py path/to/stage2_run.bag
 ```
 
+If the runtime uses different topic names, pass a JSON override:
+
+```bash
+python3 research/scripts/analyze_stage2_rosbag_metrics.py path/to/stage2_run.bag --topics-json path/to/topics.json
+```
+
 Generated outputs:
 
 - `metrics.json`
