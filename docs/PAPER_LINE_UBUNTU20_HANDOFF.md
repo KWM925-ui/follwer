@@ -15,6 +15,7 @@ Research and route:
 - `docs/PAPER_LINE_TECHNICAL_ROUTE.md`
 - `docs/PAPER_LINE_PATENT_PREP.md`
 - `docs/PAPER_LINE_MATLAB_EXPERIMENT_PLAN_CN.md`
+- `docs/PAPER_LINE_UBUNTU20_VALIDATION_MATRIX.md`
 - `research/notes/`
 - `research/prompts/`
 
@@ -188,6 +189,9 @@ Latest Ubuntu-side scenario widening on 2026-05-27:
     planner recovery proof.
 
 ## First Steps On Ubuntu 20.04 + ROS1
+
+Use `docs/PAPER_LINE_UBUNTU20_VALIDATION_MATRIX.md` as the ordered acceptance
+checklist. The commands below are the quick handoff version.
 
 1. Pull the branch:
 

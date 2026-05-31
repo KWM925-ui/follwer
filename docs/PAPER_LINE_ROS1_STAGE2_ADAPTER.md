@@ -45,6 +45,10 @@ Outputs:
 
 ## Launch Entry
 
+Ubuntu20 acceptance checklist:
+
+- `docs/PAPER_LINE_UBUNTU20_VALIDATION_MATRIX.md`
+
 Preferred paper-line regression entry:
 
 ```bash
