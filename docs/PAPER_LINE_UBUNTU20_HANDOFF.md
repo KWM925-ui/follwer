@@ -196,6 +196,21 @@ Latest Ubuntu-side scenario widening on 2026-05-27:
 Use `docs/PAPER_LINE_UBUNTU20_VALIDATION_MATRIX.md` as the ordered acceptance
 checklist. The commands below are the quick handoff version.
 
+If GitHub push is still blocked by credentials, export the local paper-line
+commits from the Windows/WSL machine and apply them on Ubuntu20:
+
+```bash
+git format-patch origin/paper-line..paper-line -o research/runs/paper_line_patch_queue
+```
+
+Copy those patch files to Ubuntu20, then run:
+
+```bash
+git checkout paper-line
+git pull --ff-only origin paper-line
+git am path/to/patches/*.patch
+```
+
 1. Pull the branch:
 
 ```bash
