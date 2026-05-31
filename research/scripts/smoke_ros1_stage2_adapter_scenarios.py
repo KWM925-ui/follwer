@@ -7,6 +7,7 @@ transitions, hard safety filtering, and failed-candidate cooldown.
 """
 
 import math
+import sys
 import time
 
 from smoke_ros1_stage2_adapter_core import install_stubs, load_adapter, make_uninitialized_node
@@ -219,6 +220,9 @@ def run_state_and_cooldown_checks(module):
 
 def main():
     install_stubs()
+    rospy = sys.modules["rospy"]
+    rospy.ROSException = RuntimeError
+    rospy.logwarn_throttle = lambda *args, **kwargs: None
     module = load_adapter()
     candidate_results = run_candidate_selection_checks(module)
     run_state_and_cooldown_checks(module)

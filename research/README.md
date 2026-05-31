@@ -21,4 +21,18 @@ Working order:
 4. Add prediction, scoring, and state-machine logic.
 5. Generate plots and a first paper outline.
 
+Python offline experiments:
+
+```bash
+python3 research/scripts/run_stage2_adapter_experiments.py --seeds 1:5
+```
+
+This runs a software-only baseline/ablation matrix against the ROS1 Stage2
+adapter decision core. It writes `runs.csv`, `by_condition.csv`,
+`by_scenario_condition.csv`, `manifest.json`, and `summary.md` under
+`research/runs/stage2_adapter_experiments/<timestamp>/`.
+
+The Python runner is diagnostic evidence only. It is useful on machines without
+MATLAB and before ROS1/EGO runtime validation, but it is not hardware evidence.
+
 Keep this tree separate from the Ubuntu mainline deployment work.

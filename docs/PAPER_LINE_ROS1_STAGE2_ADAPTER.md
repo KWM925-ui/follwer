@@ -57,6 +57,16 @@ Repeated regression runner:
 bash research/scripts/run_paper_line_ros1_regression.sh 5
 ```
 
+Offline baseline/ablation runner:
+
+```bash
+python3 research/scripts/run_stage2_adapter_experiments.py --seeds 1:5
+```
+
+The offline runner uses the adapter's decision core without ROS master. Outputs
+are written under `research/runs/` and include per-run CSV, condition summaries,
+scenario-condition summaries, a manifest, and a short markdown report.
+
 For the existing Stage2 placeholder path:
 
 ```bash
@@ -135,6 +145,7 @@ python3 -m py_compile research/scripts/smoke_ros1_stage2_adapter_scenarios.py
 python3 -m py_compile src/human_follow_bringup/scripts/stage2_paper_line_regression_monitor_node.py
 python3 research/scripts/smoke_ros1_stage2_adapter_core.py
 python3 research/scripts/smoke_ros1_stage2_adapter_scenarios.py
+python3 research/scripts/run_stage2_adapter_experiments.py --seeds 1:5
 catkin_make
 roslaunch human_follow_bringup stage2_paper_line_real_ego_regression.launch
 bash research/scripts/run_paper_line_ros1_regression.sh 5
@@ -146,6 +157,23 @@ Known evidence from the paper-line preparation branch:
 - Offline scenario smoke covers open follow, behind-blocked side selection,
   switching bias, target-loss state transitions, hard filtering, and
   failed-candidate cooldown.
+- MATLAB-free offline experiments have run diagnostic baseline/ablation
+  variants. The latest diagnostic result was:
+
+```text
+offline smoke PASS candidate=behind score=0.806 margin=0.846
+offline scenario smoke PASS open_follow:behind:0.806:1.126 behind_blocked:left:0.755:1.126 switching_bias:left:0.810:1.126
+stage2 adapter experiments PASS runs=175 ... best=fixed_behind success=1.000
+```
+
+Current diagnostic result boundary:
+
+- `no_hard_filter` produces safety-shell violations, supporting the hard-filter
+  design.
+- `no_planner_feedback` produces repeated planner failures in the blocked
+  planner scenario, supporting feedback/cooldown.
+- `paper_line_full` is not yet dominant over all baselines in the offline
+  diagnostic suite, so it must not be claimed as globally superior.
 - Plain `catkin_make` on the WSL2 Ubuntu 22.04 preparation host hit a CMake
   4.2 `/usr/src/googletest` policy issue before package configuration;
   `catkin_make -DCMAKE_POLICY_VERSION_MINIMUM=3.5` passed there. The target

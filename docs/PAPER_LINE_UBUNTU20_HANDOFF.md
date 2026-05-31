@@ -33,6 +33,7 @@ ROS1 deployment adapter:
 - `research/scripts/smoke_ros1_stage2_adapter_core.py`
 - `research/scripts/smoke_ros1_stage2_adapter_scenarios.py`
 - `research/scripts/run_paper_line_ros1_regression.sh`
+- `research/scripts/run_stage2_adapter_experiments.py`
 - `src/human_follow_bringup/launch/stage2_paper_line_real_ego_regression.launch`
 - `src/human_follow_bringup/scripts/stage2_paper_line_regression_monitor_node.py`
 - `src/human_follow_bringup/config/paper_line_stage2_normal.yaml`
@@ -79,6 +80,7 @@ Python syntax:
 python3 -m py_compile src/human_follow_user/scripts/user_stage2_goal_node.py
 python3 -m py_compile research/scripts/smoke_ros1_stage2_adapter_core.py
 python3 -m py_compile research/scripts/smoke_ros1_stage2_adapter_scenarios.py
+python3 -m py_compile research/scripts/run_stage2_adapter_experiments.py
 python3 -m py_compile src/human_follow_bringup/scripts/stage2_paper_line_regression_monitor_node.py
 ```
 
@@ -87,6 +89,7 @@ Offline core and scenario smoke:
 ```bash
 python3 research/scripts/smoke_ros1_stage2_adapter_core.py
 python3 research/scripts/smoke_ros1_stage2_adapter_scenarios.py
+python3 research/scripts/run_stage2_adapter_experiments.py --seeds 1:5
 ```
 
 Observed result:
@@ -94,6 +97,7 @@ Observed result:
 ```text
 offline smoke PASS candidate=behind score=0.806 margin=0.846
 offline scenario smoke PASS open_follow:behind:0.806:1.126 behind_blocked:left:0.755:1.126 switching_bias:left:0.810:1.126
+stage2 adapter experiments PASS runs=175 ... best=fixed_behind success=1.000
 ```
 
 Offline scenario smoke:
@@ -240,7 +244,13 @@ roslaunch human_follow_bringup stage2_paper_line_real_ego_regression.launch
 bash research/scripts/run_paper_line_ros1_regression.sh 5
 ```
 
-8. During EGO tests, also inspect:
+8. For software-only paper-line baseline/ablation diagnostics without MATLAB:
+
+```bash
+python3 research/scripts/run_stage2_adapter_experiments.py --seeds 1:5
+```
+
+9. During EGO tests, also inspect:
 
 ```bash
 rostopic echo /move_base_simple/goal
@@ -309,6 +319,15 @@ The strongest current claims are:
 - hard safety filtering before scoring is necessary;
 - planner feedback plus failed-candidate cooldown reduces repeated infeasible
   command bursts in diagnostic stress tests.
+
+Latest Python offline experiment status:
+
+- `no_hard_filter` created safety-shell violations in the diagnostic suite.
+- `no_planner_feedback` created repeated planner-failure bursts in the blocked
+  planner scenario.
+- `paper_line_full` is not yet globally better than all baselines, so paper
+  claims should focus on safety/recovery mechanisms unless stronger ROS1/EGO
+  data proves broader benefit.
 
 The following remain optional or unproven:
 
