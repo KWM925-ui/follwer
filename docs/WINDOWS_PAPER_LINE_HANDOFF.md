@@ -1,17 +1,19 @@
 # Windows Paper-Line Handoff
 
-状态：Windows/MATLAB 执行入口，2026-05-27。
+状态：Windows/MATLAB 复现入口，2026-06-01 更新。
 
 这份文件给 Windows 端 Codex 直接使用。用户不需要重新解释 Ubuntu
-这边的长对话；Windows 端先读本文件，再按下面顺序执行。
+这边的长对话；Windows 端先读本文件，再按下面顺序复现或整理 MATLAB 结果。
 
 ## 一句话结论
 
-Ubuntu 这边的算法仿真准备已经做到可以交给 Windows/MATLAB 的程度。
+Windows/MATLAB 算法诊断实验已经完成并记录到
+`research/notes/2026-05-31_windows_matlab_refresh_log.md`。这份文件保留
+Windows 端复现实验、重新出图或整理 CSV 时的入口。
 
-下一步不是继续在 Ubuntu 上搭临时仿真，也不是现在做 Gazebo + RViz
-严格全链路仿真。下一步是在 Windows/MATLAB 运行现有实验，拿到数据，
-再判断哪些模块能写进论文和专利主线。
+Ubuntu20 侧也已经完成 ROS1/EGO 验证和第一轮 Gazebo/RViz 受管仿真。当前不要
+再把 Gazebo/RViz 写成 Windows/MATLAB 的前置阻塞；需要补实验时，应先说明
+要支撑哪条论文或专利主张。
 
 ## 仓库和分支
 
@@ -40,8 +42,13 @@ git pull --ff-only origin paper-line
 
 ## 当前已经完成什么
 
-已完成的，是“算法决策部分”的 MATLAB 实验准备，不是完整无人机系统已经
-完成。
+已完成的包括三条证据线：
+
+1. Windows/MATLAB 算法诊断实验；
+2. Ubuntu20 ROS1/EGO adapter 验证；
+3. Ubuntu20 `PX4 Gazebo Classic + MAVROS + Gazebo GUI + RViz` 第一轮受管仿真。
+
+这些仍然不是实机安全证明，也不是完整真实传感器系统已经完成。
 
 当前已有 MATLAB 入口：
 
@@ -65,9 +72,9 @@ git pull --ff-only origin paper-line
 之前助手临时做过的 Ubuntu 本地算法仿真已经被用户否定，并且相关提交已经
 回退。Windows 端不要重开那条路。
 
-## 当前实验到底要验证什么
+## Windows 复现实验到底要验证什么
 
-这轮 MATLAB 实验只验证上层算法决策，不验证机体、真实传感器、PX4、
+如果在 Windows 端复现 MATLAB，这轮只验证上层算法决策，不验证机体、真实传感器、PX4、
 Gazebo、RViz 或 EGO 内部优化。
 
 主要回答三件事：
@@ -222,16 +229,19 @@ planner feedback 和 failed-candidate cooldown 就可以作为主贡献。
 
 ## 和 Gazebo/RViz 的关系
 
-Gazebo + RViz 严格全链路仿真是后面的系统级验证。
+Gazebo + RViz 第一轮受管全链路仿真已经在 Ubuntu20 完成，详见：
 
-当前顺序是：
+- `research/notes/2026-06-01_ubuntu20_gazebo_rviz_validation_log.md`
 
-1. 先把 MATLAB 算法决策实验跑完；
-2. 根据结果收紧论文和专利主线；
-3. 必要时补 MATLAB 图表和统计；
-4. 再回 Ubuntu 做 Gazebo + RViz + EGO + 跟踪的严格全链路验证。
+如果后面要继续补 Gazebo/RViz，不是重复跑同一条链路，而是围绕具体主张补场景：
 
-不要把第 4 步提前到当前 MATLAB 结果之前。
+1. obstacle-near；
+2. planner-blocked；
+3. fixed-behind baseline；
+4. no-feedback ablation。
+
+Windows/MATLAB 端只负责算法诊断复现、CSV、图表和结果解释，不负责启动
+Gazebo/RViz。
 
 ## Windows Codex 启动词
 
@@ -251,9 +261,11 @@ Gazebo + RViz 严格全链路仿真是后面的系统级验证。
 - docs/PAPER_LINE_ROUTE_BOOK_CN.md
 
 边界：
-- 这轮只做 Windows/MATLAB 的算法决策实验。
+- 如果这轮是复现或重新出图，只做 Windows/MATLAB 的算法决策实验。
 - 不改 Ubuntu 主线、硬件标定、PX4、Gazebo、RViz、EGO 内部代码。
 - 不重开之前被否定的 Ubuntu 本地临时仿真。
+- 不把 Gazebo/RViz 当作 Windows/MATLAB 的前置阻塞；那条线已有
+  Ubuntu20 受管仿真日志。
 - 生成的 CSV 和图片默认不要提交，先汇总结果给我看。
 
 请按文档顺序执行：

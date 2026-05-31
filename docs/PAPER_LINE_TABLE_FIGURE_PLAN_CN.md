@@ -128,6 +128,38 @@
 - target-loss/search bag 中出现 `follow`、`predict_hold`、
   `search_safe_viewpoint`。
 
+### 表 5：Gazebo/RViz 受管仿真通过结果
+
+数据来源：
+
+- `research/notes/2026-06-01_ubuntu20_gazebo_rviz_validation_log.md`
+
+建议列：
+
+- run type
+- backend
+- world
+- Gazebo GUI
+- RViz evidence
+- armed/offboard reached
+- real-EGO path observed
+- search goal observed
+- nonzero MAVROS setpoint count
+- shutdown warning
+
+建议行：
+
+- `PX4 SIH + MAVROS + Stage2 real-EGO` 对照；
+- Gazebo Classic headless；
+- Gazebo Classic GUI + RViz。
+
+主要结论：
+
+- 当前 paper-line 链路可在本机 `PX4 Gazebo Classic + MAVROS + Stage2 real-EGO`
+  中运行；
+- visual run 支持 `Gazebo GUI + RViz` 链路已经实际启动；
+- shutdown warning 已记录，不影响 `status=passed`，但不能写成完全无 warning。
+
 ## 2. 图清单
 
 ### 图 1：方法总流程图
@@ -243,6 +275,26 @@ target measurement / UAV state / obstacle clearance / planner feedback
 - 说明 target-loss/search 状态在 ROS bag 中实际出现；
 - 支撑“可执行状态链”，不是支撑“恢复一定成功”。
 
+### 图 7：Gazebo/RViz 受管仿真链路图
+
+内容：
+
+```text
+paper-line source
+        -> sim_plane managed ROS1 workspace
+        -> PX4 Gazebo Classic iris
+        -> MAVROS
+        -> Stage2 paper-line adapter
+        -> EGO
+        -> Gazebo GUI + RViz
+```
+
+用途：
+
+- 放在系统验证章节；
+- 说明 Gazebo/RViz 证据来自受管仿真链路，而不是手工零散启动；
+- 明确该图不代表真实相机、真实 SLAM 或实机飞行已验证。
+
 ## 3. 推荐论文表述
 
 可以写：
@@ -261,6 +313,12 @@ target measurement / UAV state / obstacle clearance / planner feedback
 > The Ubuntu20 ROS1/EGO validation confirms that the decision layer can be
 > executed as an external Stage2 goal provider and that target-loss/search
 > states are observable in bag-level metrics.
+
+可以写：
+
+> The managed Gazebo Classic validation confirms that the current paper-line
+> software chain can run through PX4 Gazebo Classic, MAVROS, Stage2 real-EGO,
+> Gazebo GUI, and RViz on the Ubuntu20 host.
 
 不要写：
 
@@ -282,7 +340,8 @@ target measurement / UAV state / obstacle clearance / planner feedback
 2. Planner failure burst 对比图；
 3. ROS1/EGO topic chain 图；
 4. target-loss/search 状态驻留时间图；
-5. 方法总流程图；
-6. 动态安全边界示意图。
+5. Gazebo/RViz 受管仿真链路图；
+6. 方法总流程图；
+7. 动态安全边界示意图。
 
 前两张最适合先做，因为它们直接支撑论文和专利的核心技术效果。

@@ -174,6 +174,8 @@ margin = body_radius
 4. failure burst 指标可以比失败总数更直接反映连续规划失败风险；
 5. 该方法能够以外部 goal provider 的形式接入 ROS1/EGO 软件链，而不需要修改
    EGO、PX4、SLAM 或检测器内部。
+6. 当前实现能够在本机 `PX4 Gazebo Classic + MAVROS + Gazebo GUI + RViz`
+   受管仿真链路中运行，用于支撑工程可实施性；该点不等同于实机安全验证。
 
 ## 8. 实验支撑
 
@@ -210,6 +212,29 @@ margin = body_radius
 - target-loss/search bag:
   `goal_count=127`, `ego_cmd_count=873`, `search_count=16`。
 
+### 8.3 Ubuntu20 Gazebo/RViz 受管仿真
+
+证据文件：
+
+- `research/notes/2026-06-01_ubuntu20_gazebo_rviz_validation_log.md`
+
+关键结果：
+
+- 当前 paper-line source 已同步到 `/home/coco/sim_plane` 受管 ROS 工作区并构建通过；
+- `PX4 SIH + MAVROS + Stage2 real-EGO` 对照 run PASS；
+- `PX4 Gazebo Classic + MAVROS + Stage2 real-EGO` headless run PASS；
+- `PX4 Gazebo Classic + MAVROS + Stage2 real-EGO + Gazebo GUI + RViz` visual run PASS；
+- headless run 中 `algorithm_adapter_stage2_nonzero_mavros_setpoint_count=82`；
+- visual run 中 `algorithm_adapter_stage2_nonzero_mavros_setpoint_count=106`；
+- visual run 的 launch evidence 包含 `rviz:=true`。
+
+边界：
+
+- 该证据支持仿真链路可运行；
+- 不证明真实相机、真实 SLAM、硬件标定或实机飞行安全；
+- 不证明 Gazebo Harmonic 或所有 Gazebo 版本；
+- shutdown 阶段存在已记录 warning，不能写成完全无 warning。
+
 ## 9. 附图建议
 
 建议准备以下附图：
@@ -222,7 +247,8 @@ margin = body_radius
 6. planner feedback 与 failed-candidate cooldown 流程图；
 7. failure burst 指标示意图；
 8. ROS1/EGO 软件链接入图；
-9. target-loss/search 状态转移图。
+9. Gazebo/RViz 受管仿真链路图；
+10. target-loss/search 状态转移图。
 
 ## 10. 权利要求草案方向
 

@@ -8,6 +8,8 @@ Status on 2026-06-01:
 - Phase 0 through Phase 4 passed on Ubuntu 20.04.6 + ROS Noetic.
 - Detailed evidence is recorded in
   `research/notes/2026-06-01_ubuntu20_ros1_validation_log.md`.
+- The later Gazebo/RViz managed simulation evidence is recorded separately in
+  `research/notes/2026-06-01_ubuntu20_gazebo_rviz_validation_log.md`.
 - Re-run this matrix only after code/environment changes or when collecting a
   new scenario-specific artifact.
 
@@ -208,20 +210,25 @@ Supported after the 2026-06-01 Ubuntu20 run:
   diagnostic scenarios.
 - target-loss/search states `follow`, `predict_hold`, and
   `search_safe_viewpoint` are observed in ROS bag metrics.
+- a first local `PX4 Gazebo Classic + MAVROS + Stage2 real-EGO + Gazebo GUI +
+  RViz` managed simulation has passed, tracked in the Gazebo/RViz validation
+  log rather than this ROS1-only matrix.
 
 Not supported yet:
 
 - real-flight safety;
 - full system superiority;
+- real camera, real SLAM, hardware calibration, or field safety;
+- Gazebo Harmonic or all Gazebo versions;
+- broad Gazebo/RViz scenario-matrix robustness;
 - prediction as an independent novelty claim;
 - occlusion scoring, visibility scoring, or FSM recovery as independent
-  contributions;
-- strict Gazebo + RViz full-chain validation.
+  contributions.
 
 ## Next Expansion
 
 Do not keep repeating the same matrix as busywork. Add scenario-specific ROS1
-fixtures only when they answer a concrete paper or patent claim:
+or Gazebo/RViz fixtures only when they answer a concrete paper or patent claim:
 
 - obstacle-near following;
 - planner blocked-goal recovery;

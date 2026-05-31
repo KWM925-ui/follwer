@@ -13,6 +13,7 @@ Current evidence package:
 - `docs/PAPER_LINE_EVIDENCE_PACKAGE_CN.md`
 - `research/notes/2026-05-31_windows_matlab_refresh_log.md`
 - `research/notes/2026-06-01_ubuntu20_ros1_validation_log.md`
+- `research/notes/2026-06-01_ubuntu20_gazebo_rviz_validation_log.md`
 
 ## 1. Purpose
 
@@ -117,8 +118,12 @@ Current evidence status after 2026-06-01:
 - Ubuntu20 ROS1/EGO evidence supports that the method can run as a software
   adapter in the intended ROS1/EGO chain and that target-loss/search states are
   observable in bag metrics.
-- Ubuntu20 ROS1/EGO evidence does not support real-flight safety or strict
-  Gazebo/RViz full-chain validation.
+- Ubuntu20 Gazebo/RViz managed simulation evidence supports first-pass
+  executability through `PX4 Gazebo Classic + MAVROS + Stage2 real-EGO +
+  Gazebo GUI + RViz` on this host.
+- Current evidence still does not support real-flight safety, real camera,
+  real SLAM, hardware calibration, Gazebo Harmonic, or broad scenario-matrix
+  robustness claims.
 
 ## 5. Disclosure Skeleton For Later Drafting
 

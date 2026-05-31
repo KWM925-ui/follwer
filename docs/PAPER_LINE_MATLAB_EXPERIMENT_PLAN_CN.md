@@ -1,9 +1,14 @@
 # Paper-Line MATLAB 实验执行计划
 
-状态：Windows/MATLAB 前最终准备版，2026-05-27。
+状态：Windows/MATLAB 复现实验计划，2026-06-01 更新。
 
 这份文档只管“算法决策部分”的仿真，不管 Gazebo、机体、真实传感器、
 PX4 实机、EGO 内部优化。
+
+当前 Windows/MATLAB 算法诊断实验已经完成，结果记录在
+`research/notes/2026-05-31_windows_matlab_refresh_log.md`。保留本文档的目的
+是后续复现实验、重新出图或检查 CSV，而不是把 MATLAB 当作 Ubuntu
+Gazebo/RViz 的前置阻塞。
 
 ## 1. 这轮实验要回答什么
 
@@ -274,16 +279,19 @@ MATLAB 端补，不在 Ubuntu 端补。
 
 ## 13. 去 Windows 前 Ubuntu 还剩什么
 
-Ubuntu 本地这条算法仿真准备线只剩：
+如果需要重新复现 MATLAB 线，Ubuntu 本地这条算法仿真准备线只需要确认：
 
 1. 确认这份实验计划；
 2. 确认 MATLAB 代码文件齐全；
 3. 确认没有未提交改动；
 4. 把本计划推到 `paper-line`。
 
-做完这些，就该去 Windows/MATLAB 跑实验。
+做完这些，就可以去 Windows/MATLAB 复现实验或重新出图。
 
-Gazebo + RViz 严格全链路仿真是后续系统级验证，不属于这轮算法仿真的前置阻塞。
+Gazebo + RViz 第一轮受管全链路仿真已经在 Ubuntu20 完成，详见
+`research/notes/2026-06-01_ubuntu20_gazebo_rviz_validation_log.md`。它已经
+不是 MATLAB 复现的前置阻塞；后续补 Gazebo/RViz 时，必须先说明要支撑哪条
+具体论文或专利主张。
 
 Windows 端入口文档是 `docs/WINDOWS_PAPER_LINE_HANDOFF.md`。到 Windows 后先让
 Codex 读那份文件，再按本文件第 8 节的 MATLAB 顺序执行。

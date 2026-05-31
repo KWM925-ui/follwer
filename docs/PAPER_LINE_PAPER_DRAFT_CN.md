@@ -7,6 +7,7 @@
 
 - `research/notes/2026-05-31_windows_matlab_refresh_log.md`
 - `research/notes/2026-06-01_ubuntu20_ros1_validation_log.md`
+- `research/notes/2026-06-01_ubuntu20_gazebo_rviz_validation_log.md`
 - `docs/PAPER_LINE_EVIDENCE_PACKAGE_CN.md`
 
 ## 题目候选
@@ -36,8 +37,10 @@
 反馈和 cooldown 明显降低 planner failure burst。Ubuntu20 ROS1/EGO 软件链验证
 表明，该决策层可作为外部 Stage2 goal provider 接入现有 EGO 链路，并在
 target-loss/search 场景中产生 `follow`、`predict_hold` 和
-`search_safe_viewpoint` 状态。当前结果支持该方法作为安全感知上层决策层，
-但不声称实机安全或对所有 baseline 的全面优越。
+`search_safe_viewpoint` 状态。进一步的本地受管仿真表明，当前 paper-line
+链路可在 `PX4 Gazebo Classic + MAVROS + Stage2 real-EGO + Gazebo GUI + RViz`
+中跑通。当前结果支持该方法作为安全感知上层决策层，但不声称实机安全、
+真实传感器闭环安全或对所有 baseline 的全面优越。
 
 ## 1. Introduction
 
@@ -78,6 +81,7 @@ target-loss/search 场景中产生 `follow`、`predict_hold` 和
 - MATLAB stage/stress 诊断实验；
 - Ubuntu20 ROS1/EGO adapter 验证；
 - target-loss/search 状态链路验证。
+- Ubuntu20 `PX4 Gazebo Classic + MAVROS + Gazebo GUI + RViz` 受管仿真验证。
 
 ## 2. Related Work
 
@@ -270,8 +274,26 @@ stress 场景：
 不用于证明：
 
 - 实机安全；
-- strict Gazebo/RViz full-chain；
+- 真实相机、真实 SLAM 或硬件标定；
 - 全指标优越。
+
+### 5.3 Ubuntu20 Gazebo/RViz Managed Simulation
+
+验证目标：
+
+- 证明当前 paper-line source 能同步进 `sim_plane` 受管仿真工作区并构建；
+- 证明 `PX4 SIH + MAVROS + Stage2 real-EGO` fresh control run 仍然通过；
+- 证明 `PX4 Gazebo Classic + MAVROS + Stage2 real-EGO` headless 通过；
+- 证明 `PX4 Gazebo Classic + MAVROS + Stage2 real-EGO + Gazebo GUI + RViz`
+  在本机通过。
+
+不用于证明：
+
+- 实机安全；
+- 真实相机 detector-in-loop；
+- 真实 SLAM、硬件标定或现场飞行；
+- Gazebo Harmonic 或所有 Gazebo 版本；
+- 广泛场景矩阵或统计鲁棒性。
 
 ## 6. Results
 
@@ -311,11 +333,31 @@ stress 场景：
   `follow=5.714 sec`, `predict_hold=1.887 sec`,
   `search_safe_viewpoint=1.081 sec`。
 
+### 6.5 Gazebo/RViz Managed Simulation
+
+可写：
+
+- SIH 对照 run PASS；
+- Gazebo Classic headless run PASS；
+- Gazebo Classic GUI + RViz run PASS；
+- headless run 中 `algorithm_adapter_stage2_nonzero_mavros_setpoint_count=82`；
+- visual run 中 `algorithm_adapter_stage2_nonzero_mavros_setpoint_count=106`；
+- visual run 的 adapter launch args 和 roslaunch command 均包含 `rviz:=true`。
+
+必须同时写清楚：
+
+- 两条 Gazebo run 都有 shutdown 阶段
+  `WARN [commander] Connection to mission computer lost`；
+- visual run 有一次 shutdown cleanup warning：
+  `forcing process kill` for `human_follow_stage2_integrated_chain`；
+- 这些 warning 没有阻止 `status=passed`，但论文里不能写成完全无 warning。
+
 ## 7. Discussion
 
 应该主动承认：
 
 - 当前结果是诊断和软件链验证，不是实机；
+- Gazebo/RViz 结果是本机 Gazebo Classic 受管链路，不是所有 Gazebo 版本或真实传感器；
 - full proposed row 不全指标最好；
 - 预测、遮挡评分、可见性评分、FSM recovery 暂时是工程组成；
 - 动态安全过滤和 planner feedback/cooldown 是当前最稳贡献。
@@ -328,8 +370,9 @@ stress 场景：
 动态安全边界和硬安全过滤可以降低近失风险，planner feedback/cooldown 可以
 降低连续不可行指令。Ubuntu20 ROS1/EGO 验证表明，该决策层能以外部 goal
 provider 形式接入现有软件链，并在 target-loss/search 场景中产生可观测状态
-转移。后续工作将围绕更严格的 Gazebo/RViz 全链路验证、实机实验和更系统的
-baseline 对比展开。
+转移。Ubuntu20 Gazebo/RViz 受管仿真进一步表明，该链路可在
+`PX4 Gazebo Classic + MAVROS + Gazebo GUI + RViz` 中运行。后续工作将围绕
+更丰富的 Gazebo 场景矩阵、实机实验和更系统的 baseline 对比展开。
 
 ## 9. 当前缺口
 
