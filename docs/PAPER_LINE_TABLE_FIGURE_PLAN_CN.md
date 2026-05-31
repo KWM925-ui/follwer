@@ -5,6 +5,10 @@
 这份文件把现有证据转换成论文/专利最容易使用的表格和图。当前先定义内容、
 数据来源和结论边界；真正画图可以后续在 Windows/MATLAB 或 Python 中完成。
 
+已经整理好的可直接引用结果表见：
+
+- `docs/PAPER_LINE_RESULTS_TABLES_CN.md`
+
 ## 1. 表格清单
 
 ### 表 1：MATLAB Stage-One Ablation 总体结果

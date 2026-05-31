@@ -31,6 +31,7 @@
 | Ubuntu20 ROS1/EGO 验证 | `research/notes/2026-06-01_ubuntu20_ros1_validation_log.md` | 支撑 adapter 在 ROS1/EGO 软件链中可运行 |
 | Ubuntu20 Gazebo/RViz 受管仿真 | `/home/coco/sim_plane/runs/px4_gazebo_classic_iris_human_follow_stage2_real_ego_20260531_180600_060153` 和 `/home/coco/sim_plane/runs/px4_gazebo_classic_iris_human_follow_stage2_real_ego_visual_20260531_180705_889048` | 支撑 `PX4 Gazebo Classic + MAVROS + Stage2 real-EGO + Gazebo GUI + RViz` 链路可运行 |
 | 技术路线 | `docs/PAPER_LINE_ROUTE_BOOK_CN.md` | 定义论文和专利边界 |
+| 论文结果表 | `docs/PAPER_LINE_RESULTS_TABLES_CN.md` | 汇总 MATLAB、ROS1/EGO、Gazebo/RViz 可直接引用的实验表 |
 | ROS1 接入说明 | `docs/PAPER_LINE_ROS1_STAGE2_ADAPTER.md` | 说明 adapter 接口、话题和验证入口 |
 | 验证矩阵 | `docs/PAPER_LINE_UBUNTU20_VALIDATION_MATRIX.md` | 说明 Ubuntu20 验证流程和通过标准 |
 | 专利准备 | `docs/PAPER_LINE_PATENT_PREP.md` | 说明专利结构、保护点和不应过度主张的内容 |
