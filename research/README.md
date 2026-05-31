@@ -21,6 +21,15 @@ Working order:
 4. Add prediction, scoring, and state-machine logic.
 5. Generate plots and a first paper outline.
 
+Current paper/patent packaging entry points:
+
+- `docs/PAPER_LINE_EVIDENCE_PACKAGE_CN.md`
+- `docs/PAPER_LINE_PAPER_DRAFT_CN.md`
+- `docs/PAPER_LINE_PATENT_DISCLOSURE_DRAFT_CN.md`
+- `docs/PAPER_LINE_TABLE_FIGURE_PLAN_CN.md`
+- `research/notes/2026-05-31_windows_matlab_refresh_log.md`
+- `research/notes/2026-06-01_ubuntu20_ros1_validation_log.md`
+
 Python offline experiments:
 
 ```bash

@@ -373,3 +373,10 @@ ROS1 验证，除非代码或环境发生变化。
 
 只有论文/专利证据包缺少明确支撑时，才重新讨论 2.5D、更多
 EGO planner-in-loop 场景或 Simulink。
+
+当前写作入口：
+
+- `docs/PAPER_LINE_EVIDENCE_PACKAGE_CN.md`
+- `docs/PAPER_LINE_PAPER_DRAFT_CN.md`
+- `docs/PAPER_LINE_PATENT_DISCLOSURE_DRAFT_CN.md`
+- `docs/PAPER_LINE_TABLE_FIGURE_PLAN_CN.md`

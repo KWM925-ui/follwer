@@ -1,8 +1,18 @@
 # Paper-Line Patent Preparation
 
-Status: preparation only. Do not draft final claims yet.
+Status: disclosure draft prepared, final claims not drafted yet.
 Scope: paper-line only.
 Template source reviewed: `C:\Users\wysxgd\Downloads\技术交底书样本3-2.doc`.
+
+Current draft entry:
+
+- `docs/PAPER_LINE_PATENT_DISCLOSURE_DRAFT_CN.md`
+
+Current evidence package:
+
+- `docs/PAPER_LINE_EVIDENCE_PACKAGE_CN.md`
+- `research/notes/2026-05-31_windows_matlab_refresh_log.md`
+- `research/notes/2026-06-01_ubuntu20_ros1_validation_log.md`
 
 ## 1. Purpose
 
@@ -66,7 +76,7 @@ This boundary is provisional and must be narrowed after more prior-art search.
 
 ## 4. Patent Maturity Gate
 
-Do not start formal patent drafting until these are available:
+Do not start formal claim drafting until these are available:
 
 - final paper-line route frozen enough for implementation
 - prior-art search notes covering papers, patents, products, and official docs
@@ -82,10 +92,10 @@ Do not start formal patent drafting until these are available:
 - concrete flowchart or system diagram
 - list of mandatory features and optional embodiments
 
-Current evidence status:
+Current evidence status after 2026-06-01:
 
-- The dynamic safety margin has initial diagnostic support: fixed safety margin
-  produces many near-miss events in the rebuilt stage-one batch.
+- The dynamic safety margin has diagnostic support: fixed safety margin
+  produces many near-miss events in the stage-one and stress batches.
 - Candidate viewpoints now include target-facing heading, which is useful for a
   method disclosure because visibility depends on view direction, not only
   viewpoint position.
@@ -104,6 +114,11 @@ Current evidence status:
 - Current MATLAB evidence does not yet support claiming that prediction,
   occlusion scoring, visibility scoring, or FSM recovery independently improves
   all scenarios.
+- Ubuntu20 ROS1/EGO evidence supports that the method can run as a software
+  adapter in the intended ROS1/EGO chain and that target-loss/search states are
+  observable in bag metrics.
+- Ubuntu20 ROS1/EGO evidence does not support real-flight safety or strict
+  Gazebo/RViz full-chain validation.
 
 ## 5. Disclosure Skeleton For Later Drafting
 
@@ -221,10 +236,11 @@ Record in `research/notes/`:
 - generated figures
 - failure cases and limitations
 
-## 7. Current Do-Not-Draft Rule
+## 7. Current Do-Not-Overclaim Rule
 
-Formal claims, abstract, and final specification are deferred.
+Formal claims, abstract, and final specification are still deferred.
 
 Reason:
-The route still needs MATLAB first-stage evidence and broader prior-art
-comparison. Drafting now would risk overclaiming.
+The route now has MATLAB and Ubuntu20 ROS1/EGO evidence, but still needs broader
+prior-art comparison and careful claim drafting. Drafting broad final claims now
+would risk overclaiming.

@@ -1,6 +1,6 @@
 # Paper-Line Experiment Matrix
 
-Status: initial ROS1 evidence matrix, 2026-05-27.
+Status: Ubuntu20 ROS1 evidence refreshed, 2026-06-01.
 
 Purpose: turn paper-line work into paper/patent evidence, not only a chain-alive
 ROS smoke test.
@@ -9,15 +9,23 @@ For the Windows/MATLAB execution plan, read:
 
 - `docs/PAPER_LINE_MATLAB_EXPERIMENT_PLAN_CN.md`
 
+For the current evidence package, read:
+
+- `docs/PAPER_LINE_EVIDENCE_PACKAGE_CN.md`
+- `research/notes/2026-05-31_windows_matlab_refresh_log.md`
+- `research/notes/2026-06-01_ubuntu20_ros1_validation_log.md`
+
 ## Claim Boundary
 
-Current ROS1 evidence supports only these claims:
+Current ROS1 evidence supports these claims:
 
 - the paper-line external Stage2 goal provider can drive the real EGO chain in
   a repeatable ROS1 regression;
 - the fixture can now load scenario definitions from YAML;
 - a full-duration target-loss fixture can exercise `follow`, `predict_hold`,
   and `search_safe_viewpoint` states while the EGO chain remains connected.
+- normal ROS1/EGO repeated regression passed 5/5 on Ubuntu20;
+- normal and target-loss/search rosbag metrics passed.
 
 Do not claim:
 
@@ -58,6 +66,27 @@ fixture_scenario_yaml:=/path/to/scenario.yaml
 ```
 
 ## Current ROS Evidence
+
+Latest Ubuntu20 ROS1/EGO evidence:
+
+- normal single regression:
+  `.codex/artifacts/paper_line_ros1_adapter_20260601/formal_real_ego_regression_002359`
+- target-loss/search single regression:
+  `.codex/artifacts/paper_line_ros1_adapter_20260601/formal_real_ego_regression_002421`
+- normal repeated regression:
+  `.codex/artifacts/paper_line_ros1_adapter_20260601/formal_real_ego_regression_002516`
+- normal bag metrics:
+  `research/runs/stage2_rosbags/20260601_002655_normal_validation/normal_validation_metrics`
+- target-loss/search bag metrics:
+  `research/runs/stage2_rosbags/20260601_002811_target_loss_validation/target_loss_validation_metrics`
+
+Summary:
+
+- normal repeated regression: 5/5 PASS;
+- normal bag: `goal_count=171`, `ego_cmd_count=1133`;
+- target-loss/search bag: `goal_count=127`, `ego_cmd_count=873`;
+- target-loss/search bag observed `follow`, `predict_hold`,
+  `search_safe_viewpoint`.
 
 Baseline-compatible YAML fixture:
 
