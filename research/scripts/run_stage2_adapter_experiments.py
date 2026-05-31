@@ -118,6 +118,8 @@ def _make_scenarios():
 def _conditions():
     return [
         "fixed_behind",
+        "side_only",
+        "no_far_safe",
         "nearest_feasible",
         "paper_line_full",
         "no_prediction",
@@ -212,6 +214,10 @@ def _select_candidate(node, module, condition, predicted, vehicle_xyz, vehicle_s
     candidates = node._generate_follow_candidates(predicted, vehicle_xyz)
     if condition == "fixed_behind":
         candidates = [candidate for candidate in candidates if candidate.name == "behind"]
+    elif condition == "side_only":
+        candidates = [candidate for candidate in candidates if candidate.name in ("left", "right")]
+    elif condition == "no_far_safe":
+        candidates = [candidate for candidate in candidates if candidate.name != "far_safe"]
 
     safe, margin = node._filter_and_score_candidates(
         candidates,

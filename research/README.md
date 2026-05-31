@@ -32,6 +32,10 @@ adapter decision core. It writes `runs.csv`, `by_condition.csv`,
 `by_scenario_condition.csv`, `manifest.json`, and `summary.md` under
 `research/runs/stage2_adapter_experiments/<timestamp>/`.
 
+The current condition set includes fixed behind, nearest feasible, full
+paper-line, no prediction, fixed safety margin, no hard filter, no planner
+feedback, side-only candidates, and no-far-safe candidates.
+
 The Python runner is diagnostic evidence only. It is useful on machines without
 MATLAB and before ROS1/EGO runtime validation, but it is not hardware evidence.
 
@@ -39,10 +43,11 @@ ROS bag metric extraction on Ubuntu 20.04 + ROS1:
 
 ```bash
 bash research/scripts/record_stage2_validation_bag.sh
-python3 research/scripts/analyze_stage2_rosbag_metrics.py path/to/stage2_run.bag
+python3 research/scripts/analyze_stage2_rosbag_metrics.py path/to/stage2_run.bag --validate
 ```
 
 This writes a compact metric bundle next to the bag, including topic counts,
-latency/continuity proxies, state durations, and a markdown summary.
+latency/continuity proxies, state durations, a validation PASS/FAIL block, and
+a markdown summary.
 
 Keep this tree separate from the Ubuntu mainline deployment work.

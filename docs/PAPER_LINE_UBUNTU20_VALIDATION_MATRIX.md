@@ -50,6 +50,8 @@ Pass criteria:
 - `no_hard_filter` shows safety-shell violations in at least one scenario;
 - `no_planner_feedback` shows repeated planner failures in
   `planner_blocked`;
+- candidate-set ablations `side_only` and `no_far_safe` are recorded so the
+  multi-viewpoint candidate design can be defended or narrowed later;
 - `paper_line_full` is recorded without claiming global superiority.
 
 Interpretation:
@@ -143,7 +145,7 @@ Metrics to derive later:
 Bag analysis command:
 
 ```bash
-python3 research/scripts/analyze_stage2_rosbag_metrics.py path/to/stage2_run.bag
+python3 research/scripts/analyze_stage2_rosbag_metrics.py path/to/stage2_run.bag --validate
 ```
 
 If the runtime uses different topic names, pass a JSON override:
@@ -157,6 +159,24 @@ Generated outputs:
 - `metrics.json`
 - `topic_counts.csv`
 - `summary.md`
+
+Default bag-validation criteria:
+
+- required topic keys exist: `target`, `odom`, `state`, `goal`, `ego_goal`,
+  `ego_cmd`, and `bridge_setpoint`;
+- at least 3 Stage2 goals and 3 EGO commands are present;
+- goal and command rates are each at least 0.1 Hz;
+- max goal and command gaps are each at most 5.0 s;
+- mean bridge echo distance is at most 0.75 m;
+- state `follow` is observed.
+
+For target-loss/search bags, add:
+
+```bash
+python3 research/scripts/analyze_stage2_rosbag_metrics.py path/to/search_run.bag \
+  --validate \
+  --required-states follow,predict_hold,search_safe_viewpoint
+```
 
 ## Phase 5: Claim Boundary After Ubuntu20 Validation
 
