@@ -116,6 +116,12 @@ Minimum topics to record during a passing run:
 /follow/stage2/offboard/setpoint
 ```
 
+Recording helper:
+
+```bash
+bash research/scripts/record_stage2_validation_bag.sh
+```
+
 Metrics to derive later:
 
 - goal update rate;
@@ -125,6 +131,18 @@ Metrics to derive later:
 - state residence time in `follow`, `predict_hold`, `search_safe_viewpoint`,
   `hold_safe`, and `failsafe`;
 - repeated candidate or repeated failure patterns.
+
+Bag analysis command:
+
+```bash
+python3 research/scripts/analyze_stage2_rosbag_metrics.py path/to/stage2_run.bag
+```
+
+Generated outputs:
+
+- `metrics.json`
+- `topic_counts.csv`
+- `summary.md`
 
 ## Phase 5: Claim Boundary After Ubuntu20 Validation
 
