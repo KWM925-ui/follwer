@@ -3,6 +3,14 @@
 Scope: paper-line only. This is a ROS1/EGO software-validation checklist, not a
 real-flight checklist.
 
+Status on 2026-06-01:
+
+- Phase 0 through Phase 4 passed on Ubuntu 20.04.6 + ROS Noetic.
+- Detailed evidence is recorded in
+  `research/notes/2026-06-01_ubuntu20_ros1_validation_log.md`.
+- Re-run this matrix only after code/environment changes or when collecting a
+  new scenario-specific artifact.
+
 ## Goal
 
 Validate that the paper-line upper decision layer can be repeatedly exercised
@@ -192,25 +200,29 @@ python3 research/scripts/analyze_stage2_rosbag_metrics.py path/to/search_run.bag
 
 ## Phase 5: Claim Boundary After Ubuntu20 Validation
 
-Supported if Phases 1-3 pass:
+Supported after the 2026-06-01 Ubuntu20 run:
 
 - paper-line adapter is executable in the ROS1/EGO software chain;
 - hard safety filtering is necessary in diagnostic scenarios;
 - planner feedback/cooldown reduces repeated infeasible-goal behavior in
   diagnostic scenarios.
+- target-loss/search states `follow`, `predict_hold`, and
+  `search_safe_viewpoint` are observed in ROS bag metrics.
 
 Not supported yet:
 
 - real-flight safety;
 - full system superiority;
 - prediction as an independent novelty claim;
-- occlusion scoring or FSM recovery as independent contributions.
+- occlusion scoring, visibility scoring, or FSM recovery as independent
+  contributions;
+- strict Gazebo + RViz full-chain validation.
 
 ## Next Expansion
 
-After the matrix passes, add scenario-specific ROS1 fixtures for:
+Do not keep repeating the same matrix as busywork. Add scenario-specific ROS1
+fixtures only when they answer a concrete paper or patent claim:
 
-- target-loss/reacquisition;
 - obstacle-near following;
 - planner blocked-goal recovery;
 - fixed-behind baseline comparison;

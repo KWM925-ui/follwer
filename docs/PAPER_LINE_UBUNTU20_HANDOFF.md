@@ -94,7 +94,100 @@ Implemented mechanisms:
 - deterministic follow/loss/hold/search/failsafe states;
 - optional failed-candidate cooldown from planner command feedback.
 
-## Checks Already Completed On This Machine
+## Latest Ubuntu20 Validation
+
+Fresh Ubuntu20 validation was completed on 2026-06-01. Detailed log:
+
+- `research/notes/2026-06-01_ubuntu20_ros1_validation_log.md`
+
+Runtime:
+
+- Ubuntu 20.04.6 LTS
+- Python 3.8.10
+- ROS Noetic
+- commit `bc684c537198cd3ea77ea877bd9bb590e190476d`
+
+Phase 0 and Phase 1:
+
+```bash
+SKIP_ROS=1 bash research/scripts/run_paper_line_ubuntu20_validation.sh
+```
+
+Result: PASS.
+
+Completed:
+
+- Python syntax checks;
+- offline decision-core smoke;
+- offline scenario smoke;
+- offline baseline/ablation diagnostics;
+- `catkin_make`.
+
+Phase 2 normal ROS1/EGO regression:
+
+```bash
+RUN_COUNT=1 LAUNCH_TIMEOUT_SEC=35 MONITOR_DURATION_SEC=18.0 \
+bash research/scripts/run_paper_line_ros1_regression.sh 1
+```
+
+Result: PASS.
+
+Artifact:
+
+- `.codex/artifacts/paper_line_ros1_adapter_20260601/formal_real_ego_regression_002359`
+
+Phase 2 target-loss/search ROS1/EGO regression:
+
+```bash
+MONITOR_DURATION_SEC=9.5 LAUNCH_TIMEOUT_SEC=35 \
+bash research/scripts/run_paper_line_ros1_regression.sh 1 \
+  fixture_scenario_yaml:=$(pwd)/src/human_follow_bringup/config/paper_line_stage2_target_loss.yaml \
+  monitor_full_duration_evidence:=true \
+  monitor_required_state_names:=follow,predict_hold,search_safe_viewpoint \
+  monitor_required_phase_labels:=loss_target_visible_start,short_dropout_predict_hold,reacquired_after_short_loss,long_dropout_search,reacquired_after_search
+```
+
+Result: PASS.
+
+Artifact:
+
+- `.codex/artifacts/paper_line_ros1_adapter_20260601/formal_real_ego_regression_002421`
+
+Phase 3 repeated regression:
+
+```bash
+bash research/scripts/run_paper_line_ros1_regression.sh 5
+```
+
+Result: 5/5 PASS.
+
+Artifact:
+
+- `.codex/artifacts/paper_line_ros1_adapter_20260601/formal_real_ego_regression_002516`
+
+Phase 4 bag metrics:
+
+- normal bag metrics PASS:
+  `research/runs/stage2_rosbags/20260601_002655_normal_validation/normal_validation_metrics`
+- target-loss/search bag metrics PASS:
+  `research/runs/stage2_rosbags/20260601_002811_target_loss_validation/target_loss_validation_metrics`
+
+Key target-loss/search bag evidence:
+
+- `goal_count=127`
+- `ego_cmd_count=873`
+- observed states: `follow`, `predict_hold`, `search_safe_viewpoint`
+- state durations:
+  `follow=5.714 sec`, `predict_hold=1.887 sec`,
+  `search_safe_viewpoint=1.081 sec`
+
+Boundary:
+
+- This proves paper-line ROS1/EGO software-chain executability.
+- It does not prove real-flight safety or strict Gazebo/RViz full-chain
+  validation.
+
+## Earlier Checks Completed On This Branch
 
 Python syntax:
 
@@ -211,7 +304,7 @@ Latest Ubuntu-side scenario widening on 2026-05-27:
     target-loss/search window, so this is state-sequence evidence, not robust
     planner recovery proof.
 
-## First Steps On Ubuntu 20.04 + ROS1
+## If Re-running On Ubuntu 20.04 + ROS1
 
 Use `docs/PAPER_LINE_UBUNTU20_VALIDATION_MATRIX.md` as the ordered acceptance
 checklist. The commands below are the quick handoff version.
@@ -341,18 +434,20 @@ research/scripts/run_paper_line_ros1_regression.sh 1 \
   monitor_required_phase_labels:=loss_target_visible_start,short_dropout_predict_hold,reacquired_after_short_loss,long_dropout_search,reacquired_after_search
 ```
 
-## What To Record Next
+## What To Do Next
 
-For paper and patent evidence, record:
+Do not keep rerunning the same validation loop unless code or environment
+changes. The useful next work is paper/patent evidence packaging and targeted
+scenario widening.
 
-- whether `/follow/stage2/goal` updates at the expected rate;
-- whether EGO receives `/move_base_simple/goal`;
-- whether EGO produces `/follow/stage2/ego_position_cmd`;
-- target-loss behavior: `predict_hold`, `search_safe_viewpoint`, `hold_safe`;
+For paper and patent evidence, prepare:
+
+- a compact table from `research/notes/2026-05-31_windows_matlab_refresh_log.md`;
+- a compact table from `research/notes/2026-06-01_ubuntu20_ros1_validation_log.md`;
+- a figure or table showing target-loss/search state residence time;
+- a figure or table showing planner failure burst reduction;
 - obstacle-near behavior and any over-conservative cases;
-- repeated planner failure bursts with and without planner feedback;
-- concrete failure cases where candidate cooldown helps or hurts.
-- per-run `summary.json` with ROS chain results and metric fields.
+- concrete failure cases where candidate cooldown helps or hurts;
 - baseline/ablation comparisons:
   original Stage2 baseline, paper-line without prediction, paper-line without
   dynamic margin, paper-line without hard filter, and full paper-line adapter.

@@ -1,6 +1,6 @@
 # Paper-Line 技术路线书
 
-状态：阶段性收口版，2026-05-23。
+状态：Ubuntu20 ROS1 验证后收口版，2026-06-01。
 范围：paper-line only。不得修改 `ubuntu-mainline`、EGO/PX4/SLAM/检测器。
 当前允许的部署侧改动仅限 `src/human_follow_user/` 中的外部算法接入口，
 用于把 paper-line 决策层接入已有 ROS1 Stage2 链路。
@@ -321,24 +321,55 @@ ROS1 节点实现内容：
 
 - Python 语法检查；
 - 离线核心逻辑 smoke test。
+- Ubuntu 20.04 + ROS Noetic `catkin_make`；
+- normal ROS1/EGO regression 单次 PASS；
+- target-loss/search ROS1/EGO regression 单次 PASS；
+- normal ROS1/EGO repeated regression 5/5 PASS；
+- normal 和 target-loss/search rosbag metrics PASS。
 
-仍需在 Ubuntu 20.04 + ROS1 中完成：
+关键证据记录：
 
-- catkin 构建；
-- Stage2 placeholder launch smoke；
-- Stage2/EGO planner-in-loop 验证；
-- `/follow/stage2/goal`、`/move_base_simple/goal`、`/follow/stage2/state`
-  和 EGO command feedback 话题检查。
+- `research/notes/2026-06-01_ubuntu20_ros1_validation_log.md`
+- repeated artifact:
+  `.codex/artifacts/paper_line_ros1_adapter_20260601/formal_real_ego_regression_002516`
+- normal bag metrics:
+  `research/runs/stage2_rosbags/20260601_002655_normal_validation/normal_validation_metrics`
+- target-loss/search bag metrics:
+  `research/runs/stage2_rosbags/20260601_002811_target_loss_validation/target_loss_validation_metrics`
+
+当前 ROS1/EGO 证据支持：
+
+- paper-line adapter 能在 ROS1/EGO 软件链中运行；
+- `/follow/stage2/state` 和 `/follow/stage2/goal` 能发布；
+- EGO 能收到 `/move_base_simple/goal`；
+- EGO 能输出 `/follow/stage2/ego_position_cmd`；
+- bridge / fake MAVROS 链路能走到 `/follow/stage2/offboard/setpoint`
+  和 `/mavros/setpoint_raw/local`；
+- target-loss/search 中实际出现 `follow`、`predict_hold`、
+  `search_safe_viewpoint`。
+
+仍不能声称：
+
+- 实机飞行安全；
+- 严格 Gazebo + RViz 全链路完成；
+- proposed 全面优于所有 baseline；
+- prediction、occlusion score、visibility score、FSM recovery 是独立主贡献。
 
 ## 11. 下一阶段
 
-本阶段不再继续调 2D MATLAB 数值。
+本阶段不再继续调 2D MATLAB 数值，也不需要反复重跑同一套 Ubuntu20
+ROS1 验证，除非代码或环境发生变化。
 
 下一阶段优先顺序：
 
-1. 在 Ubuntu 20.04 + ROS1 做 Stage2 placeholder 和 EGO planner-in-loop
-   验证，确认 paper-line adapter 的真实运行边界；
-2. 基于 ROS1 验证结果更新指标和失败案例；
-3. 写论文方法和实验章节草案，把当前结论写成“诊断基线和设计收敛”。
+1. 把 MATLAB 诊断结果和 Ubuntu20 ROS1/EGO 结果整理成论文/专利证据包；
+2. 写论文方法和实验章节草案，把主线收紧到动态安全边界、硬安全过滤、
+   planner feedback、failed-candidate cooldown 和 failure burst；
+3. 只在能回答具体主张时，再补 ROS1 场景：
+   obstacle-near、planner-blocked、fixed-behind baseline、no-feedback
+   ablation；
+4. Gazebo + RViz 严格全链路仿真放到后续系统级验证，不作为当前
+   paper-line 结果包的前置阻塞。
 
-只有进入第二项后，才重新讨论 2.5D、EGO planner-in-loop 或 Simulink。
+只有论文/专利证据包缺少明确支撑时，才重新讨论 2.5D、更多
+EGO planner-in-loop 场景或 Simulink。
