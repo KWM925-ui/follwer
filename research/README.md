@@ -39,6 +39,18 @@ feedback, side-only candidates, and no-far-safe candidates.
 The Python runner is diagnostic evidence only. It is useful on machines without
 MATLAB and before ROS1/EGO runtime validation, but it is not hardware evidence.
 
+Ubuntu 20.04 validation entry:
+
+```bash
+bash research/scripts/run_paper_line_ubuntu20_validation.sh
+```
+
+For a quick non-ROS check:
+
+```bash
+SKIP_CATKIN=1 SKIP_ROS=1 bash research/scripts/run_paper_line_ubuntu20_validation.sh
+```
+
 ROS bag metric extraction on Ubuntu 20.04 + ROS1:
 
 ```bash

@@ -11,6 +11,18 @@ for later paper and patent work.
 
 ## Phase 0: Build And Static Checks
 
+One-command validation entry on Ubuntu 20.04 + ROS1:
+
+```bash
+bash research/scripts/run_paper_line_ubuntu20_validation.sh
+```
+
+For a non-ROS quick check, use:
+
+```bash
+SKIP_CATKIN=1 SKIP_ROS=1 bash research/scripts/run_paper_line_ubuntu20_validation.sh
+```
+
 Commands:
 
 ```bash
