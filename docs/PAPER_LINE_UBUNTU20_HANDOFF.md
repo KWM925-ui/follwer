@@ -20,9 +20,9 @@ startup prompt from:
 
 - `docs/UBUNTU20_CODEX_START_PROMPT.md`
 
-Next meaningful work should move to Ubuntu 20.04 + ROS1 when the target runtime
-is available. Do not reopen the rejected Ubuntu 22.04/ROS2 local temporary
-simulation path.
+Ubuntu20 ROS1/EGO validation and local `sim_plane` Gazebo/RViz managed
+simulation have now both been completed. Do not reopen the rejected
+Ubuntu 22.04/ROS2 local temporary simulation path.
 
 ## Current Deliverables
 
@@ -184,8 +184,68 @@ Key target-loss/search bag evidence:
 Boundary:
 
 - This proves paper-line ROS1/EGO software-chain executability.
-- It does not prove real-flight safety or strict Gazebo/RViz full-chain
-  validation.
+- It does not prove real-flight safety.
+
+## Latest Ubuntu20 Gazebo/RViz Managed Simulation
+
+Fresh local simulation was completed on 2026-06-01 through `/home/coco/sim_plane`.
+Detailed log:
+
+- `research/notes/2026-06-01_ubuntu20_gazebo_rviz_validation_log.md`
+
+Source sync:
+
+```bash
+python3 scripts/sync_human_follow_stage1_workspace.py \
+  --source-ws /home/coco/follower_paper_ws
+```
+
+Managed workspace build:
+
+```bash
+./scripts/build_human_follow_stage1_ws.sh
+```
+
+Result: PASS.
+
+Gazebo headless:
+
+- scenario:
+  `/home/coco/sim_plane/scenarios/px4_gazebo_classic_iris_human_follow_stage2_real_ego.json`
+- artifact:
+  `/home/coco/sim_plane/runs/px4_gazebo_classic_iris_human_follow_stage2_real_ego_20260531_180600_060153`
+- result: `status=passed`
+
+Gazebo GUI + RViz:
+
+- scenario:
+  `/home/coco/sim_plane/scenarios/px4_gazebo_classic_iris_human_follow_stage2_real_ego_visual.json`
+- artifact:
+  `/home/coco/sim_plane/runs/px4_gazebo_classic_iris_human_follow_stage2_real_ego_visual_20260531_180705_889048`
+- result: `status=passed`
+
+Key supported metrics:
+
+- `ever_armed=true`
+- `algorithm_adapter_offboard_mode_reached=true`
+- `algorithm_adapter_stage2_real_ego_path_observed=true`
+- `algorithm_adapter_stage2_search_goal_observed=true`
+- headless:
+  `algorithm_adapter_stage2_nonzero_mavros_setpoint_count=82`
+- visual:
+  `algorithm_adapter_stage2_nonzero_mavros_setpoint_count=106`
+
+Boundary:
+
+- This supports `PX4 Gazebo Classic + MAVROS + Stage2 real-EGO + Gazebo GUI + RViz`
+  on the current Ubuntu20 host.
+- It still does not prove real camera, real SLAM, hardware calibration,
+  Gazebo Harmonic, or real-flight safety.
+- Both Gazebo runs had a shutdown-stage PX4 warning:
+  `WARN  [commander] Connection to mission computer lost`;
+  it did not block `status=passed`, but do not call the runs `info-only`.
+- The visual run also had one shutdown cleanup warning:
+  `forcing process kill` for `human_follow_stage2_integrated_chain`.
 
 ## Earlier Checks Completed On This Branch
 

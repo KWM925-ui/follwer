@@ -1,9 +1,10 @@
 # Paper-Line 论文/专利证据包
 
-状态：Ubuntu20 ROS1 验证后整理版，2026-06-01。
+状态：Ubuntu20 ROS1/Gazebo/RViz 验证后整理版，2026-06-01。
 
-这份文件不是新的实验结果，而是把已经完成的 MATLAB 诊断实验和
-Ubuntu20 ROS1/EGO 验证结果整理成论文、专利、软件著作权可用的证据索引。
+这份文件把已经完成的 MATLAB 诊断实验、Ubuntu20 ROS1/EGO 验证、
+以及本地 `sim_plane` 的 Gazebo/RViz 受管仿真结果整理成论文、专利、
+软件著作权可用的证据索引。
 
 ## 1. 当前一句话结论
 
@@ -11,12 +12,14 @@ Ubuntu20 ROS1/EGO 验证结果整理成论文、专利、软件著作权可用�
 
 > 面向无人机人跟随的上层跟随视点决策层，通过动态安全边界、硬安全过滤、
 > planner command-health feedback 和失败候选 cooldown，降低近失风险和
-> 连续不可行指令，并且该决策层已经能在 Ubuntu20 ROS1/EGO 软件链中运行。
+> 连续不可行指令，并且该决策层已经能在 Ubuntu20 ROS1/EGO 软件链、
+> `PX4 Gazebo Classic + MAVROS + Gazebo GUI + RViz` 受管仿真链路中运行。
 
 不能说：
 
 - 已经实机安全；
-- 已经严格 Gazebo + RViz 全链路完成；
+- 已经覆盖真实相机、真实 SLAM、硬件标定和实机飞行；
+- Gazebo Classic 结果可直接外推到所有 Gazebo/Harmonic 环境；
 - proposed 全面优于所有 baseline；
 - prediction、occlusion score、visibility score、FSM recovery 是独立主贡献。
 
@@ -26,6 +29,7 @@ Ubuntu20 ROS1/EGO 验证结果整理成论文、专利、软件著作权可用�
 |---|---|---|
 | MATLAB 诊断实验 | `research/notes/2026-05-31_windows_matlab_refresh_log.md` | 支撑动态安全边界、硬安全过滤、planner feedback/cooldown |
 | Ubuntu20 ROS1/EGO 验证 | `research/notes/2026-06-01_ubuntu20_ros1_validation_log.md` | 支撑 adapter 在 ROS1/EGO 软件链中可运行 |
+| Ubuntu20 Gazebo/RViz 受管仿真 | `/home/coco/sim_plane/runs/px4_gazebo_classic_iris_human_follow_stage2_real_ego_20260531_180600_060153` 和 `/home/coco/sim_plane/runs/px4_gazebo_classic_iris_human_follow_stage2_real_ego_visual_20260531_180705_889048` | 支撑 `PX4 Gazebo Classic + MAVROS + Stage2 real-EGO + Gazebo GUI + RViz` 链路可运行 |
 | 技术路线 | `docs/PAPER_LINE_ROUTE_BOOK_CN.md` | 定义论文和专利边界 |
 | ROS1 接入说明 | `docs/PAPER_LINE_ROS1_STAGE2_ADAPTER.md` | 说明 adapter 接口、话题和验证入口 |
 | 验证矩阵 | `docs/PAPER_LINE_UBUNTU20_VALIDATION_MATRIX.md` | 说明 Ubuntu20 验证流程和通过标准 |
@@ -222,23 +226,92 @@ target-loss/search bag metrics：PASS。
   `follow=5.714 sec`, `predict_hold=1.887 sec`,
   `search_safe_viewpoint=1.081 sec`
 
-## 5. 论文可用表格建议
+## 5. Ubuntu20 Gazebo/RViz 受管仿真证据
+
+仿真平台：
+
+- `/home/coco/sim_plane`
+- backend: `px4_gazebo_classic`
+- adapter: `human_follow_ros_stage2`
+- managed workspace:
+  `/home/coco/sim_plane_ws/workspaces/ros1_human_follow_stage1`
+
+同步和构建：
+
+- `python3 scripts/sync_human_follow_stage1_workspace.py --source-ws /home/coco/follower_paper_ws`
+- `./scripts/build_human_follow_stage1_ws.sh`
+- 结果：PASS。
+
+fresh SIH 对照：
+
+- artifact:
+  `/home/coco/sim_plane/runs/px4_sih_quadx_human_follow_stage2_real_ego_20260531_175457_993127`
+- latest acceptance：PASS。
+
+Gazebo headless：
+
+- scenario:
+  `/home/coco/sim_plane/scenarios/px4_gazebo_classic_iris_human_follow_stage2_real_ego.json`
+- artifact:
+  `/home/coco/sim_plane/runs/px4_gazebo_classic_iris_human_follow_stage2_real_ego_20260531_180600_060153`
+- result: `status=passed`
+- key metrics:
+  `ever_armed=true`,
+  `algorithm_adapter_offboard_mode_reached=true`,
+  `algorithm_adapter_stage2_real_ego_path_observed=true`,
+  `algorithm_adapter_stage2_search_goal_observed=true`,
+  `algorithm_adapter_stage2_nonzero_mavros_setpoint_count=82`
+
+Gazebo GUI + RViz：
+
+- scenario:
+  `/home/coco/sim_plane/scenarios/px4_gazebo_classic_iris_human_follow_stage2_real_ego_visual.json`
+- artifact:
+  `/home/coco/sim_plane/runs/px4_gazebo_classic_iris_human_follow_stage2_real_ego_visual_20260531_180705_889048`
+- result: `status=passed`
+- key metrics:
+  `gazebo_gui=true`,
+  `world=warehouse`,
+  `ever_armed=true`,
+  `algorithm_adapter_offboard_mode_reached=true`,
+  `algorithm_adapter_stage2_real_ego_path_observed=true`,
+  `algorithm_adapter_stage2_search_goal_observed=true`,
+  `algorithm_adapter_stage2_nonzero_mavros_setpoint_count=106`
+- RViz 证据：
+  adapter launch args 和 roslaunch command 均包含 `rviz:=true`。
+
+边界：
+
+- 这证明当前论文线能在本机
+  `PX4 Gazebo Classic + MAVROS + Stage2 real-EGO + Gazebo GUI + RViz`
+  受管链路中跑通。
+- 两条 Gazebo run 都有 shutdown 阶段 PX4 残留 warning：
+  `WARN  [commander] Connection to mission computer lost`。
+  该 warning 发生在 ROS/MAVROS shutdown 附近，未阻止 `status=passed`，
+  但不能把这两次 run 写成 `info-only`。
+- visual run 还出现一次 shutdown 清理 warning：
+  `forcing process kill` for `human_follow_stage2_integrated_chain`。
+- 这还不是 detector、真实相机、真实 SLAM、硬件标定和实机飞行证据。
+
+## 6. 论文可用表格建议
 
 建议至少做四张表：
 
 1. MATLAB stage-one ablation 总体表；
 2. MATLAB stress ablation 总体表；
 3. Ubuntu20 ROS1/EGO regression 通过表；
-4. Ubuntu20 rosbag metrics 表。
+4. Ubuntu20 rosbag metrics 表；
+5. Ubuntu20 Gazebo/RViz 受管仿真通过表。
 
 建议至少做四类图：
 
 1. 动态安全边界与 fixed safety margin 的 near-miss 对比；
 2. planner feedback/cooldown 与 no feedback 的 failure burst 对比；
 3. ROS1/EGO topic chain 示意图；
-4. target-loss/search 状态驻留时间图。
+4. Gazebo/RViz 受管仿真链路图；
+5. target-loss/search 状态驻留时间图。
 
-## 6. 专利可用证据点
+## 7. 专利可用证据点
 
 可以写进技术效果：
 
@@ -246,7 +319,8 @@ target-loss/search bag metrics：PASS。
 - 硬安全过滤避免不安全候选靠评分“软通过”；
 - planner feedback/cooldown 降低连续不可行指令；
 - failure burst 比总失败次数更能反映连续失败风险；
-- ROS1/EGO 验证说明方法可以作为上层 adapter 接入现有规划链。
+- ROS1/EGO/Gazebo/RViz 验证说明方法可以作为上层 adapter 接入现有
+  规划链和仿真链。
 
 不要写成主权利要求：
 
@@ -257,9 +331,10 @@ target-loss/search bag metrics：PASS。
 - EGO、PX4、SLAM、检测器内部实现；
 - proposed 全面优于所有方案。
 
-## 7. 当前下一步
+## 8. 当前下一步
 
-不用继续重复跑 Windows/MATLAB 或 Ubuntu20 ROS1 验证。
+不用继续重复跑 Windows/MATLAB、Ubuntu20 ROS1 验证或刚刚通过的
+Gazebo/RViz 单次链路验证。
 
 下一步优先做：
 
@@ -267,5 +342,6 @@ target-loss/search bag metrics：PASS。
 2. 论文实验章节；
 3. 专利技术交底书；
 4. 图表生成脚本或手工表格；
-5. 只有当具体论文/专利主张缺证据时，再补 obstacle-near、
+5. 只有当具体论文/专利主张缺证据时，再补 Gazebo/RViz 场景矩阵、
+   obstacle-near、
    planner-blocked、fixed-behind baseline、no-feedback ablation 等 ROS1 场景。
