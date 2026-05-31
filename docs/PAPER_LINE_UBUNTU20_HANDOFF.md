@@ -38,7 +38,9 @@ ROS1 deployment adapter:
 - `research/scripts/analyze_stage2_rosbag_metrics.py`
 - `research/scripts/record_stage2_validation_bag.sh`
 - `src/human_follow_bringup/launch/stage2_paper_line_real_ego_regression.launch`
+- `src/human_follow_bringup/launch/stage2_paper_line_search_real_ego_regression.launch`
 - `src/human_follow_bringup/scripts/stage2_paper_line_regression_monitor_node.py`
+- `src/human_follow_bringup/scripts/stage2_paper_line_search_regression_monitor_node.py`
 - `src/human_follow_bringup/config/paper_line_stage2_normal.yaml`
 - `src/human_follow_bringup/config/paper_line_stage2_target_loss.yaml`
 
@@ -86,6 +88,7 @@ python3 -m py_compile research/scripts/smoke_ros1_stage2_adapter_scenarios.py
 python3 -m py_compile research/scripts/run_stage2_adapter_experiments.py
 python3 -m py_compile research/scripts/analyze_stage2_rosbag_metrics.py
 python3 -m py_compile src/human_follow_bringup/scripts/stage2_paper_line_regression_monitor_node.py
+python3 -m py_compile src/human_follow_bringup/scripts/stage2_paper_line_search_regression_monitor_node.py
 ```
 
 Offline core and scenario smoke:
@@ -258,6 +261,12 @@ external_goal_type:=user_stage2_goal_node.py
 
 ```bash
 roslaunch human_follow_bringup stage2_paper_line_real_ego_regression.launch
+```
+
+For target-loss/search behavior:
+
+```bash
+roslaunch human_follow_bringup stage2_paper_line_search_real_ego_regression.launch
 ```
 
 7. For repeated paper-line regression runs, run:

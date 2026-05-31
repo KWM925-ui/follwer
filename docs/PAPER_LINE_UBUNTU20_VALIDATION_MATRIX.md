@@ -65,6 +65,12 @@ Command:
 roslaunch human_follow_bringup stage2_paper_line_real_ego_regression.launch
 ```
 
+Target-loss/search regression command:
+
+```bash
+roslaunch human_follow_bringup stage2_paper_line_search_real_ego_regression.launch
+```
+
 Pass criteria:
 
 - `/follow/stage2/state` is published by `paper_line_stage2_goal`;
@@ -73,6 +79,8 @@ Pass criteria:
 - the PX4 bridge emits `/follow/stage2/offboard/setpoint`;
 - fake MAVROS receives `/mavros/setpoint_raw/local`;
 - monitor exits PASS before timeout.
+- search regression sees `follow`, `predict_hold`, and
+  `search_safe_viewpoint` states and produces moving search goals/commands.
 
 Record:
 
