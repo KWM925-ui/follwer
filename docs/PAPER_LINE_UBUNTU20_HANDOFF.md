@@ -1,11 +1,23 @@
 # Paper-Line Ubuntu 20.04 Handoff
 
-Date: 2026-05-23
+Date: 2026-05-31
 
 Target runtime: Ubuntu 20.04 + ROS1 / catkin.
 
 MATLAB is not required on the runtime machine. MATLAB artifacts in this branch
 are research prototypes and evidence only.
+
+## Current Stage Boundary
+
+The Windows/MATLAB algorithm-only refresh has been completed through
+`Seeds=1:5` for both stage-one and stress batches. The current MATLAB evidence
+is recorded in:
+
+- `research/notes/2026-05-31_windows_matlab_refresh_log.md`
+
+Next meaningful work should move to Ubuntu 20.04 + ROS1 when the target runtime
+is available. Do not reopen the rejected Ubuntu 22.04/ROS2 local temporary
+simulation path.
 
 ## Current Deliverables
 
@@ -158,21 +170,21 @@ available. The runtime machine does not need MATLAB.
 Latest Windows/WSL-side MATLAB refresh:
 
 - `tPaperLineCore`: 11 passed, 0 failed, 0 incomplete.
-- MATLAB Code Analyzer: clean for `runPaperLineDemo.m`,
-  `runPaperLineBatch.m`, `runPaperLineStressBatch.m`,
-  `tests/tPaperLineCore.m`, and all current `+paperline/*.m` functions.
-- Small execution smoke:
-  `runPaperLineBatch(Seeds=1, SaveOutputs=false)` and
-  `runPaperLineStressBatch(Seeds=1, SaveOutputs=false)` both returned
-  nonempty summaries.
+- `runPaperLineDemo(ShowFigures=false)`: completed.
+- `runPaperLineBatch(Seeds=1, SaveOutputs=false)`: completed.
+- `runPaperLineStressBatch(Seeds=1, SaveOutputs=false)`: completed.
+- `runPaperLineBatch(Seeds=1:3, SaveOutputs=true)`: completed.
+- `runPaperLineStressBatch(Seeds=1:3, SaveOutputs=true)`: completed.
+- `runPaperLineBatch(Seeds=1:5, SaveOutputs=true)`: completed, 300 runs.
+- `runPaperLineStressBatch(Seeds=1:5, SaveOutputs=true)`: completed, 225 runs.
+- `summarizePaperLineResults`: completed.
+- Final interpretation: dynamic safety margin and planner feedback/cooldown are
+  supported; prediction, occlusion score, visibility score, FSM recovery, and
+  global full-method superiority remain unsupported as independent claims.
 
-Before moving to Windows/MATLAB, read:
-
-- `docs/PAPER_LINE_MATLAB_EXPERIMENT_PLAN_CN.md`
-
-That file is the current execution plan for the algorithm-only MATLAB
-experiments: what to run, what to compare, which metrics matter, and which
-claims are allowed.
+Before moving to Ubuntu 20.04 + ROS1, read
+`docs/PAPER_LINE_UBUNTU20_VALIDATION_MATRIX.md`. That file is now the ordered
+acceptance checklist for runtime validation.
 
 Latest Ubuntu-side scenario widening on 2026-05-27:
 

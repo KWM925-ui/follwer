@@ -189,14 +189,14 @@ planner feedback 当前是最值得保留的路线之一。
 - no_visibility_score；
 - no_planner_feedback。
 
-当前结果摘要：
+当前结果摘要（2026-05-31 Windows/MATLAB，Seeds=1:5）：
 
-| condition | visible ratio | loss duration | near-miss | planner failures | task success |
-|---|---:|---:|---:|---:|---:|
-| proposed | 0.9297 | 1.6944 | 0.0000 | 0.3333 | 1.0000 |
-| fixed_safety_margin | 0.9564 | 1.0500 | 67.3889 | 0.3333 | 0.1667 |
-| no_planner_feedback | 0.9297 | 1.6944 | 0.0000 | 2.6667 | 0.8333 |
-| no_prediction | 0.9421 | 1.3944 | 0.0000 | 0.2222 | 1.0000 |
+| condition | visible ratio | loss duration | min clearance | near-miss | planner failures | max failure burst | task success |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| proposed | 0.9297 | 1.6933 | 1.6731 | 0.0000 | 0.3333 | 0.1667 | 1.0000 |
+| fixed_safety_margin | 0.9570 | 1.0367 | 1.2829 | 67.0333 | 0.3333 | 0.1667 | 0.1667 |
+| no_planner_feedback | 0.9297 | 1.6933 | 1.6731 | 0.0000 | 2.6667 | 2.6667 | 0.8333 |
+| no_prediction | 0.9411 | 1.4200 | 1.8872 | 0.0000 | 0.2333 | 0.1667 | 1.0000 |
 
 解释：
 
@@ -214,14 +214,14 @@ planner feedback 当前是最值得保留的路线之一。
 - planner_feedback_stress；
 - planner_blocked_goal。
 
-当前结果摘要：
+当前结果摘要（2026-05-31 Windows/MATLAB，Seeds=1:5）：
 
-| condition | visible ratio | loss duration | near-miss | planner failures | max failure burst | task success |
-|---|---:|---:|---:|---:|---:|---:|
-| proposed | 0.8266 | 4.1800 | 0.0000 | 1.4000 | 0.4000 | 0.8000 |
-| fixed_safety_margin | 0.9646 | 0.8533 | 108.6000 | 1.4000 | 0.4000 | 0.0000 |
-| no_planner_feedback | 0.8545 | 3.5067 | 0.0000 | 15.4000 | 15.4000 | 0.6000 |
-| no_prediction | 0.9270 | 1.7600 | 0.0000 | 1.1333 | 0.4000 | 1.0000 |
+| condition | visible ratio | loss duration | min clearance | near-miss | planner failures | max failure burst | task success |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| proposed | 0.8264 | 4.1840 | 1.5504 | 0.0000 | 1.4000 | 0.4000 | 0.8000 |
+| fixed_safety_margin | 0.9650 | 0.8440 | 0.8458 | 107.8000 | 1.4000 | 0.4000 | 0.0000 |
+| no_planner_feedback | 0.8551 | 3.4920 | 1.3177 | 0.0000 | 15.4000 | 15.4000 | 0.6000 |
+| no_prediction | 0.9129 | 2.1000 | 1.6739 | 0.0000 | 1.1200 | 0.4000 | 1.0000 |
 
 解释：
 

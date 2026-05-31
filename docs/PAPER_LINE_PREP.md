@@ -54,6 +54,7 @@ Add these only when the work actually needs them:
 - `research/notes/2026-05-22_rebuild_scope_log.md`
 - `research/notes/2026-05-23_stress_suite_log.md`
 - `research/notes/2026-05-23_ros1_stage2_adapter_log.md`
+- `research/notes/2026-05-31_windows_matlab_refresh_log.md`
 - Read this before making any implementation choice.
 
 Historical context only:
