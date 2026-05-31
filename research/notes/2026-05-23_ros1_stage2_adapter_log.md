@@ -51,6 +51,24 @@ Outputs:
 Completed:
 
 - `python3 -m py_compile src/human_follow_user/scripts/user_stage2_goal_node.py`
+- `python3 -m py_compile src/human_follow_bringup/scripts/stage2_paper_line_regression_monitor_node.py`
+- `python3 -m py_compile research/scripts/smoke_ros1_stage2_adapter_core.py`
+- `python3 -m py_compile research/scripts/smoke_ros1_stage2_adapter_scenarios.py`
+- `python3 research/scripts/smoke_ros1_stage2_adapter_core.py`
+- `python3 research/scripts/smoke_ros1_stage2_adapter_scenarios.py`
+
+Observed offline results:
+
+```text
+offline smoke PASS candidate=behind score=0.806 margin=0.846
+offline scenario smoke PASS open_follow:behind:0.806:1.126 behind_blocked:left:0.755:1.126 switching_bias:left:0.810:1.126
+```
+
+Added ROS1 paper-line regression entry:
+
+- `src/human_follow_bringup/launch/stage2_paper_line_real_ego_regression.launch`
+- `src/human_follow_bringup/scripts/stage2_paper_line_regression_monitor_node.py`
+- `research/scripts/run_paper_line_ros1_regression.sh`
 
 Not completed in this shell:
 
@@ -80,4 +98,16 @@ For real EGO testing, use the existing Stage2/EGO launch path and set:
 goal_provider:=external \
 external_goal_pkg:=human_follow_user \
 external_goal_type:=user_stage2_goal_node.py
+```
+
+The preferred one-command paper-line regression entry is now:
+
+```bash
+roslaunch human_follow_bringup stage2_paper_line_real_ego_regression.launch
+```
+
+For repeated runs on Ubuntu 20.04 + ROS1:
+
+```bash
+bash research/scripts/run_paper_line_ros1_regression.sh 5
 ```

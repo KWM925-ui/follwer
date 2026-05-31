@@ -24,6 +24,7 @@
   <exec_depend>human_follow_fusion</exec_depend>
   <exec_depend>human_follow_px4_bridge</exec_depend>
   <exec_depend>human_follow_perception</exec_depend>
+  <exec_depend>human_follow_user</exec_depend>
   <exec_depend>ego_planner</exec_depend>
   <exec_depend>mavros</exec_depend>
   <exec_depend>mavros_msgs</exec_depend>

@@ -34,6 +34,7 @@ ROS1 deployment adapter:
 - `research/scripts/smoke_ros1_stage2_adapter_scenarios.py`
 - `research/scripts/run_paper_line_ros1_regression.sh`
 - `src/human_follow_bringup/launch/stage2_paper_line_real_ego_regression.launch`
+- `src/human_follow_bringup/scripts/stage2_paper_line_regression_monitor_node.py`
 - `src/human_follow_bringup/config/paper_line_stage2_normal.yaml`
 - `src/human_follow_bringup/config/paper_line_stage2_target_loss.yaml`
 
@@ -77,18 +78,22 @@ Python syntax:
 ```bash
 python3 -m py_compile src/human_follow_user/scripts/user_stage2_goal_node.py
 python3 -m py_compile research/scripts/smoke_ros1_stage2_adapter_core.py
+python3 -m py_compile research/scripts/smoke_ros1_stage2_adapter_scenarios.py
+python3 -m py_compile src/human_follow_bringup/scripts/stage2_paper_line_regression_monitor_node.py
 ```
 
-Offline core smoke:
+Offline core and scenario smoke:
 
 ```bash
 python3 research/scripts/smoke_ros1_stage2_adapter_core.py
+python3 research/scripts/smoke_ros1_stage2_adapter_scenarios.py
 ```
 
 Observed result:
 
 ```text
 offline smoke PASS candidate=behind score=0.806 margin=0.846
+offline scenario smoke PASS open_follow:behind:0.806:1.126 behind_blocked:left:0.755:1.126 switching_bias:left:0.810:1.126
 ```
 
 Offline scenario smoke:
@@ -196,7 +201,7 @@ catkin_make
 source devel/setup.bash
 ```
 
-3. Run the external adapter through the existing Stage2 placeholder slot:
+3. Run the paper-line adapter through the existing Stage2 placeholder slot:
 
 ```bash
 roslaunch human_follow_bringup stage2_placeholder.launch \
@@ -223,26 +228,51 @@ external_goal_pkg:=human_follow_user \
 external_goal_type:=user_stage2_goal_node.py
 ```
 
-6. During EGO tests, also inspect:
+6. For the one-command paper-line adapter + real-EGO regression harness, run:
+
+```bash
+roslaunch human_follow_bringup stage2_paper_line_real_ego_regression.launch
+```
+
+7. For repeated paper-line regression runs, run:
+
+```bash
+bash research/scripts/run_paper_line_ros1_regression.sh 5
+```
+
+8. During EGO tests, also inspect:
 
 ```bash
 rostopic echo /move_base_simple/goal
 rostopic echo /follow/stage2/ego_position_cmd
 ```
 
-7. For the formal paper-line regression entry, prefer:
+## Can This Version Run Directly On Ubuntu 20.04?
+
+Yes, after the normal ROS1 workspace setup and `catkin_make`, this branch now
+has a direct paper-line regression entry:
 
 ```bash
 roslaunch human_follow_bringup stage2_paper_line_real_ego_regression.launch
 ```
 
-8. For repeated evidence, run:
+That entry launches the paper-line adapter itself, not the baseline Stage2 goal
+generator. The monitor requires `/follow/stage2/state` from the paper-line node
+and checks that the generated Stage2 goal is carried through EGO goal ingress,
+EGO command output, the PX4 bridge output, and the fake MAVROS setpoint gate.
+
+Boundary: this is a ROS1/EGO regression harness, not real hardware validation.
+It proves that the algorithm can be exercised through the intended software
+chain. It still needs to be run on Ubuntu 20.04 + ROS1 because this WSL2
+Ubuntu 22.04 shell is not the target ROS1 runtime.
+
+For repeated evidence, run:
 
 ```bash
 research/scripts/run_paper_line_ros1_regression.sh 5
 ```
 
-9. For target-loss full-duration state-sequence evidence, run:
+For target-loss full-duration state-sequence evidence, run:
 
 ```bash
 MONITOR_DURATION_SEC=9.5 LAUNCH_TIMEOUT_SEC=25 \

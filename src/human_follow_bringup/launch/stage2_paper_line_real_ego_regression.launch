@@ -2,7 +2,7 @@
   <arg name="max_duration_sec" default="18.0" />
   <arg name="monitor_required" default="true" />
   <arg name="monitor_full_duration_evidence" default="false" />
-  <arg name="monitor_required_state_names" default="" />
+  <arg name="monitor_required_state_names" default="follow" />
   <arg name="monitor_required_phase_labels" default="" />
   <arg name="fixture_scenario_yaml" default="$(find human_follow_bringup)/config/paper_line_stage2_normal.yaml" />
 
@@ -18,9 +18,9 @@
   <include file="$(find human_follow_bringup)/launch/stage2_real_ego.launch">
     <arg name="stage2_enabled" value="true" />
     <arg name="goal_provider" value="external" />
+    <arg name="goal_node_name" value="paper_line_stage2_goal" />
     <arg name="external_goal_pkg" value="human_follow_user" />
     <arg name="external_goal_type" value="user_stage2_goal_node.py" />
-    <arg name="goal_node_name" value="paper_line_stage2_goal" />
     <arg name="target_world_topic" value="/follow/fusion/target_world" />
     <arg name="odom_topic" value="/follow/lio/odom" />
     <arg name="goal_topic" value="/follow/stage2/goal" />
@@ -41,6 +41,7 @@
   <node pkg="human_follow_bringup" type="stage2_paper_line_regression_monitor_node.py" name="stage2_paper_line_regression_monitor" output="screen" required="$(arg monitor_required)">
     <param name="max_duration_sec" value="$(arg max_duration_sec)" />
     <param name="full_duration_evidence" value="$(arg monitor_full_duration_evidence)" />
+    <param name="state_topic" value="/follow/stage2/state" />
     <param name="required_state_names" value="$(arg monitor_required_state_names)" />
     <param name="required_phase_labels" value="$(arg monitor_required_phase_labels)" />
   </node>

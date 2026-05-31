@@ -45,6 +45,18 @@ Outputs:
 
 ## Launch Entry
 
+Preferred paper-line regression entry:
+
+```bash
+roslaunch human_follow_bringup stage2_paper_line_real_ego_regression.launch
+```
+
+Repeated regression runner:
+
+```bash
+bash research/scripts/run_paper_line_ros1_regression.sh 5
+```
+
 For the existing Stage2 placeholder path:
 
 ```bash
@@ -114,66 +126,40 @@ research/scripts/run_paper_line_ros1_regression.sh 1 \
 
 ## Verification Status
 
-Completed in the current workspace on `paper-line` commit `daaf3bb`:
+Run these checks after pulling the branch on Ubuntu 20.04 + ROS1:
 
 ```bash
 python3 -m py_compile src/human_follow_user/scripts/user_stage2_goal_node.py
 python3 -m py_compile research/scripts/smoke_ros1_stage2_adapter_core.py
 python3 -m py_compile research/scripts/smoke_ros1_stage2_adapter_scenarios.py
 python3 -m py_compile src/human_follow_bringup/scripts/stage2_paper_line_regression_monitor_node.py
+python3 research/scripts/smoke_ros1_stage2_adapter_core.py
+python3 research/scripts/smoke_ros1_stage2_adapter_scenarios.py
+catkin_make
+roslaunch human_follow_bringup stage2_paper_line_real_ego_regression.launch
+bash research/scripts/run_paper_line_ros1_regression.sh 5
 ```
 
-Offline core smoke:
+Known evidence from the paper-line preparation branch:
 
-```text
-offline smoke PASS candidate=behind score=0.806 margin=0.846
-```
-
-Offline scenario smoke:
-
-```text
-scenario smoke PASS normal=behind short_loss=predict_hold long_loss=search_safe_viewpoint expired_loss=hold_safe hard_filter=behind_rejected cooldown=blocked_then_expired
-```
-
-Catkin build:
-
-- `catkin_make` failed on this host before package configuration because
-  CMake 4.2 rejects the system `/usr/src/googletest` minimum-version policy.
-- `catkin_make -DCMAKE_POLICY_VERSION_MINIMUM=3.5` passed.
-
-Formal real-EGO regression:
-
-- Artifact:
-  `.codex/artifacts/paper_line_ros1_adapter_20260526/formal_real_ego_regression_234357`
-- Result: 5/5 PASS.
-- Each run had `distinct_goals=3`, `distinct_cmds=3`, and `request_count=1`.
-- Each run sampled `/planning/bspline` and `/follow/stage2/ego_position_cmd`.
-- `/follow/stage2/offboard/setpoint` and `/mavros/setpoint_raw/local` were
-  confirmed by the monitor contract and `offboard_mode_gate` logs.
-- Fresh formal runs had `final_plan_success=0` count `0`; previous manual
-  smoke had startup `final_plan_success=0` transients followed by
-  `final_plan_success=1`, so this remains a fact to keep watching.
-- No `ERROR`, `FATAL`, `Traceback`, or `in obstacle` lines were counted by the
-  runner in these five formal runs.
-- Process cleanup was clean in all five runs.
-
-Scenario widening on `paper-line` commit after `962be77`:
-
-- `stage2_goal_input_fixture_node.py` can load scenario phases from YAML.
-- Default regression scenario:
-  `src/human_follow_bringup/config/paper_line_stage2_normal.yaml`.
-- Target-loss scenario:
+- Offline core smoke has passed with `behind` as the open-scene candidate.
+- Offline scenario smoke covers open follow, behind-blocked side selection,
+  switching bias, target-loss state transitions, hard filtering, and
+  failed-candidate cooldown.
+- Plain `catkin_make` on the WSL2 Ubuntu 22.04 preparation host hit a CMake
+  4.2 `/usr/src/googletest` policy issue before package configuration;
+  `catkin_make -DCMAKE_POLICY_VERSION_MINIMUM=3.5` passed there. The target
+  runtime remains Ubuntu 20.04 + ROS1.
+- A formal real-EGO regression batch previously passed 5/5 with sampled
+  `/planning/bspline`, `/follow/stage2/ego_position_cmd`, bridge setpoints,
+  and fake MAVROS setpoints.
+- Scenario widening added YAML-driven fixtures:
+  `src/human_follow_bringup/config/paper_line_stage2_normal.yaml` and
   `src/human_follow_bringup/config/paper_line_stage2_target_loss.yaml`.
-- Paper-line monitor can run in full-duration evidence mode and require state
-  names or phase labels before passing.
-- Latest target-loss full-duration artifact:
-  `.codex/artifacts/paper_line_ros1_adapter_20260527/target_loss_full_duration_010748`
-  - observed states: `follow`, `predict_hold`, `search_safe_viewpoint`
-  - observed candidates: `behind`, `left`, `right`, `search_reacquire_1`,
-    `search_reacquire_5`
-  - `distinct_goals=32`, `distinct_cmds=23`, `request_count=1`
-  - many `final_plan_success=0` lines occurred during the harder search window,
-    so this is scenario-state evidence, not robust recovery proof.
+- Target-loss full-duration evidence has observed `follow`, `predict_hold`,
+  and `search_safe_viewpoint` plus `search_reacquire_*` candidates. Harder
+  target-loss windows can still produce many `final_plan_success=0` lines, so
+  this is state-sequence evidence, not robust recovery proof.
 
 ## Experiment Data Interface
 
