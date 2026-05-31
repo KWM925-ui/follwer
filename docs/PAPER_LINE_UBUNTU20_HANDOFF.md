@@ -15,6 +15,11 @@ is recorded in:
 
 - `research/notes/2026-05-31_windows_matlab_refresh_log.md`
 
+If handing the project to a fresh Codex session on Ubuntu 20.04, paste the
+startup prompt from:
+
+- `docs/UBUNTU20_CODEX_START_PROMPT.md`
+
 Next meaningful work should move to Ubuntu 20.04 + ROS1 when the target runtime
 is available. Do not reopen the rejected Ubuntu 22.04/ROS2 local temporary
 simulation path.

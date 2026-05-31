@@ -49,6 +49,7 @@ Add these only when the work actually needs them:
 - `docs/PAPER_LINE_MATLAB_EXPERIMENT_PLAN_CN.md`
 - `docs/PAPER_LINE_ROS1_STAGE2_ADAPTER.md`
 - `docs/PAPER_LINE_UBUNTU20_HANDOFF.md`
+- `docs/UBUNTU20_CODEX_START_PROMPT.md`
 - `research/notes/2026-05-22_rebuilt_research_dossier.md`
 - `research/notes/2026-05-22_chatgpt_rebuild_review.md`
 - `research/notes/2026-05-22_rebuild_scope_log.md`
