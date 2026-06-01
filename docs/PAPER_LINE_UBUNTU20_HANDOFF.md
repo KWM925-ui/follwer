@@ -246,6 +246,10 @@ Boundary:
   it did not block `status=passed`, but do not call the runs `info-only`.
 - The visual run also had one shutdown cleanup warning:
   `forcing process kill` for `human_follow_stage2_integrated_chain`.
+- The visual run did not save a Gazebo/RViz screenshot or screen recording.
+  Treat the current artifact as launch/log/PASS evidence. If complete GUI
+  frames are required, run a separate visual-acceptance pass that explicitly
+  captures screenshots or video.
 
 ## Earlier Checks Completed On This Branch
 

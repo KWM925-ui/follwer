@@ -106,6 +106,12 @@ Target-loss/search 状态驻留时间：
   `forcing process kill` for `human_follow_stage2_integrated_chain`；
 - 这些 warning 没有阻止 `status=passed`，但论文不能写成完全无 warning。
 
+画面证据边界：
+
+- 当前 artifact 没有 `.png/.jpg/.mp4/.webm` 等 Gazebo/RViz 截图或录屏；
+- `rviz:=true` 只能说明 RViz 被启动到链路里，不能当成“完整画面已保存”；
+- 若需要答辩或论文附图，应补一次带截图/录屏保存的 visual-acceptance run。
+
 可写结论：
 
 - 当前 paper-line 能在本机 `PX4 Gazebo Classic + MAVROS + Stage2 real-EGO`

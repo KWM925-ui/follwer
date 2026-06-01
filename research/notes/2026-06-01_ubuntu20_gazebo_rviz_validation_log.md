@@ -164,6 +164,15 @@ RViz evidence:
 - adapter launch args included `rviz:=true`
 - roslaunch command included `rviz:=true`
 
+Visual capture boundary:
+
+- no Gazebo/RViz screenshot, video, or screen recording was captured in this
+  artifact;
+- the visual evidence in this run is launch/log evidence plus PASS metrics, not
+  saved image evidence;
+- a future visual-acceptance run should explicitly save screenshots or video if
+  paper/patent review requires complete GUI-frame evidence.
+
 Dashboard:
 
 - `http://127.0.0.1:8765` during run

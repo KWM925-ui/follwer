@@ -163,6 +163,8 @@
   中运行；
 - visual run 支持 `Gazebo GUI + RViz` 链路已经实际启动；
 - shutdown warning 已记录，不影响 `status=passed`，但不能写成完全无 warning。
+- 当前没有保存完整 Gazebo/RViz 截图或录屏；如果论文需要可视化画面，必须补
+  visual-acceptance run 并保存图片或视频。
 
 ## 2. 图清单
 

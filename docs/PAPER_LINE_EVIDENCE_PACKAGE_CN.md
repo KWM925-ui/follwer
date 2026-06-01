@@ -280,12 +280,17 @@ Gazebo GUI + RViz：
   `algorithm_adapter_stage2_nonzero_mavros_setpoint_count=106`
 - RViz 证据：
   adapter launch args 和 roslaunch command 均包含 `rviz:=true`。
+- 画面证据边界：
+  本 artifact 没有保存 Gazebo/RViz 截图、录屏或视频；当前证据是
+  launch/log 级别加 PASS 指标，不是完整 GUI 画面证据。
 
 边界：
 
 - 这证明当前论文线能在本机
   `PX4 Gazebo Classic + MAVROS + Stage2 real-EGO + Gazebo GUI + RViz`
   受管链路中跑通。
+- 如果论文、专利或答辩需要“看得见的完整画面”，还需要补一次明确带截图或
+  录屏保存的 visual-acceptance run。
 - 两条 Gazebo run 都有 shutdown 阶段 PX4 残留 warning：
   `WARN  [commander] Connection to mission computer lost`。
   该 warning 发生在 ROS/MAVROS shutdown 附近，未阻止 `status=passed`，
